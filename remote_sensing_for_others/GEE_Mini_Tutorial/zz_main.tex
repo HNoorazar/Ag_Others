@@ -1,0 +1,109 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[osf,sc]{mathpazo}
+\usepackage[scaled=0.90]{helvet}
+\usepackage[table,dvipsnames]{xcolor}
+
+\usepackage{enumitem,mathtools}
+% \usepackage[ruled,vlined]{algorithm2e}
+\usepackage[ruled,vlined,resetcount]{algorithm2e}
+
+% \SetAlFnt{\small}
+\usepackage{algorithmic}
+
+\usepackage{float}
+\usepackage{soul}
+\usepackage{subcaption}
+
+\usepackage{graphicx}
+\usepackage{lineno}
+\usepackage{url}
+% \def\UrlBreaks{\do\/\do-}
+
+% \usepackage{breakurl}
+\usepackage[breaklinks]{hyperref}
+
+\usepackage{tcolorbox}
+\usepackage{array}
+\usepackage{tabularx}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=cyan, % color1 : will be black
+    filecolor=red,
+    urlcolor=ForestGreen,
+    citecolor=red,
+    bookmarksopen=false,
+    pdftitle={Title},
+    pdfauthor={Author},
+}
+
+\usepackage[capitalise]{cleveref}
+
+
+\definecolor{darkpastelpurple}{rgb}{0.59, 0.44, 0.84}
+\def\code#1{\textbf{\texttt{#1}}}
+\def\codeRed#1{{\color{Maroon}{\textbf{\texttt{#1}}}}}
+\def\codeCyan#1{{\color{cyan}{\textbf{\texttt{#1}}}}}
+\def\vari#1{{\color{Cerulean}{\textbf{\texttt{#1}}}}}
+\def\func#1{{\color{Purple}{\textbf{\texttt{#1}}}}}
+\newenvironment{coded}{\color{blue}\code}
+
+\definecolor{Gray}{gray}{0.95}
+\colorlet{shadecolor}{gray!40}
+\definecolor{LightCyan}{rgb}{0.88, 1, 1}
+%\definecolor{LightCyan}{rgb}{0.92, 0.98, 0.98}
+\definecolor{brickred}{rgb}{0.8, 0.25, 0.33}
+\definecolor{mgreen}{rgb}{0.2, 0.8, 1}
+\definecolor{bleudefrance}{rgb}{0.19, 0.55, 0.91}
+\definecolor{aliceblue}{rgb}{0.94, 0.97, 1.0}
+\definecolor{azureWeb}{rgb}{0.94, 1.0, 1.0}
+\definecolor{beaublue}{rgb}{0.74, 0.83, 0.9}
+\definecolor{gainsboro}{rgb}{0.86, 0.86, 0.86}
+\definecolor{linen}{rgb}{0.98, 0.94, 0.9}
+\definecolor{oldlace}{rgb}{0.99, 0.96, 0.9}
+\definecolor{magnolia}{rgb}{0.97, 0.96, 1.0}
+\definecolor{moccasin}{rgb}{0.98, 0.92, 0.84}
+\definecolor{navajowhite}{rgb}{1.0, 0.87, 0.68}
+\definecolor{palecornflowerblue}{rgb}{0.67, 0.8, 0.94}
+
+
+\usepackage{enumitem}
+\setlist[description]{%
+  topsep=10pt,   % space before start / after end of list
+% itemsep=5pt,   % space between items
+%   font={\bfseries\sffamily}, % set the label font
+%  font={\bfseries\sffamily\color{red}}, % if colour is needed
+font={\color{red}},
+}
+
+\newcommand{\EVI}{E\!V\!I}
+\newcommand{\NDVI}{N\!D\!V\!I}
+\newcommand{\NIR}{N\!I\!R}
+
+\title{Google Earth Engine}
+\author{Hossein Noorazar}
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\clearpage
+
+\input{./GEE_Chapter} %
+\input{./Python}
+
+%%%%%%%----------------------------------------
+%%%%%%%
+%%%%%%% references
+%%%%%%%
+
+\bibliographystyle{unsrt}
+\bibliography{GEE_References.bib}
+
+%%%%%%%----------------------------------------
+%%%%%%%
+%%%%%%%       The End
+%%%%%%%
+\end{document}

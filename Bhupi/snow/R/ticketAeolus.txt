@@ -1,0 +1,48 @@
+To whom it may conern,
+
+Following your installation guide (https://confluence.esg.wsu.edu/display/KB/Running+Applications#RunningApplications-InstallingCRANpackages) when I try to install
+
+some libraries (“rgdal”) I get errors like:
+
+“----------
+
+configure: error: proj_api.h not found in standard or given locations.
+
+ERROR: configuration failed for package ‘rgdal’
+
+removing ‘/home/hnoorazar/.local/lib/R3.5.1/rgdal’
+
+restoring previous ‘/home/hnoorazar/.local/lib/R3.5.1/rgdal’
+
+The downloaded source packages are in
+
+‘/tmp/RtmpZwU080/downloaded_packages’
+
+Warning message:
+
+In install.packages("rgdal", lib = "~/.local/lib/R3.5.1", repos = "http://mirrors.vcea.wsu.edu/r-cran/") :
+
+  installation of package ‘rgdal’ had non-zero exit status
+
+----------------”
+
+These are the modules I load and use
+
+module load udunits/2.2.20
+module load libxml2/2.9.4
+module load gdal/2.1.2_gcc proj/4.9.2
+module load gcc/7.3.0 r/3.5.1/gcc/7.3.0
+module load gcc/7.3.0
+module load r/3.5.1/gcc/7.3.0
+module load r/3.5.1
+
+
+P.S. Even thou I am loading R 3.5.3, I kept installing my packaes in “lib="~/.local/lib/R3.5.1"”
+
+I was wondering if you can help me with the issue. AND, if you have
+
+more recent versions of R you can update my script above. Thanks,
+
+Cheers,
+
+Hossein

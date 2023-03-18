@@ -1,0 +1,348 @@
+\providecommand{\exclude}[1]{}
+% Simple approach for selecting styles
+% #1 article + archive
+% #2 revtex
+% #3 Tufte
+\newcommand{\select}[3]{#3}
+\select
+ {% #1 article + preprint
+}{% #2 revtex
+}{% #3 Tufte
+} 
+
+\select
+ {% #1 article + archive
+  \documentclass[%twocolumn,
+                 switch]{article}
+  \usepackage{arxiv}
+  \usepackage{caption}
+  \usepackage{authblk}
+  \bibliographystyle{plain}
+}{% #2 revtex
+  \documentclass[10pt, prl, superscriptaddress, nofootinbib,
+                 amsmath,   % amsfonts, amsmath, amssymb,
+                 twocolumn, % preprintnumbers,
+                 raggedbottom,
+                 floatfix,
+                 longbibliography, %noeprint,
+                  colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue,
+                 ]{revtex4-2}
+}{% #3 Tufte
+  \documentclass[notitlepage, justified, openany]{tufte-book} % notitlepage
+  \usepackage[caption=false]{subfig}
+  \bibliographystyle{unsrt} 
+  \usepackage{fancyhdr} 
+  \pagestyle{fancy}
+  \renewcommand{\sectionmark}[1]{\markright{#1}} % remove section number from header of pages.
+\renewcommand{\chaptermark}[1]{\markboth{#1}{#1}}
+\fancyhead[RO]{\rightmark\  \ \  \ \  \thepage} 
+\fancyhead[LE]{ \thepage\   \ \  \ \  \leftmark }
+} 
+
+\providecommand{\captionsetup}[1]{}
+
+\usepackage[nottoc]{tocbibind} % Remove Chapter number from References
+\usepackage[colorinlistoftodos, prependcaption, textsize=small, color=Dandelion]{todonotes}
+
+
+%______________________________________________________________________
+%%
+%%       preamble 
+%%
+\usepackage{etoolbox}
+\usepackage{amssymb}
+\usepackage{epsfig}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{url}
+\usepackage{color}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{makeidx}
+\usepackage{relsize}
+% \usepackage{titlesec}
+\usepackage{tcolorbox}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{colortbl}
+\usepackage{xcolor}
+\usepackage{multirow} % needed for cline for example
+
+%% HN packages
+% \usepackage{amsfonts}
+% \usepackage{tocloft} % trying to put dots in table of content. goes with \renewcommand{\cftdot}{} before \tableofcontents. In Tufte case removing the \renewcommand{\cftdot}{} will generate the dots.
+\usepackage{enumitem,mathtools}
+% \usepackage[ruled,vlined]{algorithm2e}
+\usepackage[ruled,vlined,resetcount,algochapter]{algorithm2e}
+\usepackage{algorithmic}
+%\usepackage{algorithm}
+%\usepackage{algpseudocode}
+
+% \usepackage{soul}
+% \modulolinenumbers[5]
+
+% for flowchart
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows}
+\usepackage{soul} % for highlightinh
+
+% break the long references (URL link)
+\usepackage{lineno}
+\usepackage{url}
+\def\UrlBreaks{\do\/\do-}
+\usepackage{breakurl}
+% \usepackage[breaklinks]{hyperref}
+
+% \usepackage{comment}
+% \renewenvironment{comment}{}{}
+
+\providecommand{\bmmax}{0}
+\RequirePackage{bm}
+  
+% \usepackage[margin=1.5in]{geometry}
+%\setlength{\textwidth}{6.0in}
+%\setlength{\textheight}{7.0in}
+%\setlength{\topmargin}{0.5in}
+%\setlength{\oddsidemargin}{0.0in}
+%\setlength{\evensidemargin}{0.0in}
+
+
+\DeclareMathOperator{\transverse}{\cap\kern-7.75pt\top}
+
+\definecolor{darkpastelpurple}{rgb}{0.59, 0.44, 0.84}
+\def\code#1{\text{\texttt{#1}}}
+\def\codeRed#1{{\color{Maroon}{\text{\texttt{#1}}}}}
+\def\codeGreen#1{{\color{Green}{\text{\texttt{#1}}}}}
+\def\codeCyan#1{{\color{cyan}{\text{\texttt{#1}}}}}
+\def\codeGoldenrod#1{{\color{RedOrange}{\textbf{\texttt{#1}}}}}
+
+\def\vari#1{{\color{Cerulean}{\textbf{\texttt{#1}}}}}
+\def\func#1{{\color{Purple}{\textbf{\texttt{#1}}}}}
+\newenvironment{coded}{\color{blue}\code}
+
+\definecolor{titlered}{rgb}{.6,0,0}
+\definecolor{titleblue}{rgb}{0,0,0.6}
+\definecolor{exerciseblue}{rgb}{0,0,.6}
+\definecolor{proofgreen}{rgb}{0.6,0,0}
+\definecolor{myblue}{rgb}{0,0,0.7}
+\definecolor{mymagenta}{rgb}{0.7,0,0}
+\definecolor{aliceblue}{rgb}{0.94, 0.97, 1.0}
+\colorlet{shadecolor}{gray!40}
+\definecolor{color2}{RGB}{1,2,3}
+
+\newcommand{\EVI}{E\!V\!I}
+\newcommand{\NDVI}{N\!D\!V\!I}
+\newcommand{\NIR}{N\!I\!R}
+
+\newcommand{\df}{d\!f}
+\newcommand{\tblue}{\color{titleblue}}
+\newcommand{\tred}{\color{titlered}}
+\newcommand{\pgreen}{\color{proofgreen}}
+\newcommand{\green}{\color{green}}
+\newcommand{\blue}{\color{blue}}
+\newcommand{\red}{\color{red}}
+\newcommand{\magenta}{\color{magenta}}
+
+\newcommand{\Rank}{\operatorname{rank}}
+\newcommand{\spn}{\operatorname{span}}
+\newcommand{\Cyl}{\operatorname{Cyl}}
+\newcommand{\T}{\operatorname{T}}
+\newcommand{\D}{\operatorname{D}}
+%\newcommand{\argmin}{\operatorname*{argmin}}
+%\newcommand{\argmax}{\operatorname*{argmax}}
+\DeclareMathOperator*{\argmax}{argmax}
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator{\match}{match}
+\newcommand{\clos}{\operatorname{clos}}
+\newcommand{\bdy}{\operatorname{bdy}}
+\newcommand{\diam}{\operatorname{diam}}
+\newcommand{\Lip}{\operatorname{Lip}}
+\newcommand{\ga}{\operatorname{ga}}
+\newcommand{\dis}{operatorname{dis}}
+\newcommand{\dist}{\operatorname{dist}}
+\newcommand{\vol}{\operatorname{vol}}
+\newcommand{\epi}{\operatorname{epi}}
+\newcommand{\epo}{\operatorname{epo}}
+\newcommand{\cnv}{\operatorname{cnv}}
+\newcommand{\R}{\Bbb{R}}
+\newcommand{\Z}{\Bbb{Z}}
+\newcommand{\bbeta}{\bm \beta}
+\newcommand{\hatM}{{(\bm X^T \bm X)^{-1} \bm X^T}}
+%\newcommand{\R}{\mathbf{R}}
+%\newcommand{\R}[1]{\mathbb{R}^{#1}}
+\newcommand{\Hd}{\mathcal{H}}
+\newcommand{\F}{\Bbb{F}}
+\newcommand{\CHi}[1]{\LARGE \chi_{\tiny #1}}
+%\newcommand{\CHI}{{\LARGE \chi}}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\del}{\delta}
+\newcommand{\1}{\mathbf{1}}
+\newcommand{\Div}{\mbox{div}}
+\newcommand{\done}{$\Box$}
+\newcommand{\Per}{\mbox{Per}}
+\newcommand{\Ar}{\mbox{Area}}
+\newcommand{\myb}[1]{{\bf #1}}
+\newcommand{\op}[2]{{\bf #1}\,#2}
+\newcommand{\X}[1]{\mathcal{X}(#1)}
+\newcommand{\lip}{\mbox{Lip}}
+\newcommand{\Rto}[2]{\R^{#1}\rightarrow\R^{#2}}
+\newcommand{\ipd}[2]{\left<#1,#2\right>}
+\newcommand{\nind}{\noindent}
+\newcommand{\Ln}[1]{\mathcal{L}^{#1}}
+\newcommand{\Le}{\mathcal{L}}
+\newcommand{\mychi}[1]{\mathlarger{\mathlarger{\mathlarger{\chi}}}_{\mathsmallerg{\mathsmaller{#1}}}}
+\newcommand{\mychitest}[3]{\text{\scalebox{#1}{$\chi$}}_{\text{\scalebox{#2}{$#3$}}}}
+\newcommand{\myell}{\,\hbox{\vrule height 6pt depth 0pt
+\vrule height 0.4pt depth 0pt width 5pt}\,}
+\newcommand{\mylee}{\,\hbox{\vrule height 0.4pt depth 0pt width 5pt
+\vrule height 6pt depth 0pt}\,}
+%\newcommand{\myfig65}[1]{\includegraphics[width=0.65\textwidth]{#1}}
+
+\newcommand{\warn}{\textbf{\color{red}{Warning }}}
+
+\newcommand{\abs}[1]{\lvert{#1}\rvert}
+\newcommand{\norm}[1]{\lVert{#1}\rVert}
+\newcommand{\mat}[1]{\bm{#1}}
+\newcommand{\vect}[1]{\vec{#1}}
+\newcommand{\braket}[1]{\langle{#1}\rangle}
+
+\newtheorem{thm}{Theorem}[section] % "[section]" restarts the theorem counter at every new section.
+\newtheorem{Coro}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{rem}[thm]{Remark}
+\newtheorem{exm}[thm]{Example}
+\newtheorem{deff}[thm]{Definition}
+\newtheorem{exc}[thm]{Exercise} % "[thm]" in the middle will use the same counter as the theorem environment. if "[thm]" was at the end, then  the counter of this new environment will be reset every time a new theorem environment is used.
+\newtheorem{claim}[thm]{Claim}
+\newtheorem{cond}[thm]{Condition}
+
+\newcommand{\Tau}{\mathcal{T}}
+\renewcommand\qedsymbol{$\blacksquare$}
+
+
+
+%revtex uses \prb...
+%\newtheorem{prb}{Problem}[section]
+\newtheorem{excse}{Exercise}[section]
+\newcommand{\exercise}[2]{\begin{excse}\label{#1}\color{exerciseblue}\emph{#2}\end{excse}}
+\newcommand{\idef}[1]{\index{#1}{\bf\emph{#1}}}
+
+\newcommand{\intrr}{\operatorname{int}}
+
+\newcommand{\ifft}{if and only if }
+
+% flowchart definitions
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=red!20]
+
+\tikzstyle{io} = [trapezium, trapezium left angle=0, trapezium right angle=0, minimum width=1cm, minimum height=1cm, text centered, draw=black, fill=blue!10]
+
+\tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=orange!30]
+\tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=red!70]
+
+\tikzstyle{arrow} = [thick,->,>=stealth]
+
+%\usepackage{mathptmx}
+%\renewcommand{\familydefault}{\sfdefault}
+%\renewcommand{\familydefault}{\ttdefault}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=cyan, % color1 : will be black
+    filecolor=cyan,
+    urlcolor=proofgreen,
+    citecolor=red,
+    %bookmarks=true, % true means bookmarks
+     bookmarksnumbered=false, % left window are numbered
+    bookmarksopen=false,
+    pdftitle={Title},
+    pdfauthor={Author},
+}
+
+\usepackage[nameinlink]{cleveref}
+  % \cref{} and \Cref{} which work like \autoref but also
+  % allow for capialization.  The 'nameinlink' used to mimic \autoref's behavior
+  % of including the cross-reference's name in the link
+  % https://tex.stackexchange.com/a/153480/6903
+
+  % These should be capitalized everywhere.
+  \crefname{table}{Table}{Tables}
+  \crefname{figure}{Fig.}{Figs.}
+  \crefname{equation}{Eq.}{Eqs.}
+
+
+\newenvironment{mylist}{\begin{list}{*}{\itemsep=.01in \parsep=.01in
+                  \topsep=.1in \parskip=.01in}}{\end{list}}
+\newenvironment{mybiglist}{\begin{list}{*}{\itemsep=.1in \parsep=.1in
+                  \topsep=.2in \parskip=.1in}}{\end{list}}
+\newenvironment{myproof}[1][\proofname]{\proof[#1]\mbox{}\\*}{\endproof}
+
+\setlist[description]{%
+  topsep=10pt,               % space before start / after end of list
+% itemsep=5pt,               % space between items
+%   font={\bfseries\sffamily}, % set the label font
+%  font={\bfseries\sffamily\color{red}}, % if colour is needed
+font={\color{blue}},
+}
+
+\select{% arXiv argumenths, nothing here
+}
+{% revtex argumenths, nothing here
+}
+{ % Tufte argumenths
+% \titleformat{\chapter}
+% {\color{red}\normalfont\LARGE\bfseries}
+% {\color{red}\thechapter}{2em}{}
+
+\titleformat{\chapter}[display]
+{\color{titlered}\normalfont\large\bfseries}
+{\color{titlered}\chaptertitlename\ \thechapter}{20pt}{\Huge}
+
+\titleformat{\section}
+{\color{titleblue}\normalfont\LARGE\bfseries}
+{\color{titleblue}\thesection}{1em}{}
+}%select
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\LogoOff  %this is for the foiltex documents
+
+\begin{document}
+%\raggedright
+
+\title{Kirti's Class}
+\date{\today}
+
+\select
+{% #1 article + archive
+  \renewcommand*{\Authfont}{\bfseries}
+  \author[1]{Hossein Noorazar}
+    \affil[1]{Center for Geometric Analysis and Data and
+               Department of Mathematics, Washington State University}
+}{% #2 revtex
+  \author{Hossein Noorazar}
+  \affiliation{Center for Geometric Analysis and Data and
+                  Department of Mathematics Washington State University}
+}{% #3 Tufte
+  \author{Hossein Noorazar}
+  \patchcmd{\maketitle}{\newpage}{}{}{}
+  \let\oldmaketitle\maketitle
+  \def\maketitle{\begin{fullwidth}\oldmaketitle\end{fullwidth}}
+} 
+
+\providecommand{\marginnote}[1]{Sidebar: {#1}}
+
+\maketitle
+\setcounter{secnumdepth}{3} % If this commented out. Chapters/Sections are not numbered
+\setcounter{tocdepth}{3} % If this commented out. Sections are not included in ToC
+\newpage
+
+\tableofcontents
+
+
+\newpage
+\input{./coding_chapter}
+\input{./organizing}
+\input{./GEE_Chapter_tufte}
+
+\bibliography{GEE_References}
+
+\end{document}
