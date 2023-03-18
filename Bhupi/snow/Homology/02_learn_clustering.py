@@ -39,6 +39,8 @@ import h5py
 import sys
 
 # %%
+
+# %%
 # # !pip3 install ripser
 # pip install --upgrade numpy
 # # !pip3 install tadasets
