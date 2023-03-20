@@ -39,6 +39,18 @@ import h5py
 import sys
 
 # %%
+# from jupytext.config import global_jupytext_configuration_directories
+# list(global_jupytext_configuration_directories())
+
+# from jupytext.config import find_jupytext_configuration_file
+# find_jupytext_configuration_file('/Users/hn/.config/jupytext')
+
+# %%
+# !pip3 install --upgrade numpy
+
+# %%
+
+# %%
 # # !pip3 install ripser
 # pip install --upgrade numpy
 # # !pip3 install tadasets

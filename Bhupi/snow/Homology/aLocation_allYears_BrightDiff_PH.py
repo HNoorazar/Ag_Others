@@ -16,6 +16,8 @@
 # %% [markdown]
 # This is created after the meeting w/ Ananth. 
 # Use each location in different years as a set that we need to do clustering on. 
+#
+# In this notebook we collect data of a location across all years in one set. That is a given dataset for which we compute persistent diagram and save it to the disk.
 
 # %%
 import numpy as np
@@ -62,11 +64,11 @@ import kmapper as km # Import the class
 
 # %%
 snow_TS_dir_base = "/Users/hn/Documents/01_research_data/Bhupi/snow/EithyYearsClustering/"
-diff_dir = snow_TS_dir_base+ "Brightness_temperature/Only_for_SNOTEL_grids/"
+in_dir = snow_TS_dir_base + "Brightness_temperature/"
 
 # %%
 fileName = "all_locs_all_years_eachDayAColumn.csv"
-all_stations_years = pd.read_csv(snow_TS_dir_base+ "Brightness_temperature/" + fileName)
+all_stations_years = pd.read_csv(in_dir + fileName)
 all_stations_years.head(2)
 
 # %% [markdown]
@@ -137,10 +139,43 @@ a_dmg = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"])['dgms']
 persim.plot_diagrams(a_dmg, show=False, title=f"rips output\n{diagram_sizes(a_dmg)}")
 
 # %%
-dgms = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"], maxdim=1)['dgms']
-persim.plot_diagrams(dgms, show=True)
+# output dir
+output=in_dir + "aLocation_allYears_grouped/"
+os.makedirs(output, exist_ok=True)
 
 # %%
+a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==a_loc]
+ripser_output = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"], maxdim=2)
+ripser_output["jupyterNotebook_GeneratedThisdata"] = "clustering_eachYearAdataPoint_BrightnessDiff"
+
+file_Name = a_loc + "_" + str(len(a_loc_data.year.unique())) + "years_BrightDiff" + ".pkl"
+f = open(output + file_Name, "wb") # create a binary pickle file 
+pickle.dump(ripser_output, f) # write the python object (dict) to pickle file
+f.close() # close file
+
+filepath = output + file_Name
+pickled_obj = pd.read_pickle(filepath)
+
+# %%
+for a_loc in locations:
+    a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==a_loc]
+    ripser_output = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"], maxdim=2)
+    ripser_output["jupyterNotebook_GeneratedThisdata"] = "aLocation_allYears_BrightDiff_PH"
+
+    file_Name = a_loc + "_" + str(len(a_loc_data.year.unique())) + "years_BrightDiff" + ".pkl"
+    f = open(output + file_Name, "wb") # create a binary pickle file 
+    pickle.dump(ripser_output, f) # write the python object (dict) to pickle file
+    f.close() # close file
+    a_dmg[1].shape
+
+# %%
+a_loc = locations[10]
+a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==a_loc]
+dgms = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms']
+persim.plot_diagrams(dgms, show=True, lifetime=True, legend=True)
+
+# %%
+# persim.sliced_wasserstein(dgms[1], dgms[1])
 
 # %%
 
