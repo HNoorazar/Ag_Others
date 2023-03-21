@@ -45,6 +45,10 @@ import h5py
 import sys
 
 # %%
+from scipy.cluster.hierarchy import dendrogram, linkage
+from scipy.spatial.distance import squareform
+
+# %%
 import shutup
 shutup.please()
 
@@ -67,9 +71,43 @@ snow_TS_dir_base = "/Users/hn/Documents/01_research_data/Bhupi/snow/EithyYearsCl
 in_dir = snow_TS_dir_base + "Brightness_temperature/"
 
 # %%
+file_Name = "all_locs_all_years_eachDayAColumn.pkl"
+A = pd.read_pickle(in_dir+file_Name)
+
+
 fileName = "all_locs_all_years_eachDayAColumn.csv"
 all_stations_years = pd.read_csv(in_dir + fileName)
 all_stations_years.head(2)
+
+# %%
+A = A["all_locs_all_years_eachDayAColumn"]
+
+# %%
+all_stations_years.head(5)
+
+# %%
+
+# %%
+
+# %%
+type(all_stations_years)
+
+# %%
+type(A)
+
+# %%
+
+# %%
+
+# %%
+a_loc= "42.32438_-113.61324"
+b_loc = "42.69664_-118.61593"
+
+ii_data = all_stations_years.loc[all_stations_years.lat_lon==a_loc]
+jj_data = all_stations_years.loc[all_stations_years.lat_lon==b_loc]
+ii_data.equals(jj_data)
+
+# %%
 
 # %% [markdown]
 # # Smooth
@@ -109,6 +147,14 @@ for a_loc in locations:
 
 all_stations_years_smooth.head(3)
 
+# %%
+a_loc = "42.32438_-113.61324"
+b_loc = "42.69664_-118.61593"
+
+ii_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==a_loc]
+jj_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==b_loc]
+ii_data.equals(jj_data)
+
 # %% [markdown]
 # We lost some data at the beginning due to rolling window. So, we replace them here:
 
@@ -120,6 +166,14 @@ for a_col in NA_columns:
     all_stations_years_smooth.loc[:, a_col] = all_stations_years_smooth.iloc[:, end]
 
 all_stations_years_smooth.head(3)
+
+# %%
+a_loc = "42.32438_-113.61324"
+b_loc = "42.69664_-118.61593"
+
+ii_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==a_loc]
+jj_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==b_loc]
+ii_data.equals(jj_data)
 
 
 # %%
@@ -140,9 +194,23 @@ a_dmg = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"])['dgms']
 persim.plot_diagrams(a_dmg, show=False, title=f"rips output\n{diagram_sizes(a_dmg)}")
 
 # %%
+a_loc = "42.32438_-113.61324"
+b_loc = "42.69664_-118.61593"
+
+
+a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==a_loc, "day_1":"day_365"]
+a_dmg = ripser.ripser(a_loc_data, maxdim=2)['dgms']
+persim.plot_diagrams(a_dmg, show=False, title=f"rips output\n{diagram_sizes(a_dmg)}", ax=plt.subplot(121))
+
+b_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==b_loc, "day_1":"day_365"]
+b_dmg = ripser.ripser(b_loc_data, maxdim=2)['dgms']
+persim.plot_diagrams(b_dmg, show=False, title=f"rips output\n{diagram_sizes(a_dmg)}", ax=plt.subplot(122))
+
+
+# %%
 # output dir
 output_dir=in_dir + "aLocation_allYears_grouped/"
-os.makedirs(output, exist_ok=True)
+os.makedirs(output_dir, exist_ok=True)
 
 # %%
 for a_loc in locations:
@@ -165,9 +233,12 @@ persim.plot_diagrams(dgms, show=True, lifetime=True, legend=False)
 # %%
 # persim.sliced_wasserstein(dgms[1], dgms[1])
 
+# %% [markdown]
+# # Form distance matrix
+
 # %%
 # %%time
-loc_2_loc_H1_distances = pd.DataFrame(columns=[locations], index=locations)
+loc_2_loc_H1_distances = pd.DataFrame(columns=locations, index=locations)
 
 for ii in np.arange(len(locations)):
     for jj in np.arange(ii, len(locations)):
@@ -192,6 +263,8 @@ loc_2_loc_H1_distances.loc[:, loc_2_loc_H1_distances.columns]=loc_2_loc_H1_dista
                                                                     loc_2_loc_H1_distances.values
 
 # %%
+
+# %%
 loc_2_loc_H1_distances_dict={"loc_2_loc_H1_distances":loc_2_loc_H1_distances,
                              "jupyterNotebook_GeneratedThisdata":"aLocation_allYears_BrightDiff_PH"
                             }
@@ -211,26 +284,51 @@ loc_2_loc_H1_distances=loc_2_loc_H1_distances_dict["loc_2_loc_H1_distances"]
 loc_2_loc_H1_distances
 
 # %%
+loc_2_loc_H1_distances_array = squareform(loc_2_loc_H1_distances)
+loc_2_loc_H1_linkage_matrix = linkage(loc_2_loc_H1_distances_array, "single")
+dendrogram(loc_2_loc_H1_linkage_matrix, labels=list(loc_2_loc_H1_distances.columns))
+plt.title("location to location (based on H1). ")
+plt.show()
+
+# %%
+loc_2_loc_H1_linkage_matrix.shape
+
+# %%
+loc_2_loc_H1_linkage_matrix
+
+# %%
+loc_2_loc_H1_distances
+
+# %%
+a_loc= "42.32438_-113.61324"
+b_loc = "42.69664_-118.61593"
+
+ii_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==a_loc]
+jj_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==b_loc]
+
+ii_dgms_H1 = ripser.ripser(ii_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms'][1]
+jj_dgms_H1 = ripser.ripser(jj_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms'][1]
+print(persim.sliced_wasserstein(ii_dgms_H1, jj_dgms_H1))
+
+persim.plot_diagrams(ripser.ripser(ii_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms'], 
+                     title=f"ii_dgms_H1", ax=plt.subplot(121))
+
+persim.plot_diagrams(ripser.ripser(jj_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms'], 
+                     title=f"jj_dgms_H1", ax=plt.subplot(122))
+
+# %%
+
+# %%
+
+# %%
+
+# %% [markdown]
+# ### Neighbor Joining from Biology
+
+# %%
 from skbio import DistanceMatrix
 from skbio.tree import nj
 
-# %%
-dm = DistanceMatrix(loc_2_loc_H1_distances)
-
-# %%
-dm
-
-# %%
-tree = nj(dm)
-print(tree.ascii_art())
-
-# %%
-
-# %%
-
-# %%
-
-# %%
 data = [[0,  5,  9,  9,  8],
          [5,  0, 10, 10,  9],
          [9, 10,  0,  8,  7],
@@ -246,15 +344,52 @@ newick_str = nj(dm, result_constructor=str)
 print(newick_str)
 
 # %%
+dm = DistanceMatrix(loc_2_loc_H1_distances)
+dm
+
+# %%
+tree = nj(dm)
+print(tree.ascii_art())
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
 df = pd.DataFrame(data, columns=ids, index=ids)
-
 dm = DistanceMatrix(df, ids)
-
 tree = nj(dm)
 print(tree.ascii_art())
 print ("--------------------------------------------------------")
 newick_str = nj(dm, result_constructor=str)
 print(newick_str)
+
+# %%
+
+# %%
+from scipy.cluster.hierarchy import dendrogram, linkage
+from scipy.spatial.distance import squareform
+import matplotlib.pyplot as plt
+
+
+mat = np.array([[0, 3, 0.1], [3, 0, 2], [0.1, 2, 0]])
+dists = squareform(mat)
+linkage_matrix = linkage(dists, "single")
+dendrogram(linkage_matrix, labels=["0", "1", "2"])
+plt.title("test")
+plt.show()
+
+# %%
+linkage_matrix
+
+# %%
+mat
 
 # %%
 

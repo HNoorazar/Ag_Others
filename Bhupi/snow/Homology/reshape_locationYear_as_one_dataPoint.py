@@ -31,6 +31,17 @@ all_locs_all_years_but_2003.date = pd.to_datetime(all_locs_all_years_but_2003.da
 all_locs_all_years_but_2003.head(2)
 
 # %%
+a_loc = "42.32438_-113.61324"
+b_loc = "42.69664_-118.61593"
+
+ii_data = all_locs_all_years_but_2003[a_loc]
+jj_data = all_locs_all_years_but_2003[b_loc]
+
+ii_data==jj_data
+
+# %%
+
+# %%
 all_locs_after_2004 = all_locs_all_years_but_2003[all_locs_all_years_but_2003.year>=2004].copy()
 all_locs_after_2004.reset_index(drop=True, inplace=True)
 
@@ -77,6 +88,12 @@ all_locs_smooth_after_2004.head(2)
 all_locs_smooth_after_2004 = all_locs_smooth_after_2004.round(3)
 
 # %%
+a_loc = "42.32438_-113.61324"
+b_loc = "42.69664_-118.61593"
+
+ii_data = all_locs_smooth_after_2004[a_loc]
+jj_data = all_locs_smooth_after_2004[b_loc]
+ii_data==jj_data
 
 # %%
 years = all_locs_smooth_after_2004.year.unique()
@@ -116,6 +133,14 @@ for a_location in locations:
         smoothed_yearLocSingleDataPoint.loc[smoothed_yearLocSingleDataPoint.loc_year==loc_year, col_a:col_z]=curr_TS
         
 smoothed_yearLocSingleDataPoint.head(2)
+
+# %%
+a_loc = "42.32438_-113.61324"
+b_loc = "42.69664_-118.61593"
+
+ii_data = smoothed_yearLocSingleDataPoint[a_loc]
+jj_data = smoothed_yearLocSingleDataPoint[b_loc]
+ii_data==jj_data
 
 # %%
 all_stations.to_csv(snow_TS_dir_base+ "Brightness_temperature/" + "all_locs_all_years_but_2003.csv", index=False)
