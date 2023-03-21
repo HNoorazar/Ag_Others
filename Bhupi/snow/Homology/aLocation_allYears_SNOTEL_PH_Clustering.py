@@ -68,27 +68,16 @@ import kmapper as km # Import the class
 
 # %%
 snow_TS_dir_base = "/Users/hn/Documents/01_research_data/Bhupi/snow/EithyYearsClustering/"
-in_dir = snow_TS_dir_base + "Brightness_temperature/"
-
 SNOTEL_dir = snow_TS_dir_base + "SNOTEL_observations/"
 
 # %%
 SNOTEL_join_PMW_grids = pd.read_csv(SNOTEL_dir + "SNOTEL_join_PMW_grids.csv")
+SNOTEL_join_PMW_grids.head(2)
 
 # %%
-file_Name = "all_locs_all_years_eachDayAColumn.pkl"
-all_stations_years = pd.read_pickle(in_dir+file_Name)
+file_Name = "all_locs_all_years_eachDayAColumn_SNOTEL.pkl"
+all_stations_years = pd.read_pickle(SNOTEL_dir+file_Name)
 all_stations_years = all_stations_years["all_locs_all_years_eachDayAColumn"]
-all_stations_years.head(2)
-
-# %%
-SNOTEL_join_PMW_grids=SNOTEL_join_PMW_grids[["station_name", "pmw_lat_lon"]]
-SNOTEL_join_PMW_grids.rename(columns={"pmw_lat_lon": "lat_lon"}, inplace=True)
-
-all_stations_years = pd.merge(all_stations_years, SNOTEL_join_PMW_grids, on=['lat_lon'], how='left')
-all_stations_years.drop(columns=['lat_lon'], inplace=True)
-
-# %%
 all_stations_years.head(2)
 
 # %% [markdown]
@@ -160,6 +149,7 @@ a_dmg = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"])['dgms']
 persim.plot_diagrams(a_dmg, show=False, title=f"rips output\n{diagram_sizes(a_dmg)}")
 
 # %%
+SNOTEL_join_PMW_grids.rename(columns={"pmw_lat_lon": "lat_lon"}, inplace=True)
 
 # %%
 a_loc = SNOTEL_join_PMW_grids[SNOTEL_join_PMW_grids.lat_lon=="42.32438_-113.61324"].station_name.values[0]
@@ -176,16 +166,16 @@ persim.plot_diagrams(b_dmg, show=False, title=f"rips output\n{diagram_sizes(a_dm
 
 # %%
 # output dir
-output_dir=in_dir + "aLocation_allYears_grouped_dgms/"
+output_dir=SNOTEL_dir + "aLocation_allYears_grouped_dgms/"
 os.makedirs(output_dir, exist_ok=True)
 
 # %%
 for a_loc in locations:
     a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==a_loc]
     ripser_output = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"], maxdim=2)
-    ripser_output["jupyterNotebook_GeneratedThisdata"] = "aLocation_allYears_BrightDiff_PH_Clustering"
+    ripser_output["jupyterNotebook_GeneratedThisdata"] = "aLocation_allYears_SNOTEL_PH_Clustering"
 
-    file_Name = a_loc + "_" + str(len(a_loc_data.year.unique())) + "years_BrightDiff" + ".pkl"
+    file_Name = a_loc + "_" + str(len(a_loc_data.year.unique())) + "years_SNOTEL" + ".pkl"
     f = open(output_dir + file_Name, "wb") # create a binary pickle file 
     pickle.dump(ripser_output, f) # write the python object (dict) to pickle file
     f.close() # close file
@@ -231,21 +221,17 @@ loc_2_loc_H1_distances.loc[:, loc_2_loc_H1_distances.columns]=loc_2_loc_H1_dista
 
 # %%
 loc_2_loc_H1_distances_dict={"loc_2_loc_H1_distances":loc_2_loc_H1_distances,
-                             "jupyterNotebook_GeneratedThisdata":"aLocation_allYears_BrightDiff_PH_Clustering"
+                             "jupyterNotebook_GeneratedThisdata":"aLocation_allYears_SNOTEL_PH_Clustering"
                             }
 
 # %%
-file_Name = "location_2_location_H1_distanceMatrix.pkl"
+file_Name = "location_2_location_H1_distanceMatrix_SNOTEL.pkl"
 
 f = open(output_dir + file_Name, "wb")
 pickle.dump(loc_2_loc_H1_distances_dict, f) 
 f.close() # close file
 
 # %%
-loc_2_loc_H1_distances_dict = pd.read_pickle(output_dir+"location_2_location_H1_distanceMatrix.pkl")
-loc_2_loc_H1_distances=loc_2_loc_H1_distances_dict["loc_2_loc_H1_distances"]
-
-loc_2_loc_H1_distances.head(5)
 
 # %%
 size = 10
@@ -260,7 +246,8 @@ params = {'legend.fontsize': 15, # medium, large
           'axes.titlesize': size*1.5,
           'xtick.labelsize': size*0.00015, #  * 0.75
           'ytick.labelsize': size, #  * 0.75
-          'axes.titlepad': 10}
+          # 'axes.titlepad':3
+         }
 
 #
 #  Once set, you cannot change them, unless restart the notebook
@@ -299,6 +286,7 @@ bb_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==
 
 aa_dgms_H1 = ripser.ripser(aa_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms'][1]
 bb_dgms_H1 = ripser.ripser(bb_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms'][1]
+
 print(f"{persim.sliced_wasserstein(aa_dgms_H1, bb_dgms_H1).round(3)=:}")
 
 persim.plot_diagrams(ripser.ripser(aa_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms'], 
@@ -306,73 +294,6 @@ persim.plot_diagrams(ripser.ripser(aa_data.loc[:, "day_1":"day_365"], maxdim=2)[
 
 persim.plot_diagrams(ripser.ripser(bb_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms'], 
                      title=f"{b_loc}", ax=plt.subplot(122))
-
-# %%
-
-# %%
-
-# %% [markdown]
-# ### Neighbor Joining from Biology
-
-# %%
-from skbio import DistanceMatrix
-from skbio.tree import nj
-
-data = [[0,  5,  9,  9,  8],
-         [5,  0, 10, 10,  9],
-         [9, 10,  0,  8,  7],
-         [9, 10,  8,  0,  3],
-         [8,  9,  7,  3,  0]]
-ids = list('abcde')
-dm = DistanceMatrix(data, ids)
-
-tree = nj(dm)
-print(tree.ascii_art())
-print ("--------------------------------------------------------")
-newick_str = nj(dm, result_constructor=str)
-print(newick_str)
-
-# %%
-dm = DistanceMatrix(loc_2_loc_H1_distances)
-dm
-
-# %%
-tree = nj(dm)
-print(tree.ascii_art())
-
-# %%
-
-# %%
-df = pd.DataFrame(data, columns=ids, index=ids)
-dm = DistanceMatrix(df, ids)
-tree = nj(dm)
-print(tree.ascii_art())
-print ("--------------------------------------------------------")
-newick_str = nj(dm, result_constructor=str)
-print(newick_str)
-
-# %%
-
-# %%
-from scipy.cluster.hierarchy import dendrogram, linkage
-from scipy.spatial.distance import squareform
-import matplotlib.pyplot as plt
-
-
-mat = np.array([[0, 3, 0.1], [3, 0, 2], [0.1, 2, 0]])
-dists = squareform(mat)
-linkage_matrix = linkage(dists, "single")
-dendrogram(linkage_matrix, labels=["0", "1", "2"])
-plt.title("test")
-plt.show()
-
-# %%
-linkage_matrix
-
-# %%
-mat
-
-# %%
 
 # %%
 
