@@ -76,6 +76,7 @@ all_stations_years.head(2)
 
 # %%
 locations = all_stations_years["lat_lon"].unique()
+locations=sorted(locations)
 years = all_stations_years["year"].unique()
 print (len(locations))
 
@@ -140,21 +141,8 @@ persim.plot_diagrams(a_dmg, show=False, title=f"rips output\n{diagram_sizes(a_dm
 
 # %%
 # output dir
-output=in_dir + "aLocation_allYears_grouped/"
+output_dir=in_dir + "aLocation_allYears_grouped/"
 os.makedirs(output, exist_ok=True)
-
-# %%
-a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==a_loc]
-ripser_output = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"], maxdim=2)
-ripser_output["jupyterNotebook_GeneratedThisdata"] = "clustering_eachYearAdataPoint_BrightnessDiff"
-
-file_Name = a_loc + "_" + str(len(a_loc_data.year.unique())) + "years_BrightDiff" + ".pkl"
-f = open(output + file_Name, "wb") # create a binary pickle file 
-pickle.dump(ripser_output, f) # write the python object (dict) to pickle file
-f.close() # close file
-
-filepath = output + file_Name
-pickled_obj = pd.read_pickle(filepath)
 
 # %%
 for a_loc in locations:
@@ -163,7 +151,7 @@ for a_loc in locations:
     ripser_output["jupyterNotebook_GeneratedThisdata"] = "aLocation_allYears_BrightDiff_PH"
 
     file_Name = a_loc + "_" + str(len(a_loc_data.year.unique())) + "years_BrightDiff" + ".pkl"
-    f = open(output + file_Name, "wb") # create a binary pickle file 
+    f = open(output_dir + file_Name, "wb") # create a binary pickle file 
     pickle.dump(ripser_output, f) # write the python object (dict) to pickle file
     f.close() # close file
     a_dmg[1].shape
@@ -172,12 +160,101 @@ for a_loc in locations:
 a_loc = locations[10]
 a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==a_loc]
 dgms = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms']
-persim.plot_diagrams(dgms, show=True, lifetime=True, legend=True)
+persim.plot_diagrams(dgms, show=True, lifetime=True, legend=False)
 
 # %%
 # persim.sliced_wasserstein(dgms[1], dgms[1])
 
 # %%
+# %%time
+loc_2_loc_H1_distances = pd.DataFrame(columns=[locations], index=locations)
+
+for ii in np.arange(len(locations)):
+    for jj in np.arange(ii, len(locations)):
+        ii_loc = locations[ii]
+        jj_loc = locations[jj]
+
+        ii_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==ii_loc]
+        jj_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==jj_loc]
+
+        ii_dgms_H1 = ripser.ripser(ii_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms'][1]
+        jj_dgms_H1 = ripser.ripser(jj_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms'][1]
+        
+        loc_2_loc_H1_distances.loc[ii_loc, jj_loc] = persim.sliced_wasserstein(ii_dgms_H1, jj_dgms_H1)
+
+"""
+   Replace NAs with zeros so we can add the dataframe
+   to its transpose to get a symmetric matrix
+"""
+loc_2_loc_H1_distances.fillna(0, inplace=True)
+
+loc_2_loc_H1_distances.loc[:, loc_2_loc_H1_distances.columns]=loc_2_loc_H1_distances.T.values + \
+                                                                    loc_2_loc_H1_distances.values
+
+# %%
+loc_2_loc_H1_distances_dict={"loc_2_loc_H1_distances":loc_2_loc_H1_distances,
+                             "jupyterNotebook_GeneratedThisdata":"aLocation_allYears_BrightDiff_PH"
+                            }
+
+# %%
+file_Name = "location_2_location_H1_distanceMatrix.pkl"
+
+f = open(output_dir + file_Name, "wb")
+pickle.dump(loc_2_loc_H1_distances_dict, f) 
+f.close() # close file
+
+# %%
+loc_2_loc_H1_distances_dict = pd.read_pickle(output_dir+"location_2_location_H1_distanceMatrix.pkl")
+loc_2_loc_H1_distances=loc_2_loc_H1_distances_dict["loc_2_loc_H1_distances"]
+
+# %%
+loc_2_loc_H1_distances
+
+# %%
+from skbio import DistanceMatrix
+from skbio.tree import nj
+
+# %%
+dm = DistanceMatrix(loc_2_loc_H1_distances)
+
+# %%
+dm
+
+# %%
+tree = nj(dm)
+print(tree.ascii_art())
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+data = [[0,  5,  9,  9,  8],
+         [5,  0, 10, 10,  9],
+         [9, 10,  0,  8,  7],
+         [9, 10,  8,  0,  3],
+         [8,  9,  7,  3,  0]]
+ids = list('abcde')
+dm = DistanceMatrix(data, ids)
+
+tree = nj(dm)
+print(tree.ascii_art())
+print ("--------------------------------------------------------")
+newick_str = nj(dm, result_constructor=str)
+print(newick_str)
+
+# %%
+df = pd.DataFrame(data, columns=ids, index=ids)
+
+dm = DistanceMatrix(df, ids)
+
+tree = nj(dm)
+print(tree.ascii_art())
+print ("--------------------------------------------------------")
+newick_str = nj(dm, result_constructor=str)
+print(newick_str)
 
 # %%
 
