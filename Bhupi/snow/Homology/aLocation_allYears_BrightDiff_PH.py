@@ -70,50 +70,32 @@ import kmapper as km # Import the class
 snow_TS_dir_base = "/Users/hn/Documents/01_research_data/Bhupi/snow/EithyYearsClustering/"
 in_dir = snow_TS_dir_base + "Brightness_temperature/"
 
+SNOTEL_dir = snow_TS_dir_base + "SNOTEL_observations/"
+
+# %%
+SNOTEL_join_PMW_grids = pd.read_csv(SNOTEL_dir + "SNOTEL_join_PMW_grids.csv")
+
 # %%
 file_Name = "all_locs_all_years_eachDayAColumn.pkl"
-A = pd.read_pickle(in_dir+file_Name)
-
-
-fileName = "all_locs_all_years_eachDayAColumn.csv"
-all_stations_years = pd.read_csv(in_dir + fileName)
+all_stations_years = pd.read_pickle(in_dir+file_Name)
+all_stations_years = all_stations_years["all_locs_all_years_eachDayAColumn"]
 all_stations_years.head(2)
 
 # %%
-A = A["all_locs_all_years_eachDayAColumn"]
+SNOTEL_join_PMW_grids=SNOTEL_join_PMW_grids[["station_name", "pmw_lat_lon"]]
+SNOTEL_join_PMW_grids.rename(columns={"pmw_lat_lon": "lat_lon"}, inplace=True)
+
+all_stations_years = pd.merge(all_stations_years, SNOTEL_join_PMW_grids, on=['lat_lon'], how='left')
+all_stations_years.drop(columns=['lat_lon'], inplace=True)
 
 # %%
-all_stations_years.head(5)
-
-# %%
-
-# %%
-
-# %%
-type(all_stations_years)
-
-# %%
-type(A)
-
-# %%
-
-# %%
-
-# %%
-a_loc= "42.32438_-113.61324"
-b_loc = "42.69664_-118.61593"
-
-ii_data = all_stations_years.loc[all_stations_years.lat_lon==a_loc]
-jj_data = all_stations_years.loc[all_stations_years.lat_lon==b_loc]
-ii_data.equals(jj_data)
-
-# %%
+all_stations_years.head(2)
 
 # %% [markdown]
-# # Smooth
+# # Smoothen
 
 # %%
-locations = all_stations_years["lat_lon"].unique()
+locations = all_stations_years["station_name"].unique()
 locations=sorted(locations)
 years = all_stations_years["year"].unique()
 print (len(locations))
@@ -130,7 +112,7 @@ weights_5 = np.arange(1, window_5+1)
 # weights_5 = 
 
 for a_loc in locations:
-    curr_loc = all_stations_years_smooth[all_stations_years_smooth.lat_lon==a_loc]
+    curr_loc = all_stations_years_smooth[all_stations_years_smooth.station_name==a_loc]
     years = curr_loc["year"].unique() # year 2003 does not have all locations!
     for a_year in years:
         a_signal = curr_loc.loc[curr_loc.year==a_year, "day_1":"day_365"]
@@ -147,14 +129,6 @@ for a_loc in locations:
 
 all_stations_years_smooth.head(3)
 
-# %%
-a_loc = "42.32438_-113.61324"
-b_loc = "42.69664_-118.61593"
-
-ii_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==a_loc]
-jj_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==b_loc]
-ii_data.equals(jj_data)
-
 # %% [markdown]
 # We lost some data at the beginning due to rolling window. So, we replace them here:
 
@@ -167,14 +141,6 @@ for a_col in NA_columns:
 
 all_stations_years_smooth.head(3)
 
-# %%
-a_loc = "42.32438_-113.61324"
-b_loc = "42.69664_-118.61593"
-
-ii_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==a_loc]
-jj_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==b_loc]
-ii_data.equals(jj_data)
-
 
 # %%
 def diagram_sizes(dgms):
@@ -183,7 +149,7 @@ def diagram_sizes(dgms):
 
 # %%
 a_loc = locations[0]
-a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==a_loc]
+a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==a_loc]
 # a_loc_specific_years = a_loc_data.year.unique()
 # a_year = a_loc_specific_years[9]
 # a_year_data = a_loc_data.loc[a_loc_data.year==a_year]
@@ -194,27 +160,28 @@ a_dmg = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"])['dgms']
 persim.plot_diagrams(a_dmg, show=False, title=f"rips output\n{diagram_sizes(a_dmg)}")
 
 # %%
-a_loc = "42.32438_-113.61324"
-b_loc = "42.69664_-118.61593"
 
+# %%
+a_loc = SNOTEL_join_PMW_grids[SNOTEL_join_PMW_grids.lat_lon=="42.32438_-113.61324"].station_name.values[0]
+b_loc = SNOTEL_join_PMW_grids[SNOTEL_join_PMW_grids.lat_lon=="42.69664_-118.61593"].station_name.values[0]
 
-a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==a_loc, "day_1":"day_365"]
+a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==a_loc, "day_1":"day_365"]
 a_dmg = ripser.ripser(a_loc_data, maxdim=2)['dgms']
 persim.plot_diagrams(a_dmg, show=False, title=f"rips output\n{diagram_sizes(a_dmg)}", ax=plt.subplot(121))
 
-b_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==b_loc, "day_1":"day_365"]
+b_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==b_loc, "day_1":"day_365"]
 b_dmg = ripser.ripser(b_loc_data, maxdim=2)['dgms']
 persim.plot_diagrams(b_dmg, show=False, title=f"rips output\n{diagram_sizes(a_dmg)}", ax=plt.subplot(122))
 
 
 # %%
 # output dir
-output_dir=in_dir + "aLocation_allYears_grouped/"
+output_dir=in_dir + "aLocation_allYears_grouped_dgms/"
 os.makedirs(output_dir, exist_ok=True)
 
 # %%
 for a_loc in locations:
-    a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==a_loc]
+    a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==a_loc]
     ripser_output = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"], maxdim=2)
     ripser_output["jupyterNotebook_GeneratedThisdata"] = "aLocation_allYears_BrightDiff_PH"
 
@@ -226,7 +193,7 @@ for a_loc in locations:
 
 # %%
 a_loc = locations[10]
-a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==a_loc]
+a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==a_loc]
 dgms = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms']
 persim.plot_diagrams(dgms, show=True, lifetime=True, legend=False)
 
@@ -245,8 +212,8 @@ for ii in np.arange(len(locations)):
         ii_loc = locations[ii]
         jj_loc = locations[jj]
 
-        ii_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==ii_loc]
-        jj_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==jj_loc]
+        ii_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==ii_loc]
+        jj_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==jj_loc]
 
         ii_dgms_H1 = ripser.ripser(ii_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms'][1]
         jj_dgms_H1 = ripser.ripser(jj_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms'][1]
@@ -261,8 +228,6 @@ loc_2_loc_H1_distances.fillna(0, inplace=True)
 
 loc_2_loc_H1_distances.loc[:, loc_2_loc_H1_distances.columns]=loc_2_loc_H1_distances.T.values + \
                                                                     loc_2_loc_H1_distances.values
-
-# %%
 
 # %%
 loc_2_loc_H1_distances_dict={"loc_2_loc_H1_distances":loc_2_loc_H1_distances,
@@ -280,13 +245,39 @@ f.close() # close file
 loc_2_loc_H1_distances_dict = pd.read_pickle(output_dir+"location_2_location_H1_distanceMatrix.pkl")
 loc_2_loc_H1_distances=loc_2_loc_H1_distances_dict["loc_2_loc_H1_distances"]
 
+loc_2_loc_H1_distances.head(5)
+
 # %%
-loc_2_loc_H1_distances
+size = 10
+title_FontSize = 2
+legend_FontSize = 8
+tick_FontSize = 12
+label_FontSize = 14
+
+params = {'legend.fontsize': 15, # medium, large
+          # 'figure.figsize': (6, 4),
+          'axes.labelsize': size*2,
+          'axes.titlesize': size*1.5,
+          'xtick.labelsize': size*0.00015, #  * 0.75
+          'ytick.labelsize': size, #  * 0.75
+          'axes.titlepad': 10}
+
+#
+#  Once set, you cannot change them, unless restart the notebook
+#
+plt.rc('font', family = 'Palatino')
+plt.rcParams['xtick.bottom'] = True
+plt.rcParams['ytick.left'] = True
+plt.rcParams['xtick.labelbottom'] = True
+plt.rcParams['ytick.labelleft'] = True
+plt.rcParams['figure.figsize'] = [15, 4]
+plt.rcParams.update(params)
 
 # %%
 loc_2_loc_H1_distances_array = squareform(loc_2_loc_H1_distances)
 loc_2_loc_H1_linkage_matrix = linkage(loc_2_loc_H1_distances_array, "single")
 dendrogram(loc_2_loc_H1_linkage_matrix, labels=list(loc_2_loc_H1_distances.columns))
+plt.tick_params(axis='both', which='major', labelsize=10)
 plt.title("location to location (based on H1). ")
 plt.show()
 
@@ -294,17 +285,17 @@ plt.show()
 loc_2_loc_H1_linkage_matrix.shape
 
 # %%
-loc_2_loc_H1_linkage_matrix
+loc_2_loc_H1_linkage_matrix[0:5]
 
 # %%
-loc_2_loc_H1_distances
+loc_2_loc_H1_distances.head(5)
 
 # %%
-a_loc= "42.32438_-113.61324"
-b_loc = "42.69664_-118.61593"
+a_loc = SNOTEL_join_PMW_grids[SNOTEL_join_PMW_grids.lat_lon=="42.32438_-113.61324"].station_name.values[0]
+b_loc = SNOTEL_join_PMW_grids[SNOTEL_join_PMW_grids.lat_lon=="42.69664_-118.61593"].station_name.values[0]
 
-ii_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==a_loc]
-jj_data = all_stations_years_smooth.loc[all_stations_years_smooth.lat_lon==b_loc]
+ii_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==a_loc]
+jj_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==b_loc]
 
 ii_dgms_H1 = ripser.ripser(ii_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms'][1]
 jj_dgms_H1 = ripser.ripser(jj_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms'][1]
@@ -315,8 +306,6 @@ persim.plot_diagrams(ripser.ripser(ii_data.loc[:, "day_1":"day_365"], maxdim=2)[
 
 persim.plot_diagrams(ripser.ripser(jj_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms'], 
                      title=f"jj_dgms_H1", ax=plt.subplot(122))
-
-# %%
 
 # %%
 
@@ -350,14 +339,6 @@ dm
 # %%
 tree = nj(dm)
 print(tree.ascii_art())
-
-# %%
-
-# %%
-
-# %%
-
-# %%
 
 # %%
 

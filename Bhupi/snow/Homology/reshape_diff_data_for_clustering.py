@@ -193,7 +193,7 @@ os.makedirs(output_dir, exist_ok=True)
 
 file_Name = "all_locs_all_years_but_2003.pkl"
 f = open(output_dir + file_Name, "wb") # create a binary pickle file 
-pickle.dump(all_locs_all_years_eachDayAColumn_dict, f) # write the python object (dict) to pickle file
+pickle.dump(all_locs_all_years_but_2003_dict, f) # write the python object (dict) to pickle file
 f.close() # close file
 
 # all_stations.to_csv(snow_TS_dir_base+ "Brightness_temperature/" + "all_locs_all_years_but_2003.csv", index=False)

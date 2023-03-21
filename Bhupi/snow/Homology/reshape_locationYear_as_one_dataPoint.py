@@ -24,20 +24,25 @@ snow_TS_dir_base = "/Users/hn/Documents/01_research_data/Bhupi/snow/EithyYearsCl
 diff_dir = snow_TS_dir_base + "Brightness_temperature/Only_for_SNOTEL_grids/"
 
 # %%
-all_locs_all_years_but_2003 = pd.read_csv(snow_TS_dir_base + \
-                                          "Brightness_temperature/" + \
-                                          "all_locs_all_years_but_2003.csv")
+file_Name = "all_locs_all_years_but_2003.pkl"
+all_locs_all_years_but_2003 = pd.read_pickle(snow_TS_dir_base + \
+                                             "Brightness_temperature/" + \
+                                              file_Name)
+
+all_locs_all_years_but_2003=all_locs_all_years_but_2003["all_locs_all_years_but_2003"]
+# all_locs_all_years_but_2003 = pd.read_csv(snow_TS_dir_base 
+#                                           "all_locs_all_years_but_2003.csv")
 all_locs_all_years_but_2003.date = pd.to_datetime(all_locs_all_years_but_2003.date)
 all_locs_all_years_but_2003.head(2)
 
 # %%
-a_loc = "42.32438_-113.61324"
-b_loc = "42.69664_-118.61593"
+# a_loc = "42.32438_-113.61324"
+# b_loc = "42.69664_-118.61593"
 
-ii_data = all_locs_all_years_but_2003[a_loc]
-jj_data = all_locs_all_years_but_2003[b_loc]
+# ii_data = all_locs_all_years_but_2003[a_loc]
+# jj_data = all_locs_all_years_but_2003[b_loc]
 
-ii_data==jj_data
+# ii_data==jj_data
 
 # %%
 
@@ -88,18 +93,18 @@ all_locs_smooth_after_2004.head(2)
 all_locs_smooth_after_2004 = all_locs_smooth_after_2004.round(3)
 
 # %%
-a_loc = "42.32438_-113.61324"
-b_loc = "42.69664_-118.61593"
+# a_loc = "42.32438_-113.61324"
+# b_loc = "42.69664_-118.61593"
 
-ii_data = all_locs_smooth_after_2004[a_loc]
-jj_data = all_locs_smooth_after_2004[b_loc]
-ii_data==jj_data
+# ii_data = all_locs_smooth_after_2004[a_loc]
+# jj_data = all_locs_smooth_after_2004[b_loc]
+# ii_data==jj_data
 
 # %%
 years = all_locs_smooth_after_2004.year.unique()
 
 # %%
-all_locs_smooth_after_2004
+all_locs_smooth_after_2004.head(3)
 
 # %%
 day_arr = list(np.repeat("day_", 365))
@@ -135,23 +140,20 @@ for a_location in locations:
 smoothed_yearLocSingleDataPoint.head(2)
 
 # %%
-a_loc = "42.32438_-113.61324"
-b_loc = "42.69664_-118.61593"
+# file_Name = "all_locs_all_years_but_2003.pkl"
+# all_locs_all_years_but_2003 = pd.read_pickle(snow_TS_dir_base + \
+#                                              "Brightness_temperature/" + \
+#                                               file_Name)
 
-ii_data = smoothed_yearLocSingleDataPoint[a_loc]
-jj_data = smoothed_yearLocSingleDataPoint[b_loc]
-ii_data==jj_data
+# file_Name = "all_locs_all_years_eachDayAColumn.pkl"
+# all_locs_all_years_eachDayAColumn = pd.read_pickle(snow_TS_dir_base + \
+#                                              "Brightness_temperature/" + \
+#                                               file_Name)
 
-# %%
-all_stations.to_csv(snow_TS_dir_base+ "Brightness_temperature/" + "all_locs_all_years_but_2003.csv", index=False)
+# all_locs_all_years_but_2003=all_locs_all_years_but_2003['all_locs_all_years_but_2003']
+# all_locs_all_years_eachDayAColumn=all_locs_all_years_eachDayAColumn['all_locs_all_years_eachDayAColumn']
 
-# %%
-
-# %%
-
-# %%
-
-# %%
+# all_locs_all_years_eachDayAColumn
 
 # %%
 
