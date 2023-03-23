@@ -127,6 +127,8 @@ for a_loc in locations:
                                                                    weights_5.sum(), raw=True)
         all_stations_years_smooth.loc[curr_idx, "day_1":"day_365"]=wma_5.values
 
+del(a_loc, a_year, curr_loc)
+
 all_stations_years_smooth.head(3)
 
 # %% [markdown]
@@ -154,12 +156,14 @@ a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_nam
 # a_year = a_loc_specific_years[9]
 # a_year_data = a_loc_data.loc[a_loc_data.year==a_year]
 
-# %%
 # ripser.ripser(all_locs_smooth_after_2004[["time_xAxis", "48.97191_-121.05145"]])['dgms']
 a_dmg = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"])['dgms']
-persim.plot_diagrams(a_dmg, show=False, title=f"rips output\n{diagram_sizes(a_dmg)}")
+persim.plot_diagrams(a_dmg, show=False, title=f"{a_loc}\n{diagram_sizes(a_dmg)}", ax=plt.subplot(121))
 
-# %%
+persim.plot_diagrams(a_dmg, show=True,  title=f"{a_loc}\n{diagram_sizes(a_dmg)}", ax=plt.subplot(122),
+                     lifetime=True, legend=False)
+
+del(a_loc, a_loc_data, a_dmg)
 
 # %%
 a_loc = SNOTEL_join_PMW_grids[SNOTEL_join_PMW_grids.lat_lon=="42.32438_-113.61324"].station_name.values[0]
@@ -167,11 +171,14 @@ b_loc = SNOTEL_join_PMW_grids[SNOTEL_join_PMW_grids.lat_lon=="42.69664_-118.6159
 
 a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==a_loc, "day_1":"day_365"]
 a_dmg = ripser.ripser(a_loc_data, maxdim=2)['dgms']
-persim.plot_diagrams(a_dmg, show=False, title=f"{a_loc},\n rips output\n{diagram_sizes(a_dmg)}", ax=plt.subplot(121))
+persim.plot_diagrams(a_dmg, show=False, title=f"{a_loc}, \n{diagram_sizes(a_dmg)}", ax=plt.subplot(121))
 
 b_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==b_loc, "day_1":"day_365"]
 b_dmg = ripser.ripser(b_loc_data, maxdim=2)['dgms']
-persim.plot_diagrams(b_dmg, show=False, title=f"{b_loc},\nrips output\n{diagram_sizes(a_dmg)}", ax=plt.subplot(122))
+persim.plot_diagrams(b_dmg, show=False, title=f"{b_loc},\n{diagram_sizes(a_dmg)}", ax=plt.subplot(122))
+
+del(a_loc, a_loc_data, a_dmg)
+del(b_loc, b_loc_data, b_dmg)
 
 # %%
 # output dir
@@ -188,15 +195,87 @@ for a_loc in locations:
     f = open(output_dir + file_Name, "wb") # create a binary pickle file 
     pickle.dump(ripser_output, f) # write the python object (dict) to pickle file
     f.close() # close file
+    
+del(a_loc, a_loc_data, ripser_output, file_Name)
 
 # %%
-a_loc = locations[10]
-a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==a_loc]
-dgms = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms']
-persim.plot_diagrams(dgms, show=True, lifetime=True, legend=False)
+
+# %% [markdown]
+# # Form a big plot and save to disk
 
 # %%
+
+# %%
+b_loc = SNOTEL_join_PMW_grids[SNOTEL_join_PMW_grids.lat_lon=="42.69664_-118.61593"].station_name.values[0]
+b_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==b_loc, "day_1":"day_365"]
+b_dmg = ripser.ripser(b_loc_data, maxdim=2)['dgms']
+
+params = {'axes.titlepad' : 10}
+plt.rcParams.update(params)
+fig, axs = plt.subplots(1, 2, figsize=(7, 7), sharex=False, sharey=True, # sharex=True, sharey=True,
+                       gridspec_kw={'hspace': .2, 'wspace': .3});
+(ax1, ax2) = axs;
+
+ax1.grid(False); ax2.grid(False)
+
+persim.plot_diagrams(b_dmg, show=False, 
+                     title=f"{b_loc},\n{diagram_sizes(b_dmg)}", 
+                     ax=ax1)
+
+ax1.set_title(f"{b_loc},\n{diagram_sizes(b_dmg)}",  
+              fontdict={"fontsize": 12});
+
+persim.plot_diagrams(b_dmg, show=False, 
+                     title=f"{b_loc},\n{diagram_sizes(b_dmg)}", 
+                     ax=ax2)
+
+ax2.set(xlabel=None);
+
+del(b_loc, b_loc_data, b_dmg)
+
+# %%
+
+# %%
+params = {'axes.titlepad' : 10,
+          'axes.titlesize': 20,
+          'axes.titlepad': 10}
+plt.rcParams.update(params)
+
 # persim.sliced_wasserstein(dgms[1], dgms[1])
+plot_per_col = int(np.floor(np.sqrt(len(locations))))
+print (f"{plot_per_col=}")
+extra_plots = len(locations) - plot_per_col**2
+plot_per_row = plot_per_col + int(np.ceil(extra_plots/plot_per_col))
+print (f"{plot_per_row=}")
+
+row_count, col_count= 0, 0
+subplot_size = 3
+fig, axs = plt.subplots(plot_per_row, plot_per_col, 
+                        figsize=(plot_per_col*subplot_size, plot_per_row*subplot_size),
+                        sharey=False, # "col", "row", True, False
+                        gridspec_kw={'hspace':0.3, 'wspace':.01})
+
+for a_loc in locations:
+    a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==a_loc]
+    ripser_output = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"], maxdim=1)
+    dgms = ripser_output["dgms"]
+
+    persim.plot_diagrams(dgms, show=False, legend=False, 
+                         # title=f"{a_loc},\n{diagram_sizes(dgms)}", 
+                         ax=axs[row_count][col_count])
+
+    axs[row_count][col_count].set(xlabel=None, ylabel=None)
+    axs[row_count][col_count].set_title(f"{a_loc}",  # \n{diagram_sizes(dgms)}
+                                          fontdict={"fontsize": 15});
+
+    col_count += 1
+    if col_count % plot_per_col == 0:
+        row_count += 1
+        col_count = 0
+
+fig_name = output_dir + "aLocation_allYears_BrightDiff_PH" + ".pdf"
+plt.savefig(fname = fig_name, dpi=100, bbox_inches='tight')
+plt.close('all')
 
 # %% [markdown]
 # # Form distance matrix
@@ -226,6 +305,11 @@ loc_2_loc_H1_distances.fillna(0, inplace=True)
 
 loc_2_loc_H1_distances.loc[:, loc_2_loc_H1_distances.columns]=loc_2_loc_H1_distances.T.values + \
                                                                     loc_2_loc_H1_distances.values
+
+del(ii, ii_year, ii_data, ii_dgms_H1)
+del(jj, jj_year, jj_data, jj_dgms_H1)
+
+# %%
 
 # %%
 loc_2_loc_H1_distances_dict={"loc_2_loc_H1_distances":loc_2_loc_H1_distances,
@@ -305,6 +389,9 @@ persim.plot_diagrams(ripser.ripser(aa_data.loc[:, "day_1":"day_365"], maxdim=2)[
 persim.plot_diagrams(ripser.ripser(bb_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms'], 
                      title=f"{b_loc}", ax=plt.subplot(122))
 
+del(a_loc, aa_data, aa_dgms_H1)
+del(b_loc, bb_data, bb_dgms_H1)
+
 # %%
 
 # %% [markdown]
@@ -333,8 +420,8 @@ dm = DistanceMatrix(loc_2_loc_H1_distances)
 dm
 
 # %%
-tree = nj(dm)
-print(tree.ascii_art())
+# tree = nj(dm)
+# print(tree.ascii_art())
 
 # %%
 
@@ -367,9 +454,3 @@ linkage_matrix
 
 # %%
 mat
-
-# %%
-
-# %%
-
-# %%

@@ -117,6 +117,7 @@ for a_loc in locations:
                                                                    weights_5.sum(), raw=True)
         all_stations_years_smooth.loc[curr_idx, "day_1":"day_365"]=wma_5.values
 
+del(a_loc, curr_loc, station_years, a_year)
 all_stations_years_smooth.head(3)
 
 # %% [markdown]
@@ -142,7 +143,7 @@ data_2003 = all_stations_years_smooth[all_stations_years_smooth.year==2003].copy
 len(data_2003.station_name.unique())
 
 # %%
-years=list(all_stations_years_smooth.year.unique())
+years=sorted(list(all_stations_years_smooth.year.unique()))
 
 # %%
 
@@ -157,7 +158,11 @@ print (f"{len(a_year_data.station_name.unique())=}")
 
 # ripser.ripser(all_locs_smooth_after_2004[["time_xAxis", "48.97191_-121.05145"]])['dgms']
 a_dmg = ripser.ripser(a_year_data.loc[:, "day_1":"day_365"])['dgms']
-persim.plot_diagrams(a_dmg, show=False, title=f"{a_year}, rips output\n{diagram_sizes(a_dmg)}")
+persim.plot_diagrams(a_dmg, show=False, title=f"{a_year}, \n{diagram_sizes(a_dmg)}", ax=plt.subplot(121))
+persim.plot_diagrams(a_dmg, show=True, title=f"{a_year},\n{diagram_sizes(a_dmg)}", ax=plt.subplot(122),
+                     lifetime=True, legend=False)
+
+del(a_year, a_year_data, a_dmg)
 
 # %%
 
@@ -177,6 +182,10 @@ b_dmg = ripser.ripser(b_year_data, maxdim=2)['dgms']
 persim.plot_diagrams(b_dmg, show=False, title=f"{b_year}\n rips output\n{diagram_sizes(a_dmg)}", ax=plt.subplot(122))
 
 
+del(a_year, a_year_data, a_dmg)
+del(b_year, b_year_data, b_dmg)
+
+
 # %%
 # output dir
 output_dir=SNOTEL_dir + "allLocations_aYear_grouped_dgms/"
@@ -192,17 +201,57 @@ for a_year in years:
     f = open(output_dir + file_Name, "wb") # create a binary pickle file 
     pickle.dump(ripser_output, f) # write the python object (dict) to pickle file
     f.close() # close file
+    
+del(a_year, a_year_data, ripser_output)
 
 # %%
-
-# %%
-a_year = years[10]
-a_year_data = all_stations_years_smooth.loc[all_stations_years_smooth.year==a_year]
-dgms = ripser.ripser(a_year_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms']
-persim.plot_diagrams(dgms, show=True, lifetime=True, legend=False)
 
 # %%
 # persim.sliced_wasserstein(dgms[1], dgms[1])
+
+# %%
+params = {'axes.titlepad' : 5,
+          'axes.titlesize': 5}
+plt.rcParams.update(params)
+
+# persim.sliced_wasserstein(dgms[1], dgms[1])
+plot_per_col = int(np.floor(np.sqrt(len(years))))
+print (f"{plot_per_col=}")
+extra_plots = len(years) - plot_per_col**2
+plot_per_row = plot_per_col + int(np.ceil(extra_plots/plot_per_col))
+print (f"{plot_per_row=}")
+
+row_count, col_count= 0, 0
+subplot_size = 2.5
+fig, axs = plt.subplots(plot_per_row, plot_per_col, 
+                        figsize=(plot_per_col*subplot_size, plot_per_row*subplot_size),
+                        sharey=False, # "col", "row", True, False
+                        gridspec_kw={'hspace':0.3, 'wspace':.15})
+
+for a_year in years:
+    a_year_data = all_stations_years_smooth.loc[all_stations_years_smooth.year==a_year]
+    ripser_output = ripser.ripser(a_year_data.loc[:, "day_1":"day_365"], maxdim=1)
+    dgms = ripser_output["dgms"]
+
+    persim.plot_diagrams(dgms, show=False, legend=False, 
+                         # title=f"{a_year},\n{diagram_sizes(dgms)}", 
+                         ax=axs[row_count][col_count])
+
+    axs[row_count][col_count].set(xlabel=None, ylabel=None)
+    axs[row_count][col_count].set_title(f"{a_year}",  # \n{diagram_sizes(dgms)}
+                                        fontdict={"fontsize": 10, "fontweight":"bold"});
+
+    col_count += 1
+    if col_count % plot_per_col == 0:
+        row_count += 1
+        col_count = 0
+
+del(a_year, a_year_data, ripser_output, dgms)
+fig_name = output_dir + "ayear_allLocations_SNOTEL_PH" + ".pdf"
+plt.savefig(fname = fig_name, dpi=100, bbox_inches='tight')
+plt.close('all')
+
+# %%
 
 # %% [markdown]
 # # Form distance matrix
@@ -232,6 +281,9 @@ yr_2_yr_H1_distances.fillna(0, inplace=True)
 
 yr_2_yr_H1_distances.loc[:, yr_2_yr_H1_distances.columns]=yr_2_yr_H1_distances.T.values + \
                                                                     yr_2_yr_H1_distances.values
+
+del(ii, ii_year, ii_data, ii_dgms_H1)
+del(jj, jj_year, jj_data, jj_dgms_H1)
 
 # %%
 yr_2_yr_H1_distances_dict={"yr_2_yr_H1_distances":yr_2_yr_H1_distances,
@@ -313,6 +365,9 @@ persim.plot_diagrams(ripser.ripser(aa_data.loc[:, "day_1":"day_365"], maxdim=2)[
 
 persim.plot_diagrams(ripser.ripser(bb_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms'], 
                      title=f"{b_year}", ax=plt.subplot(122))
+
+del(a_year, aa_data, aa_dgms_H1)
+del(b_year, bb_data, bb_dgms_H1)
 
 # %%
 
