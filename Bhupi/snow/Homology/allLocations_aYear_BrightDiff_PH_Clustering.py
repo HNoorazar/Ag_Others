@@ -220,18 +220,18 @@ params = {'axes.titlepad' : 5,
 plt.rcParams.update(params)
 
 # persim.sliced_wasserstein(dgms[1], dgms[1])
-plot_per_col = int(np.floor(np.sqrt(len(years))))
+number_of_cols = int(np.floor(np.sqrt(len(years))))
 
 print (f"{len(years)=}")
-print (f"{plot_per_col=}")
-extra_plots = len(years) - plot_per_col**2
-plot_per_row = plot_per_col + int(np.ceil(extra_plots/plot_per_col))
-print (f"{plot_per_row=}")
+print (f"{number_of_cols=}")
+extra_plots = len(years) - number_of_cols**2
+number_of_rows = number_of_cols + int(np.ceil(extra_plots/number_of_cols))
+print (f"{number_of_rows=}")
 
 row_count, col_count= 0, 0
 subplot_size = 2.5
-fig, axs = plt.subplots(plot_per_row, plot_per_col, 
-                        figsize=(plot_per_col*subplot_size, plot_per_row*subplot_size),
+fig, axs = plt.subplots(number_of_rows, number_of_cols, 
+                        figsize=(number_of_cols*subplot_size, number_of_rows*subplot_size),
                         sharey=False, # "col", "row", True, False
                         gridspec_kw={'hspace':0.3, 'wspace':.15})
 
@@ -249,7 +249,7 @@ for a_year in years:
                                         fontdict={"fontsize": 10, "fontweight":"bold"});
 
     col_count += 1
-    if col_count % plot_per_col == 0:
+    if col_count % number_of_cols == 0:
         row_count += 1
         col_count = 0
 

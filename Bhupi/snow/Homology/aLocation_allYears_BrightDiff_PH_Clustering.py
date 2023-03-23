@@ -242,16 +242,16 @@ params = {'axes.titlepad' : 10,
 plt.rcParams.update(params)
 
 # persim.sliced_wasserstein(dgms[1], dgms[1])
-plot_per_col = int(np.floor(np.sqrt(len(locations))))
-print (f"{plot_per_col=}")
-extra_plots = len(locations) - plot_per_col**2
-plot_per_row = plot_per_col + int(np.ceil(extra_plots/plot_per_col))
-print (f"{plot_per_row=}")
+number_of_cols = int(np.floor(np.sqrt(len(locations))))
+print (f"{number_of_cols=}")
+extra_plots = len(locations) - number_of_cols**2
+number_of_rows = number_of_cols + int(np.ceil(extra_plots/number_of_cols))
+print (f"{number_of_rows=}")
 
 row_count, col_count= 0, 0
 subplot_size = 3
-fig, axs = plt.subplots(plot_per_row, plot_per_col, 
-                        figsize=(plot_per_col*subplot_size, plot_per_row*subplot_size),
+fig, axs = plt.subplots(number_of_rows, number_of_cols, 
+                        figsize=(number_of_cols*subplot_size, number_of_rows*subplot_size),
                         sharey=False, # "col", "row", True, False
                         gridspec_kw={'hspace':0.3, 'wspace':.01})
 
@@ -269,13 +269,19 @@ for a_loc in locations:
                                           fontdict={"fontsize": 15});
 
     col_count += 1
-    if col_count % plot_per_col == 0:
+    if col_count % number_of_cols == 0:
         row_count += 1
         col_count = 0
 
-fig_name = output_dir + "aLocation_allYears_BrightDiff_PH" + ".pdf"
-plt.savefig(fname = fig_name, dpi=100, bbox_inches='tight')
-plt.close('all')
+# fig_name = output_dir + "aLocation_allYears_BrightDiff_PH" + ".pdf"
+# plt.savefig(fname = fig_name, dpi=100, bbox_inches='tight')
+# plt.close('all')
+
+# %%
+fig, axs = plt.subplots(number_of_rows, number_of_columns, 
+                        figsize=(15, 5*number_of_rows),
+                        sharey=False, # "col", "row", True, False
+                        gridspec_kw={'hspace':0.3, 'wspace':.15})
 
 # %% [markdown]
 # # Form distance matrix
