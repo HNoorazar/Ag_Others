@@ -21,6 +21,10 @@
 # That is a given dataset for which we compute persistent diagram and save it to the disk.
 
 # %%
+import shutup
+shutup.please()
+
+# %%
 import numpy as np
 import pandas as pd
 
@@ -50,8 +54,8 @@ from scipy.cluster.hierarchy import dendrogram, linkage
 from scipy.spatial.distance import squareform
 
 # %%
-import shutup
-shutup.please()
+sys.path.append('/Users/hn/Documents/00_GitHub/Ag_Others/Bhupi/snow/')
+import snow_core as sc
 
 # %%
 # # !pip3 install ripser
@@ -85,67 +89,19 @@ all_stations_years.head(2)
 # # Smoothen
 
 # %%
-locations = all_stations_years["station_name"].unique()
-locations=sorted(locations)
-years = sorted(all_stations_years["year"].unique())
-print (len(locations))
-
-# %%
 # %%time
-all_stations_years_smooth = all_stations_years.copy()
-
-window_5 = 5
-weights_5 = np.arange(1, window_5+1)
-
-# weights_5 = np.arange(1, window_5-1)
-# weights_5 = 1/weights_5
-# weights_5 = 
-
-for a_loc in locations:
-    curr_loc = all_stations_years_smooth[all_stations_years_smooth.station_name==a_loc]
-    station_years = curr_loc["year"].unique() # year 2003 does not have all locations!
-    for a_year in station_years:
-        a_signal = curr_loc.loc[curr_loc.year==a_year, "day_1":"day_365"]
-        curr_idx = curr_loc.loc[curr_loc.year==a_year, "day_1":"day_365"].index[0]
-        a_signal = pd.Series(a_signal.values[0])
-        
-        # moving average:
-        # ma5=a_signal.rolling(window_size).mean().tolist()
-        
-        # weighted moving average. weights are not symmetric here.
-        wma_5 = a_signal.rolling(window_5, center=False).apply(lambda a_signal: np.dot(a_signal, weights_5)/
-                                                                   weights_5.sum(), raw=True)
-        all_stations_years_smooth.loc[curr_idx, "day_1":"day_365"]=wma_5.values
-
-del(a_loc, curr_loc, station_years, a_year)
-all_stations_years_smooth.head(3)
-
-# %% [markdown]
-# We lost some data at the beginning due to rolling window. So, we replace them here:
+all_stations_years_smooth = sc.one_sided_smoothing(all_stations_years, window_size=5)
+all_stations_years_smooth.head(2)
 
 # %%
-end = window_5-1
-NA_columns=list(all_stations_years_smooth.columns[0:end])
-a_col = NA_columns[1]
-for a_col in NA_columns:
-    all_stations_years_smooth.loc[:, a_col] = all_stations_years_smooth.iloc[:, end]
+locations = sorted(all_stations_years["station_name"].unique())
+years = sorted(all_stations_years["year"].unique())
 
-all_stations_years_smooth.head(3)
-
-
-# %%
-def diagram_sizes(dgms):
-    return ", ".join([f"|$H_{i}$|={len(d)}" for i, d in enumerate(dgms)])
-
+print (f"{len(locations)=}")
 
 # %%
 data_2003 = all_stations_years_smooth[all_stations_years_smooth.year==2003].copy()
 len(data_2003.station_name.unique())
-
-# %%
-years=sorted(list(all_stations_years_smooth.year.unique()))
-
-# %%
 
 # %%
 a_year = years[0]
@@ -158,28 +114,26 @@ print (f"{len(a_year_data.station_name.unique())=}")
 
 # ripser.ripser(all_locs_smooth_after_2004[["time_xAxis", "48.97191_-121.05145"]])['dgms']
 a_dmg = ripser.ripser(a_year_data.loc[:, "day_1":"day_365"])['dgms']
-persim.plot_diagrams(a_dmg, show=False, title=f"{a_year}, \n{diagram_sizes(a_dmg)}", ax=plt.subplot(121))
-persim.plot_diagrams(a_dmg, show=True, title=f"{a_year},\n{diagram_sizes(a_dmg)}", ax=plt.subplot(122),
+persim.plot_diagrams(a_dmg, show=False, title=f"{a_year}, \n{sc.diagram_sizes(a_dmg)}", ax=plt.subplot(121))
+persim.plot_diagrams(a_dmg, show=True, title=f"{a_year},\n{sc.diagram_sizes(a_dmg)}", ax=plt.subplot(122),
                      lifetime=True, legend=False)
 
 del(a_year, a_year_data, a_dmg)
 
 # %%
-
-# %%
-SNOTEL_join_PMW_grids.rename(columns={"pmw_lat_lon": "lat_lon"}, inplace=True)
+# SNOTEL_join_PMW_grids.rename(columns={"pmw_lat_lon": "lat_lon"}, inplace=True)
 
 # %%
 a_year=years[-1]
 
 a_year_data = all_stations_years_smooth.loc[all_stations_years_smooth.year==a_year, "day_1":"day_365"]
 a_dmg = ripser.ripser(a_year_data, maxdim=2)['dgms']
-persim.plot_diagrams(a_dmg, show=False, title=f"{a_year}\n rips output\n{diagram_sizes(a_dmg)}", ax=plt.subplot(121))
+persim.plot_diagrams(a_dmg, show=False, title=f"{a_year}\n {sc.diagram_sizes(a_dmg)}", ax=plt.subplot(121))
 
 b_year=years[-2]
 b_year_data = all_stations_years_smooth.loc[all_stations_years_smooth.year==b_year, "day_1":"day_365"]
 b_dmg = ripser.ripser(b_year_data, maxdim=2)['dgms']
-persim.plot_diagrams(b_dmg, show=False, title=f"{b_year}\n rips output\n{diagram_sizes(a_dmg)}", ax=plt.subplot(122))
+persim.plot_diagrams(b_dmg, show=False, title=f"{b_year}\n {sc.diagram_sizes(a_dmg)}", ax=plt.subplot(122))
 
 
 del(a_year, a_year_data, a_dmg)
@@ -203,8 +157,6 @@ for a_year in years:
     f.close() # close file
     
 del(a_year, a_year_data, ripser_output)
-
-# %%
 
 # %%
 # persim.sliced_wasserstein(dgms[1], dgms[1])
@@ -234,11 +186,11 @@ for a_year in years:
     dgms = ripser_output["dgms"]
 
     persim.plot_diagrams(dgms, show=False, legend=False, 
-                         # title=f"{a_year},\n{diagram_sizes(dgms)}", 
+                         # title=f"{a_year},\n{sc.diagram_sizes(dgms)}", 
                          ax=axs[row_count][col_count])
 
     axs[row_count][col_count].set(xlabel=None, ylabel=None)
-    axs[row_count][col_count].set_title(f"{a_year}",  # \n{diagram_sizes(dgms)}
+    axs[row_count][col_count].set_title(f"{a_year}",  # \n{sc.diagram_sizes(dgms)}
                                         fontdict={"fontsize": 10, "fontweight":"bold"});
 
     col_count += 1
@@ -250,8 +202,6 @@ del(a_year, a_year_data, ripser_output, dgms)
 fig_name = output_dir + "ayear_allLocations_SNOTEL_PH" + ".pdf"
 plt.savefig(fname = fig_name, dpi=100, bbox_inches='tight')
 plt.close('all')
-
-# %%
 
 # %% [markdown]
 # # Form distance matrix
@@ -279,7 +229,7 @@ for ii in np.arange(len(years)):
 """
 yr_2_yr_H1_distances.fillna(0, inplace=True)
 
-yr_2_yr_H1_distances.loc[:, yr_2_yr_H1_distances.columns]=yr_2_yr_H1_distances.T.values + \
+yr_2_yr_H1_distances.loc[:, yr_2_yr_H1_distances.columns] = yr_2_yr_H1_distances.T.values + \
                                                                     yr_2_yr_H1_distances.values
 
 del(ii, ii_year, ii_data, ii_dgms_H1)
@@ -290,7 +240,6 @@ yr_2_yr_H1_distances_dict={"yr_2_yr_H1_distances":yr_2_yr_H1_distances,
                             "jupyterNotebook_GeneratedThisdata":"allLocations_aYear_SNOTEL_PH_Clustering"
                             }
 
-# %%
 file_Name = "year_2_year_H1_distanceMatrix_SNOTEL.pkl"
 
 f = open(output_dir + file_Name, "wb")
@@ -368,6 +317,41 @@ persim.plot_diagrams(ripser.ripser(bb_data.loc[:, "day_1":"day_365"], maxdim=2)[
 
 del(a_year, aa_data, aa_dgms_H1)
 del(b_year, bb_data, bb_dgms_H1)
+
+# %%
+from scipy.cluster.hierarchy import dendrogram, linkage
+from scipy.spatial.distance import squareform
+import matplotlib.pyplot as plt
+
+
+mat = np.array([[0, 3, 0.1], [3, 0, 2], [0.1, 2, 0]])
+dists = squareform(mat)
+linkage_matrix = linkage(dists, "single")
+dendrogram(linkage_matrix, labels=["0", "1", "2"])
+plt.title("test")
+plt.show()
+
+print (f"{linkage_matrix}")
+print ("------------------------------")
+print (f"{mat}")
+
+# %%
+from skbio import DistanceMatrix
+from skbio.tree import nj
+
+data = [[0,  5,  9,  9,  8],
+         [5,  0, 10, 10,  9],
+         [9, 10,  0,  8,  7],
+         [9, 10,  8,  0,  3],
+         [8,  9,  7,  3,  0]]
+ids = list('abcde')
+dm = DistanceMatrix(data, ids)
+
+tree = nj(dm)
+print(tree.ascii_art())
+print ("--------------------------------------------------------")
+newick_str = nj(dm, result_constructor=str)
+print(newick_str)
 
 # %%
 
