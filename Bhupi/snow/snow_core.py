@@ -32,14 +32,12 @@ def diagram_sizes(dgms):
 
 def one_sided_smoothing(all_stations_years, window_size=5):
     all_locs_years_smooth_1Sided = all_stations_years.copy()
-
-    window_size = 5
     weights = np.arange(1, window_size+1)
-    locations = all_stations_years.station_name.unique()
+    stations_ = all_stations_years.station_name.unique()
 
-    for a_loc in locations:
+    for a_loc in stations_:
         curr_loc = all_locs_years_smooth_1Sided[all_locs_years_smooth_1Sided.station_name==a_loc]
-        years = curr_loc["year"].unique() # year 2003 does not have all locations!
+        years = curr_loc["year"].unique() # year 2003 does not have all stations_!
         for a_year in years:
             a_signal = curr_loc.loc[curr_loc.year==a_year, "day_1":"day_365"]
             curr_idx = curr_loc.loc[curr_loc.year==a_year, "day_1":"day_365"].index[0]
@@ -71,8 +69,8 @@ def one_sided_smoothing(all_stations_years, window_size=5):
 
 def two_sided_smoothing(all_stations_years, window_size=5):
     all_locs_years_smooth_2Sided = all_stations_years.copy()
+    stations_ = all_stations_years.station_name.unique()
 
-    window_size = 5
     each_side_len = int((window_size-1)/2)
     weights = list(np.arange(1, each_side_len+2))
     weights_rev = list(np.arange(2, each_side_len+2))
@@ -80,9 +78,9 @@ def two_sided_smoothing(all_stations_years, window_size=5):
     weights = weights_rev+weights
     weights = 1/np.array(weights)
 
-    for a_loc in locations:
+    for a_loc in stations_:
         curr_loc = all_locs_years_smooth_2Sided[all_locs_years_smooth_2Sided.station_name==a_loc]
-        years = curr_loc["year"].unique() # year 2003 does not have all locations!
+        years = curr_loc["year"].unique() # year 2003 does not have all stations_!
         for a_year in years:
             a_signal = curr_loc.loc[curr_loc.year==a_year, "day_1":"day_365"]
             curr_idx = curr_loc.loc[curr_loc.year==a_year, "day_1":"day_365"].index[0]

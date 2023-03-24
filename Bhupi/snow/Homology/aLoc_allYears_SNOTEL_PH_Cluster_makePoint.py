@@ -77,6 +77,8 @@ import snow_core as sc
 snow_TS_dir_base = "/Users/hn/Documents/01_research_data/Bhupi/snow/EithyYearsClustering/"
 SNOTEL_dir = snow_TS_dir_base + "SNOTEL_observations/"
 
+temp_dir = "/Users/hn/Documents/01_research_data/Bhupi/snow/temparatue/"
+
 # %%
 # SNOTEL_join_PMW_grids = pd.read_csv(SNOTEL_dir + "SNOTEL_join_PMW_grids.csv")
 # SNOTEL_join_PMW_grids.head(2)
@@ -90,12 +92,6 @@ all_stations_years.head(2)
 # %% [markdown]
 # # Smoothen
 
-# %%
-locations = all_stations_years["station_name"].unique()
-locations=sorted(locations)
-years = all_stations_years["year"].unique()
-print (f"{len(locations)=}")
-
 # %% [markdown]
 # ### one-sided smoothing
 
@@ -105,12 +101,17 @@ all_locs_years_smooth_1Sided = sc.one_sided_smoothing(all_stations_years, window
 all_locs_years_smooth_1Sided.head(2)
 
 # %% [markdown]
-# ### Two-sided smoothing
+# ### two-sided smoothing
 
 # %%
 # %%time
-all_locs_years_smooth_2Sided=two_sided_smoothing(all_stations_years, window_size=5)
+all_locs_years_smooth_2Sided = sc.two_sided_smoothing(all_stations_years, window_size=5)
 all_locs_years_smooth_2Sided.head(2)
+
+# %%
+# %%time
+all_locs_years_smooth_2Sided_win7=sc.two_sided_smoothing(all_stations_years, window_size=7)
+all_locs_years_smooth_2Sided_win7.head(2)
 
 # %% [markdown]
 # # Quality Control
@@ -119,8 +120,8 @@ all_locs_years_smooth_2Sided.head(2)
 Crater = all_stations_years[all_locs_years_smooth_1Sided.station_name=="Crater Meadows"]
 Crater = Crater[Crater.year==2019]
 
-Howell_Canyon = all_locs_years_smooth_1Sided.loc[all_locs_years_smooth_1Sided.station_name=="Howell Canyon"]
-Howell_Canyon = Howell_Canyon.loc[Howell_Canyon.year==2001]
+Howell = all_locs_years_smooth_1Sided.loc[all_locs_years_smooth_1Sided.station_name=="Howell Canyon"]
+Howell = Howell.loc[Howell.year==2001]
 
 Graham_smooth = all_locs_years_smooth_1Sided[all_locs_years_smooth_1Sided.station_name=="Graham Guard Sta."]
 Graham_smooth = Graham_smooth[Graham_smooth.year==2001]
@@ -128,16 +129,15 @@ Graham_smooth = Graham_smooth[Graham_smooth.year==2001]
 Graham = all_stations_years[all_stations_years.station_name=="Graham Guard Sta."]
 Graham = Graham[Graham.year==2001]
 
-
 subplot_size = 3
 fig, axs = plt.subplots(3, 1, figsize=(8, 6),
                         # sharey=True, # "col", "row", True, False
                         gridspec_kw={'hspace':0.5, 'wspace':.15})
 
-axs[0].plot(np.arange(365), Howell_Canyon.loc[:, "day_1":"day_365"].values[0], 
-                    linewidth = 3, ls = '-', label = f'{Howell_Canyon.year.unique()}');
+axs[0].plot(np.arange(365), Howell.loc[:, "day_1":"day_365"].values[0], 
+                    linewidth = 3, ls = '-', label = f'{Howell.year.unique()}');
 axs[0].set(xlabel=None, ylabel=None)
-axs[0].set_title(f"{Howell_Canyon.station_name.unique()[0]}", 
+axs[0].set_title(f"{Howell.station_name.unique()[0]}", 
               fontdict={"fontsize": 10});
 axs[0].legend(loc="best");
 
@@ -162,7 +162,14 @@ axs[2].set_title(f"Graham",
               fontdict={"fontsize": 10});
 axs[2].legend(loc="upper right");
 
-del(Crater, Howell_Canyon, Graham_smooth, Graham)
+del(Crater, Howell, Graham_smooth, Graham)
+
+# %%
+Graham_temp = pd.read_csv(temp_dir + "Graham_temp.csv")
+Graham_temp.head(2)
+
+# %%
+len(Graham_temp.max_temp_degF.values)
 
 # %%
 Graham_smooth_1Sided = all_locs_years_smooth_1Sided[all_locs_years_smooth_1Sided.station_name=="Graham Guard Sta."]
@@ -171,15 +178,19 @@ Graham_smooth_1Sided = Graham_smooth_1Sided[Graham_smooth_1Sided.year==2001]
 Graham_smooth_2Sided = all_locs_years_smooth_2Sided[all_locs_years_smooth_2Sided.station_name=="Graham Guard Sta."]
 Graham_smooth_2Sided = Graham_smooth_2Sided[Graham_smooth_2Sided.year==2001]
 
+Graham_smooth_2Sided_win7 = all_locs_years_smooth_2Sided_win7[
+                                        all_locs_years_smooth_2Sided_win7.station_name=="Graham Guard Sta."]
+Graham_smooth_2Sided_win7 = Graham_smooth_2Sided_win7[Graham_smooth_2Sided_win7.year==2001]
+
 Graham = all_stations_years[all_stations_years.station_name=="Graham Guard Sta."]
 Graham = Graham[Graham.year==2001]
 
 
 subplot_size = 3
-fig, axs = plt.subplots(1, 1, figsize=(20, 4),
+fig, axs = plt.subplots(1, 1, figsize=(16, 5),
                         # sharey=True, # "col", "row", True, False
                         gridspec_kw={'hspace':0.5, 'wspace':.15})
-
+axs.grid(True);
 axs.plot(np.arange(365), 
          Graham.loc[:, "day_1":"day_365"].values[0], 
          linewidth = 3, ls = '-', label = f'{Graham.year.unique()}',  c="g");
@@ -190,14 +201,48 @@ axs.plot(np.arange(365),
 
 axs.plot(np.arange(365), 
          Graham_smooth_2Sided.loc[:, "day_1":"day_365"].values[0], 
-         linewidth = 1.5, ls = "-", label = f"{Graham.year.unique()}, 2-sided smooth", c="r");
+         linewidth = 1.5, ls = "-", label = f"{Graham.year.unique()}, 2-sided smooth-win5", c="r");
+
+axs.plot(np.arange(365), 
+         Graham_smooth_2Sided_win7.loc[:, "day_1":"day_365"].values[0], 
+         linewidth = 1.5, ls = "-", label = f"{Graham.year.unique()}, 2-sided smooth-win7", c="k");
+
+#######
+####### plot temp
+#######
+ax2 = axs.twinx() 
+ax2.plot(np.arange(365), 
+         Graham_temp.max_temp_degF.values, 
+         linewidth = 1.5, ls = "-", label = f"Graham temp max");
+
+ax2.plot(np.arange(365), 
+         Graham_temp.min_temp_degF.values, 
+         linewidth = 1.5, ls = "-", label = f"Graham temp min");
+
+color = 'tab:blue'
+ax2.set_ylabel('temp.', color=color)
+
+# axs.fill_between(np.arange(365), Graham_temp.min_temp_degF.values, Graham_temp.max_temp_degF.values)
+
+
 
 axs.set(xlabel=None, ylabel=None)
 axs.set_title(f"Graham", 
               fontdict={"fontsize": 10});
 axs.legend(loc="upper right");
 
+axs.set_ylabel("SNOTEL values", fontsize=12);
+axs.set_xlabel("DoY", fontsize=12);
+
 del(Graham_smooth_1Sided, Graham_smooth_2Sided, Graham)
+
+# %%
+
+# %%
+locations = all_stations_years["station_name"].unique()
+locations=sorted(locations)
+years = all_stations_years["year"].unique()
+print (f"{len(locations)=}")
 
 # %%
 a_loc = locations[0]
