@@ -150,6 +150,7 @@ for a_year in years:
     a_year_data = all_stations_years_smooth.loc[all_stations_years_smooth.year==a_year]
     ripser_output = ripser.ripser(a_year_data.loc[:, "day_1":"day_365"], maxdim=2)
     ripser_output["jupyterNotebook_GeneratedThisdata"] = "allLocations_aYear_SNOTEL_PH_Clustering"
+    ripser_output["creation_time"] = datetime.now().strftime("%Y_%m_%d_Time_%H_%M")
 
     file_Name = str(a_year) + "_" + str(len(a_year_data.station_name.unique())) + "stations_SNOTEL" + ".pkl"
     f = open(output_dir + file_Name, "wb") # create a binary pickle file 
@@ -237,9 +238,9 @@ del(jj, jj_year, jj_data, jj_dgms_H1)
 
 # %%
 yr_2_yr_H1_distances_dict={"yr_2_yr_H1_distances":yr_2_yr_H1_distances,
-                            "jupyterNotebook_GeneratedThisdata":"allLocations_aYear_SNOTEL_PH_Clustering"
+                           "jupyterNotebook_GeneratedThisdata":"allLocations_aYear_SNOTEL_PH_Clustering",
+                           "creation_time": datetime.now().strftime("%Y_%m_%d_Time_%H_%M")
                             }
-
 file_Name = "year_2_year_H1_distanceMatrix_SNOTEL.pkl"
 
 f = open(output_dir + file_Name, "wb")
@@ -286,16 +287,34 @@ plt.title("year to year (based on H1 - SNOTEL).")
 plt.show()
 
 # %%
-yr_2_yr_H1_linkage_matrix
+import plotly.express as px
+
+length_ = 800
+fig = px.imshow(yr_2_yr_H1_distances,
+                width=length_, height=length_)
+
+fig.update_layout(
+    margin=dict(l=20, r=20, t=20, b=20),
+    paper_bgcolor="LightSteelBlue",
+)
+fig.show()
 
 # %%
-yr_2_yr_H1_linkage_matrix.shape
+# plt.rcParams["figure.figsize"] = [25, 25]
+params = {"figure.figsize":[25, 25],
+          "axes.titlepad" : 10,
+          "axes.titlesize": 30,
+          "axes.titlepad": 10,
+          "font.size":15
+         }
+plt.rcParams.update(params)
 
-# %%
-yr_2_yr_H1_linkage_matrix[0:5]
-
-# %%
-yr_2_yr_H1_distances.head(5)
+plt.pcolor(yr_2_yr_H1_distances)
+plt.yticks(np.arange(0.5, len(yr_2_yr_H1_distances.index), 1), yr_2_yr_H1_distances.index)
+plt.xticks(np.arange(0.5, len(yr_2_yr_H1_distances.columns), 1), yr_2_yr_H1_distances.columns)
+plt.xticks(rotation = 90)
+plt.colorbar()
+plt.show()
 
 # %%
 a_year = years[-1]
@@ -317,42 +336,5 @@ persim.plot_diagrams(ripser.ripser(bb_data.loc[:, "day_1":"day_365"], maxdim=2)[
 
 del(a_year, aa_data, aa_dgms_H1)
 del(b_year, bb_data, bb_dgms_H1)
-
-# %%
-from scipy.cluster.hierarchy import dendrogram, linkage
-from scipy.spatial.distance import squareform
-import matplotlib.pyplot as plt
-
-
-mat = np.array([[0, 3, 0.1], [3, 0, 2], [0.1, 2, 0]])
-dists = squareform(mat)
-linkage_matrix = linkage(dists, "single")
-dendrogram(linkage_matrix, labels=["0", "1", "2"])
-plt.title("test")
-plt.show()
-
-print (f"{linkage_matrix}")
-print ("------------------------------")
-print (f"{mat}")
-
-# %%
-from skbio import DistanceMatrix
-from skbio.tree import nj
-
-data = [[0,  5,  9,  9,  8],
-         [5,  0, 10, 10,  9],
-         [9, 10,  0,  8,  7],
-         [9, 10,  8,  0,  3],
-         [8,  9,  7,  3,  0]]
-ids = list('abcde')
-dm = DistanceMatrix(data, ids)
-
-tree = nj(dm)
-print(tree.ascii_art())
-print ("--------------------------------------------------------")
-newick_str = nj(dm, result_constructor=str)
-print(newick_str)
-
-# %%
 
 # %%

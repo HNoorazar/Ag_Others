@@ -153,6 +153,7 @@ for a_loc in locations:
     a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==a_loc]
     ripser_output = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"], maxdim=2)
     ripser_output["jupyterNotebook_GeneratedThisdata"] = "aLocation_allYears_BrightDiff_PH_Clustering"
+    ripser_output["creation_time"] = datetime.now().strftime("%Y_%m_%d_Time_%H_%M")
 
     file_Name = a_loc + "_" + str(len(a_loc_data.year.unique())) + "years_BrightDiff" + ".pkl"
     f = open(output_dir + file_Name, "wb") # create a binary pickle file 
@@ -267,7 +268,8 @@ del(jj, jj_loc, jj_data, jj_dgms_H1)
 
 # %%
 loc_2_loc_H1_distances_dict={"loc_2_loc_H1_distances":loc_2_loc_H1_distances,
-                             "jupyterNotebook_GeneratedThisdata":"aLocation_allYears_BrightDiff_PH_Clustering"
+                             "jupyterNotebook_GeneratedThisdata":"aLocation_allYears_BrightDiff_PH_Clustering",
+                             "creation_time": datetime.now().strftime("%Y_%m_%d_Time_%H_%M")
                             }
 
 file_Name = "location_2_location_H1_distanceMatrix.pkl"
@@ -277,12 +279,36 @@ pickle.dump(loc_2_loc_H1_distances_dict, f)
 f.close() # close file
 
 # %%
+import plotly.express as px
+
+length_ = 800
+fig = px.imshow(loc_2_loc_H1_distances,
+                width=length_, height=length_)
+
+fig.update_layout(margin=dict(l=20, r=20, t=20, b=20),
+                  paper_bgcolor="LightSteelBlue")
+fig.show()
+
+# %%
+# plt.rcParams["figure.figsize"] = [25, 25]
+params = {"figure.figsize":[25, 25],
+          "axes.titlepad" : 10,
+          "axes.titlesize": 30,
+          "axes.titlepad": 10,
+          "font.size":15
+         }
+plt.rcParams.update(params)
+
+plt.pcolor(loc_2_loc_H1_distances)
+plt.yticks(np.arange(0.5, len(loc_2_loc_H1_distances.index), 1), loc_2_loc_H1_distances.index)
+plt.xticks(np.arange(0.5, len(loc_2_loc_H1_distances.columns), 1), loc_2_loc_H1_distances.columns)
+plt.xticks(rotation = 90)
+plt.colorbar()
+plt.show()
 
 # %%
 loc_2_loc_H1_distances_dict = pd.read_pickle(output_dir+"location_2_location_H1_distanceMatrix.pkl")
 loc_2_loc_H1_distances=loc_2_loc_H1_distances_dict["loc_2_loc_H1_distances"]
-
-loc_2_loc_H1_distances.head(5)
 
 # %%
 size = 10
@@ -298,10 +324,6 @@ params = {'legend.fontsize': 15, # medium, large
           'xtick.labelsize': size*0.00015, #  * 0.75
           'ytick.labelsize': size, #  * 0.75
           'axes.titlepad': 10}
-
-#
-#  Once set, you cannot change them, unless restart the notebook
-#
 # plt.rc('font', family = 'Palatino')
 # plt.rcParams['xtick.bottom'] = True
 # plt.rcParams['ytick.left'] = True
@@ -317,15 +339,6 @@ dendrogram(loc_2_loc_H1_linkage_matrix, labels=list(loc_2_loc_H1_distances.colum
 plt.tick_params(axis='both', which='major', labelsize=10)
 plt.title("location to location (based on H1). ")
 plt.show()
-
-# %%
-loc_2_loc_H1_linkage_matrix.shape
-
-# %%
-loc_2_loc_H1_linkage_matrix[0:5]
-
-# %%
-loc_2_loc_H1_distances.head(5)
 
 # %%
 plt.rcParams['figure.figsize'] = [7, 3]
@@ -347,53 +360,3 @@ persim.plot_diagrams(ripser.ripser(bb_data.loc[:, "day_1":"day_365"], maxdim=2)[
 
 del(a_loc, aa_data, aa_dgms_H1)
 del(b_loc, bb_data, bb_dgms_H1)
-
-# %% [markdown]
-# ### Neighbor Joining from Biology
-
-# %%
-from skbio import DistanceMatrix
-from skbio.tree import nj
-
-data = [[0,  5,  9,  9,  8],
-         [5,  0, 10, 10,  9],
-         [9, 10,  0,  8,  7],
-         [9, 10,  8,  0,  3],
-         [8,  9,  7,  3,  0]]
-
-# data = pd.DataFrame(data, columns=ids, index=ids)
-
-ids = list('abcde')
-dm = DistanceMatrix(data, ids)
-
-tree = nj(dm)
-print(tree.ascii_art())
-print ("--------------------------------------------------------")
-newick_str = nj(dm, result_constructor=str)
-print(newick_str)
-
-
-
-
-# %%
-dm = DistanceMatrix(loc_2_loc_H1_distances)
-dm
-
-# %%
-from scipy.cluster.hierarchy import dendrogram, linkage
-from scipy.spatial.distance import squareform
-import matplotlib.pyplot as plt
-
-
-mat = np.array([[0, 3, 0.1], [3, 0, 2], [0.1, 2, 0]])
-dists = squareform(mat)
-linkage_matrix = linkage(dists, "single")
-dendrogram(linkage_matrix, labels=["0", "1", "2"])
-plt.title("test")
-plt.show()
-
-print (f"{linkage_matrix}")
-print ("------------------------------")
-print (f"{mat}")
-
-# %%

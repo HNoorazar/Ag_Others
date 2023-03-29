@@ -8,7 +8,7 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.14.5
 #   kernelspec:
-#     display_name: Python 3 (ipykernel)
+#     display_name: Python 3
 #     language: python
 #     name: python3
 # ---
@@ -21,6 +21,7 @@
 # Here I want to try a set of different variances in Gaussian function to smooth the satellite and find the best variance/parameter that minimizes the 2-norm of the difference between smoothed-satellite-signal and SNOTEL data.
 
 # %%
+# !python -V
 
 # %%
 # import warnings

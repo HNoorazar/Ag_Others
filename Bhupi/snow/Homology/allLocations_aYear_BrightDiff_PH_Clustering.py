@@ -162,8 +162,8 @@ for a_year in years:
     a_yr_data = all_stations_years_smooth.loc[all_stations_years_smooth.year==a_year]
     ripser_output = ripser.ripser(a_yr_data.loc[:, "day_1":"day_365"], maxdim=2)
     ripser_output["jupyterNotebook_GeneratedThisdata"] = "allLocations_aYear_BrightDiff_PH_Clustering"
+    ripser_output["creation_time"] = datetime.now().strftime("%Y_%m_%d_Time_%H_%M")
     
-
     file_Name = str(a_year) + "_" + str(len(a_yr_data.station_name.unique())) + "stations_BrightDiff" + ".pkl"
     f = open(output_dir + file_Name, "wb") # create a binary pickle file 
     pickle.dump(ripser_output, f) # write the python object (dict) to pickle file
@@ -250,9 +250,9 @@ del(jj, jj_year, jj_data, jj_dgms_H1)
 
 # %%
 yr_2_yr_H1_distances_dict={"yr_2_yr_H1_distances":yr_2_yr_H1_distances,
-                           "jupyterNotebook_GeneratedThisdata":"allLocations_aYear_BrightDiff_PH_Clustering"
+                           "jupyterNotebook_GeneratedThisdata":"allLocations_aYear_BrightDiff_PH_Clustering",
+                           "creation_time": datetime.now().strftime("%Y_%m_%d_Time_%H_%M")
                             }
-
 file_Name = "year_2_year_H1_distanceMatrix.pkl"
 
 f = open(output_dir + file_Name, "wb")
@@ -260,41 +260,47 @@ pickle.dump(yr_2_yr_H1_distances_dict, f)
 f.close() # close file
 
 # %%
-
-# %%
 yr_2_yr_H1_distances_dict = pd.read_pickle(output_dir+"year_2_year_H1_distanceMatrix.pkl")
 yr_2_yr_H1_distances=yr_2_yr_H1_distances_dict["yr_2_yr_H1_distances"]
 
-yr_2_yr_H1_distances.head(5)
+# %%
+import plotly.express as px
+
+length_ = 400
+fig = px.imshow(yr_2_yr_H1_distances,
+                width=length_, height=length_)
+
+fig.update_layout(
+    margin=dict(l=20, r=20, t=20, b=20),
+    paper_bgcolor="LightSteelBlue",
+)
+fig.show()
 
 # %%
-# size = 10
-# title_FontSize = 2
-# legend_FontSize = 8
-# tick_FontSize = 12
-# label_FontSize = 14
+# plt.rcParams["figure.figsize"] = [25, 25]
+params = {"figure.figsize":[10, 8],
+          "axes.titlepad" : 10,
+          "axes.titlesize": 30,
+          "axes.titlepad": 10,
+          "font.size":10
+         }
+plt.rcParams.update(params)
 
-# params = {'legend.fontsize': 15, # medium, large
-#           # 'figure.figsize': (6, 4),
-#           'axes.labelsize': size*2,
-#           'axes.titlesize': size*1.5,
-#           'xtick.labelsize': size*0.00015, #  * 0.75
-#           'ytick.labelsize': size, #  * 0.75
-#           'axes.titlepad': 10}
-
-# #
-# #  Once set, you cannot change them, unless restart the notebook
-# #
-# plt.rc('font', family = 'Palatino')
-# plt.rcParams['xtick.bottom'] = True
-# plt.rcParams['ytick.left'] = True
-# plt.rcParams['xtick.labelbottom'] = True
-# plt.rcParams['ytick.labelleft'] = True
-# plt.rcParams['figure.figsize'] = [15, 4]
-# plt.rcParams.update(params)
+plt.pcolor(yr_2_yr_H1_distances)
+plt.yticks(np.arange(0.5, len(yr_2_yr_H1_distances.index), 1), yr_2_yr_H1_distances.index)
+plt.xticks(np.arange(0.5, len(yr_2_yr_H1_distances.columns), 1), yr_2_yr_H1_distances.columns)
+plt.xticks(rotation = 90)
+plt.colorbar()
+plt.show()
 
 # %%
-params = {'figure.figsize': (10, 4),'axes.titlepad': 10}
+params = {"figure.figsize":[10, 4],
+          "axes.titlepad" : 10,
+          "axes.titlesize": 10,
+          "axes.titlepad": 10,
+          "font.size":2
+         }
+
 plt.rcParams.update(params)
 
 yr_2_yr_H1_distances_array = squareform(yr_2_yr_H1_distances)
@@ -309,9 +315,6 @@ yr_2_yr_H1_linkage_matrix.shape
 
 # %%
 yr_2_yr_H1_linkage_matrix[0:5]
-
-# %%
-yr_2_yr_H1_distances.head(5)
 
 # %%
 a_year = years[-1]
@@ -333,65 +336,5 @@ persim.plot_diagrams(ripser.ripser(bb_data.loc[:, "day_1":"day_365"], maxdim=2)[
 
 del(a_year, aa_data, aa_dgms_H1)
 del(b_year, bb_data, bb_dgms_H1)
-
-# %% [markdown]
-# ### Neighbor Joining from Biology
-
-# %%
-from skbio import DistanceMatrix
-from skbio.tree import nj
-
-data = [[0,  5,  9,  9,  8],
-         [5,  0, 10, 10,  9],
-         [9, 10,  0,  8,  7],
-         [9, 10,  8,  0,  3],
-         [8,  9,  7,  3,  0]]
-ids = list('abcde')
-dm = DistanceMatrix(data, ids)
-
-tree = nj(dm)
-print(tree.ascii_art())
-print ("--------------------------------------------------------")
-newick_str = nj(dm, result_constructor=str)
-print(newick_str)
-
-# %%
-dm = DistanceMatrix(yr_2_yr_H1_distances)
-dm
-
-# %%
-tree = nj(dm)
-print(tree.ascii_art())
-
-# %%
-yr_2_yr_H1_distances
-
-# %%
-df = pd.DataFrame(data, columns=ids, index=ids)
-dm = DistanceMatrix(df, ids)
-tree = nj(dm)
-print(tree.ascii_art())
-print ("--------------------------------------------------------")
-newick_str = nj(dm, result_constructor=str)
-print(newick_str)
-
-# %%
-from scipy.cluster.hierarchy import dendrogram, linkage
-from scipy.spatial.distance import squareform
-import matplotlib.pyplot as plt
-
-
-mat = np.array([[0, 3, 0.1], [3, 0, 2], [0.1, 2, 0]])
-dists = squareform(mat)
-linkage_matrix = linkage(dists, "single")
-dendrogram(linkage_matrix, labels=["0", "1", "2"])
-plt.title("test")
-plt.show()
-
-print (f"{linkage_matrix}")
-print ("------------------------------")
-print (f"{mat}")
-
-# %%
 
 # %%

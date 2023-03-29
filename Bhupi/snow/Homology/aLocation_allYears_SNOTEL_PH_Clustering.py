@@ -17,7 +17,7 @@
 # This is created after the meeting w/ Ananth. 
 # Use each location in different years as a set that we need to do clustering on. 
 #
-# In this notebook we collect data of a location across all years in one set. That is a given dataset for which we compute persistent diagram and save it to the disk.
+# In this notebook we collect data of a location across all years in one set (location-2-location comparison). That is a given dataset for which we compute persistent diagram and save it to the disk.
 
 # %%
 import shutup
@@ -137,6 +137,7 @@ for a_loc in locations:
     a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==a_loc]
     ripser_output = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"], maxdim=2)
     ripser_output["jupyterNotebook_GeneratedThisdata"] = "aLocation_allYears_SNOTEL_PH_Clustering"
+    ripser_output["creation_time"] = datetime.now().strftime("%Y_%m_%d_Time_%H_%M")
 
     file_Name = a_loc + "_" + str(len(a_loc_data.year.unique())) + "years_SNOTEL" + ".pkl"
     f = open(output_dir + file_Name, "wb") # create a binary pickle file 
@@ -144,8 +145,6 @@ for a_loc in locations:
     f.close() # close file
     
 del(a_loc, a_loc_data, ripser_output, file_Name)
-
-# %%
 
 # %%
 params = {"axes.titlepad" : 10,
@@ -229,7 +228,8 @@ del(jj, jj_loc, jj_data, jj_dgms_H1)
 
 # %%
 loc_2_loc_H1_distances_dict={"loc_2_loc_H1_distances":loc_2_loc_H1_distances,
-                             "jupyterNotebook_GeneratedThisdata":"aLocation_allYears_SNOTEL_PH_Clustering"
+                             "jupyterNotebook_GeneratedThisdata":"aLocation_allYears_SNOTEL_PH_Clustering",
+                             "creation_time": datetime.now().strftime("%Y_%m_%d_Time_%H_%M")
                             }
 
 file_Name = "location_2_location_H1_distanceMatrix_SNOTEL.pkl"
@@ -237,6 +237,8 @@ file_Name = "location_2_location_H1_distanceMatrix_SNOTEL.pkl"
 f = open(output_dir + file_Name, "wb")
 pickle.dump(loc_2_loc_H1_distances_dict, f) 
 f.close() # close file
+
+# %%
 
 # %%
 # size = 10
@@ -299,13 +301,34 @@ plt.title("location to location (based on H1).",
 plt.show()
 
 # %%
-loc_2_loc_H1_linkage_matrix.shape
+import plotly.express as px
+
+length_ = 800
+fig = px.imshow(loc_2_loc_H1_distances,
+                width=length_, height=length_)
+
+fig.update_layout(
+    margin=dict(l=20, r=20, t=20, b=20),
+    paper_bgcolor="LightSteelBlue",
+)
+fig.show()
 
 # %%
-loc_2_loc_H1_linkage_matrix[0:5]
+# plt.rcParams["figure.figsize"] = [25, 25]
+params = {"figure.figsize":[25, 25],
+          "axes.titlepad" : 10,
+          "axes.titlesize": 30,
+          "axes.titlepad": 10,
+          "font.size":15
+         }
+plt.rcParams.update(params)
 
-# %%
-loc_2_loc_H1_distances.head(5)
+plt.pcolor(loc_2_loc_H1_distances)
+plt.yticks(np.arange(0.5, len(loc_2_loc_H1_distances.index), 1), loc_2_loc_H1_distances.index)
+plt.xticks(np.arange(0.5, len(loc_2_loc_H1_distances.columns), 1), loc_2_loc_H1_distances.columns)
+plt.xticks(rotation = 90)
+plt.colorbar()
+plt.show()
 
 # %%
 a_loc = "Howell Canyon"
@@ -524,40 +547,3 @@ for a_year in sorted(Crater.year.unique()):
     axs.set_title(f"Crater Meadows, {Crater.year.unique().min()} - {Crater.year.unique().max()}", 
                   fontdict={"fontsize": 10});
     axs.legend(loc="upper right");
-
-# %%
-from scipy.cluster.hierarchy import dendrogram, linkage
-from scipy.spatial.distance import squareform
-import matplotlib.pyplot as plt
-
-
-mat = np.array([[0, 3, 0.1], [3, 0, 2], [0.1, 2, 0]])
-dists = squareform(mat)
-linkage_matrix = linkage(dists, "single")
-dendrogram(linkage_matrix, labels=["0", "1", "2"])
-plt.title("test")
-plt.show()
-
-print (f"{linkage_matrix}")
-print ("------------------------------")
-print (f"{mat}")
-
-# %%
-from skbio import DistanceMatrix
-from skbio.tree import nj
-
-data = [[0,  5,  9,  9,  8],
-         [5,  0, 10, 10,  9],
-         [9, 10,  0,  8,  7],
-         [9, 10,  8,  0,  3],
-         [8,  9,  7,  3,  0]]
-ids = list('abcde')
-dm = DistanceMatrix(data, ids)
-
-tree = nj(dm)
-print(tree.ascii_art())
-print ("--------------------------------------------------------")
-newick_str = nj(dm, result_constructor=str)
-print(newick_str)
-
-# %%
