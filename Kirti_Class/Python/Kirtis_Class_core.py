@@ -1,7 +1,9 @@
 import numpy as np
 import pandas as pd
+
 # import geopandas as gpd
 from IPython.display import Image
+
 # from shapely.geometry import Point, Polygon
 from math import factorial
 import datetime
@@ -19,9 +21,8 @@ import os, os.path
 import math
 import sys
 
+
 ###########################################################
-
-
 def create_cosine_arr(range_list):
     """Return 2*pi*x where x runs from range_list[0] to range_list[1]
     Arguments
@@ -39,8 +40,7 @@ def create_cosine_arr(range_list):
         range_list[0] and range_list[1] in increments of 0.02
     """
     sequence = np.arange(range_list[0], range_list[1], 0.02)
-    return ([sequence, np.cos(2*np.pi*sequence)])
-
+    return [sequence, np.cos(2 * np.pi * sequence)]
 
 
 def diversify(prices_arr, portfolio_size, invest_fund=1, preferred=None):
@@ -71,5 +71,3 @@ def diversify(prices_arr, portfolio_size, invest_fund=1, preferred=None):
     >>> diversify(prices_arr=prices_arr, portfolio_size=3, invest_fund=1000)
     OrderedDict([(3, 450.15...), (1, 312.327...), (0, 237.52...)])
     """
-
-
