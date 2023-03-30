@@ -1,30 +1,31 @@
 import numpy as np
 import pandas as pd
-import scipy
-from scipy import fft, fftpack
-import os, os.path
-import sys
-import io
-
-# search path for modules
-# look @ https://stackoverflow.com/questions/67631/how-to-import-a-module-given-the-full-path
-from numpy.fft import rfft, irfft, rfftfreq, ifft
-from datetime import timedelta
-
-# from pprint import pprint
-import matplotlib.pylab as pylab
-import matplotlib.pyplot as plt
-from pylab import rcParams
-import seaborn as sb
-import matplotlib.dates as mdates
-from matplotlib.dates import MonthLocator, DateFormatter
-
-
-def diagram_sizes(dgms):
-    return ", ".join([f"|$H_{i}$|={len(d)}" for i, d in enumerate(dgms)])
 
 
 def one_sided_smoothing(all_stations_years, window_size=5):
+    """Returns a smoothed version of signal where signals are soomthed by the old neighbors.
+               In other words, only past data contribute to adjusting the current value and
+               future data play no role here.
+
+    Side Note: perhaps it is better to break this into smaller functions.
+
+    Hossein: March 29, 2023
+
+    Arguments
+    ---------
+    all_stations_years : DataFrame
+        pandas DataFrame. Each row is 365 days data for a given location and year.
+
+
+    window_size : int
+        Size of the window to consider.
+
+
+    Returns
+    -------
+    A smoother version of data.
+    """
+
     all_locs_years_smooth_1Sided = all_stations_years.copy()
     weights = np.arange(1, window_size + 1)
     stations_ = all_stations_years.station_name.unique()
@@ -59,6 +60,26 @@ def one_sided_smoothing(all_stations_years, window_size=5):
 
 
 def two_sided_smoothing(all_stations_years, window_size=5):
+    """Returns a smoothed version of signal where signals are soomthed
+               using both old and future data.
+
+    Side Note: perhaps it is better to break this into smaller functions.
+
+    Hossein: March 29, 2023
+
+    Arguments
+    ---------
+    all_stations_years : DataFrame
+        pandas DataFrame. Each row is 365 days data for a given location and year.
+
+
+    window_size : int
+        Size of the window to consider.
+
+    Returns
+    -------
+    A smoother version of data.
+    """
     all_locs_years_smooth_2Sided = all_stations_years.copy()
     stations_ = all_stations_years.station_name.unique()
 
@@ -106,3 +127,18 @@ def two_sided_smoothing(all_stations_years, window_size=5):
         all_locs_years_smooth_2Sided.loc[:, a_col] = all_locs_years_smooth_2Sided.iloc[:, begin - 1]
 
     return all_locs_years_smooth_2Sided
+
+
+def add_waterYear(DF_):
+    """Returns a DataFrame with one added column; the water year.
+
+    Arguments
+    ---------
+    DF_ : DataFrame
+        pandas DataFrame. Each row is 365 days data for a given location and year.
+
+
+    Returns
+    -------
+    A DataFrame with an additional column; water year.
+    """

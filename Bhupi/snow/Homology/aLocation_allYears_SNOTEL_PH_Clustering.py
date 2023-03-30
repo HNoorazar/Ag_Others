@@ -30,12 +30,7 @@ import pandas as pd
 from datetime import date, datetime
 import time
 
-import random
-from random import seed
-from random import random
-
 import os, os.path
-import shutil
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -53,8 +48,9 @@ from scipy.cluster.hierarchy import dendrogram, linkage
 from scipy.spatial.distance import squareform
 
 # %%
-sys.path.append('/Users/hn/Documents/00_GitHub/Ag_Others/Bhupi/snow/')
-import snow_core as sc
+sys.path.append('/Users/hn/Documents/00_GitHub/Ag_Others/Bhupi/snow/src/')
+import PH as ph
+import processing as sp
 
 # %%
 # # !pip3 install ripser
@@ -89,9 +85,14 @@ all_stations_years.head(2)
 
 # %%
 # %%time
-all_stations_years_smooth = sc.one_sided_smoothing(all_stations_years, window_size=5)
+all_stations_years_smooth = spr.one_sided_smoothing(all_stations_years, window_size=5)
 
 # %%
+params = {"figure.figsize":[10, 10],
+          "font.size" : 5}
+plt.rcParams.update(params)
+
+
 locations = all_stations_years["station_name"].unique()
 locations=sorted(locations)
 years = all_stations_years["year"].unique()
@@ -105,23 +106,22 @@ a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_nam
 
 # ripser.ripser(all_locs_smooth_after_2004[["time_xAxis", "48.97191_-121.05145"]])["dgms"]
 a_dmg = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"])["dgms"]
-persim.plot_diagrams(a_dmg, show=False, title=f"{a_loc},\n{sc.diagram_sizes(a_dmg)}", ax=plt.subplot(121))
-persim.plot_diagrams(a_dmg, show=True, title=f"{a_loc},\n{sc.diagram_sizes(a_dmg)}", ax=plt.subplot(122),
+persim.plot_diagrams(a_dmg, show=False, title=f"{a_loc},\n{ph.diagram_sizes(a_dmg)}", ax=plt.subplot(121))
+persim.plot_diagrams(a_dmg, show=True, title=f"{a_loc},\n{ph.diagram_sizes(a_dmg)}", ax=plt.subplot(122),
                      lifetime=True, legend=False)
 
 del(a_loc, a_loc_data, a_dmg)
 
 # %%
-a_loc = "Howell Canyon"
-b_loc = "Fish Creek"
+a_loc, b_loc = "Howell Canyon", "Fish Creek"
 
 a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==a_loc, "day_1":"day_365"]
 a_dmg = ripser.ripser(a_loc_data, maxdim=2)["dgms"]
-persim.plot_diagrams(a_dmg, show=False, title=f"{a_loc},\n {sc.diagram_sizes(a_dmg)}", ax=plt.subplot(121))
+persim.plot_diagrams(a_dmg, show=False, title=f"{a_loc},\n {ph.diagram_sizes(a_dmg)}", ax=plt.subplot(121))
 
 b_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==b_loc, "day_1":"day_365"]
 b_dmg = ripser.ripser(b_loc_data, maxdim=2)["dgms"]
-persim.plot_diagrams(b_dmg, show=False, title=f"{b_loc},\n {sc.diagram_sizes(a_dmg)}", ax=plt.subplot(122))
+persim.plot_diagrams(b_dmg, show=False, title=f"{b_loc},\n {ph.diagram_sizes(a_dmg)}", ax=plt.subplot(122))
 
 del(a_loc, a_loc_data, a_dmg)
 del(b_loc, b_loc_data, b_dmg)
@@ -148,8 +148,7 @@ del(a_loc, a_loc_data, ripser_output, file_Name)
 
 # %%
 params = {"axes.titlepad" : 10,
-          "axes.titlesize": 20,
-          "axes.titlepad": 10}
+          "axes.titlesize": 20}
 plt.rcParams.update(params)
 
 # persim.sliced_wasserstein(dgms[1], dgms[1])
@@ -172,11 +171,10 @@ for a_loc in locations:
     dgms = ripser_output["dgms"]
 
     persim.plot_diagrams(dgms, show=False, legend=False, 
-                         # title=f"{a_loc},\n{sc.diagram_sizes(dgms)}", 
                          ax=axs[row_count][col_count])
 
     axs[row_count][col_count].set(xlabel=None, ylabel=None)
-    axs[row_count][col_count].set_title(f"{a_loc}",  # \n{sc.diagram_sizes(dgms)}
+    axs[row_count][col_count].set_title(f"{a_loc}",
                                           fontdict={"fontsize": 15});
 
     col_count += 1
@@ -318,7 +316,6 @@ fig.show()
 params = {"figure.figsize":[25, 25],
           "axes.titlepad" : 10,
           "axes.titlesize": 30,
-          "axes.titlepad": 10,
           "font.size":15
          }
 plt.rcParams.update(params)
@@ -331,8 +328,7 @@ plt.colorbar()
 plt.show()
 
 # %%
-a_loc = "Howell Canyon"
-b_loc = "Fish Creek"
+a_loc, b_loc = "Howell Canyon", "Fish Creek"
 
 aa_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==a_loc]
 bb_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==b_loc]
@@ -353,13 +349,11 @@ axs[0] = persim.plot_diagrams(ripser.ripser(aa_data.loc[:, "day_1":"day_365"], m
 axs[1] = persim.plot_diagrams(ripser.ripser(bb_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms'], 
                               title=f"{b_loc}", ax=plt.subplot(122))
 
-fig_name = output_dir + "FishCreend_HowwellCanyon_SNOTEL_PH.pdf"
+fig_name = output_dir + "FishCreend_HowellCanyon_SNOTEL_PH.pdf"
 plt.savefig(fname = fig_name, dpi=100, bbox_inches='tight')
 
 del(a_loc, aa_data, aa_dgms_H1);
 del(b_loc, bb_data, bb_dgms_H1);
-
-# %%
 
 # %%
 # curr_data = Howell_Canyon.copy()
@@ -421,8 +415,7 @@ del(b_loc, bb_data, bb_dgms_H1);
 # del(curr_data, curr_location, a_year, a_year_data)
 
 # %%
-a_loc = "Howell Canyon"
-b_loc = "Fish Creek"
+a_loc, b_loc = "Howell Canyon", "Fish Creek"
 
 Howell_Canyon = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==a_loc]
 Fish_Creek    = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==b_loc]
@@ -430,7 +423,6 @@ Fish_Creek    = all_stations_years_smooth.loc[all_stations_years_smooth.station_
 curr_data = Fish_Creek.copy()
 curr_location = curr_data.station_name.unique()[0]
 
-subplot_size = 3
 fig, axs = plt.subplots(2, 1, 
                         figsize=(12, 6),
                         sharey=True, # "col", "row", True, False
@@ -459,7 +451,7 @@ for a_year in sorted(curr_data.year.unique()):
     axs[0].set_title(f"{curr_location}, {curr_data.year.unique().min()} - {curr_data.year.unique().max()}", 
                   fontdict={"fontsize": 10});
 
-fig_name = output_dir + "FishCreend_HowwellCanyon_SNOTEL.pdf"
+fig_name = output_dir + "FishCreend_HowellCanyon_SNOTEL.pdf"
 plt.savefig(fname = fig_name, dpi=100, bbox_inches='tight')
 
 del(a_loc, b_loc, curr_data, curr_location, a_year, a_year_data)
@@ -499,51 +491,3 @@ fig_name = output_dir + "allLocations_allYears_SNOTEL.pdf"
 plt.savefig(fname = fig_name, dpi=100, bbox_inches="tight")
 
 del(a_loc, a_loc_data, min_year, max_year, a_year, a_year_data)
-
-# %%
-Graham_smooth = all_stations_years_smooth[all_stations_years_smooth.station_name=="Graham Guard Sta."]
-Graham_smooth = Graham_smooth[Graham_smooth.year==2001]
-
-Graham = all_stations_years[all_stations_years.station_name=="Graham Guard Sta."]
-Graham = Graham[Graham.year==2001]
-
-curr_location = Graham_smooth.station_name.unique()[0]
-fig, axs = plt.subplots(1, 1, 
-                        figsize=(12, 3),
-                        sharey=False, # "col", "row", True, False
-                        gridspec_kw={"hspace":0.3, "wspace":.01})
-
-for a_year in sorted(Graham_smooth.year.unique()):
-    a_year_data_smooth = Graham_smooth.loc[Graham_smooth.year==a_year]
-    a_year_data = Graham.loc[Graham_smooth.year==a_year]
-    
-    axs.plot(np.arange(365), a_year_data_smooth.loc[:, "day_1":"day_365"].values[0], 
-                        linewidth = 3, ls = "-", label = f"{a_year}, smooth", c="dodgerblue");
-    
-    axs.plot(np.arange(365), a_year_data.loc[:, "day_1":"day_365"].values[0], 
-                        linewidth = 2, ls = "-", label = f"{a_year}", c="r");
-    
-    axs.set(xlabel=None, ylabel=None)
-    axs.set_title(f"{curr_location}, {Graham_smooth.year.unique().min()} - {Graham_smooth.year.unique().max()}", 
-                  fontdict={"fontsize": 10});
-    axs.legend(loc="upper right");
-
-# %%
-# persim.sliced_wasserstein(dgms[1], dgms[1])
-Crater = all_stations_years[all_stations_years_smooth.station_name=="Crater Meadows"]
-Crater = Crater[Crater.year==2019]
-fig, axs = plt.subplots(1, 1, 
-                        figsize=(12, 3),
-                        sharey=True, # "col", "row", True, False
-                        gridspec_kw={"hspace":0.3, "wspace":.01})
-loc_count=0
-for a_year in sorted(Crater.year.unique()):
-    a_year_data = Crater.loc[Crater.year==a_year]
-    
-    axs.plot(np.arange(365), a_year_data.loc[:, "day_1":"day_365"].values[0], 
-                        linewidth = 3, ls = '-', label = f'{a_year}');
-    
-    axs.set(xlabel=None, ylabel=None)
-    axs.set_title(f"Crater Meadows, {Crater.year.unique().min()} - {Crater.year.unique().max()}", 
-                  fontdict={"fontsize": 10});
-    axs.legend(loc="upper right");

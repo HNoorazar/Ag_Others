@@ -34,12 +34,7 @@ import pandas as pd
 from datetime import date, datetime
 import time
 
-import random
-from random import seed
-from random import random
-
 import os, os.path
-import shutil
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -64,9 +59,11 @@ import persim
 import tadasets
 import kmapper as km # Import the class
 
-sys.path.append('/Users/hn/Documents/00_GitHub/Ag_Others/Bhupi/snow/')
-import snow_core as sc
-import snow_plot_core as scp
+# %%
+sys.path.append('/Users/hn/Documents/00_GitHub/Ag_Others/Bhupi/snow/src/')
+import PH as ph
+import processing as sp
+import snow_plot_core as spl
 
 # %% [markdown]
 # ### Directories
@@ -91,22 +88,15 @@ all_stations_years.head(2)
 # # Smoothen
 
 # %% [markdown]
-# ### one-sided smoothing
+# ### one- and two-sided smoothing
 
 # %%
 # %%time
-all_locs_years_smooth_1Sided = sc.one_sided_smoothing(all_stations_years, window_size=5)
+all_locs_years_smooth_1Sided = spr.one_sided_smoothing(all_stations_years, window_size=5)
 
-# %% [markdown]
-# ### two-sided smoothing
-
-# %%
-# %%time
-all_locs_years_smooth_2Sided = sc.two_sided_smoothing(all_stations_years, window_size=5)
-
-# %%
-# %%time
-all_locs_years_smooth_2Sided_win7=sc.two_sided_smoothing(all_stations_years, window_size=7)
+## two sided smoothing
+all_locs_years_smooth_2Sided = spr.two_sided_smoothing(all_stations_years, window_size=5)
+all_locs_years_smooth_2Sided_win7=spr.two_sided_smoothing(all_stations_years, window_size=7)
 
 # %% [markdown]
 # # Quality Control
@@ -157,23 +147,21 @@ axs[2].legend(loc="upper right");
 del(Crater, Howell, Graham_smooth, Graham)
 
 # %%
-raw_SNOTEL=pd.read_csv(SNOTEL_dir+"89_SNOTEL_stations.csv")
-crater_raw = raw_SNOTEL.loc[:, ["Date", "Year", "Crater Meadows"]]
-crater_raw_2019 = crater_raw[crater_raw.Year==2019]
-crater_raw_2019.reset_index(inplace=True, drop=True)
-crater_raw_2019.loc[50:70,]
+# # It is linear-interpolation.
+# raw_SNOTEL=pd.read_csv(SNOTEL_dir+"89_SNOTEL_stations.csv")
+# crater_raw = raw_SNOTEL.loc[:, ["Date", "Year", "Crater Meadows"]]
+# crater_raw_2019 = crater_raw[crater_raw.Year==2019]
+# crater_raw_2019.reset_index(inplace=True, drop=True)
+# print (crater_raw_2019.loc[50,"Crater Meadows"]-crater_raw_2019.loc[51,"Crater Meadows"])
+# print (crater_raw_2019.loc[51,"Crater Meadows"]-crater_raw_2019.loc[52,"Crater Meadows"])
+# print (crater_raw_2019.loc[52,"Crater Meadows"]-crater_raw_2019.loc[53,"Crater Meadows"])
+# crater_raw_2019.loc[50:70,]
 
 # %%
-print (crater_raw_2019.loc[50,"Crater Meadows"]-crater_raw_2019.loc[51,"Crater Meadows"])
-print (crater_raw_2019.loc[51,"Crater Meadows"]-crater_raw_2019.loc[52,"Crater Meadows"])
-print (crater_raw_2019.loc[52,"Crater Meadows"]-crater_raw_2019.loc[53,"Crater Meadows"])
 
 # %%
 Graham_temp = pd.read_csv(temperature_dir + "Graham_temp.csv")
 Graham_temp.head(2)
-
-# %%
-len(Graham_temp.max_temp_degF.values)
 
 # %%
 Graham_smooth_1Sided = all_locs_years_smooth_1Sided[all_locs_years_smooth_1Sided.station_name=="Graham Guard Sta."]
@@ -241,12 +229,16 @@ print(f"{len(locations)=}")
 # ### 1 sided and 2 sided smoothing. Not much of a difference
 
 # %%
+params = {"figure.figsize":[8, 8],
+          "font.size" : 8}
+plt.rcParams.update(params)
+
 a_loc = locations[0]
 a_loc_data = all_locs_years_smooth_1Sided.loc[all_locs_years_smooth_1Sided.station_name==a_loc]
 
 a_dmg = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"])["dgms"]
-persim.plot_diagrams(a_dmg, show=False, title=f"{a_loc},\n{sc.diagram_sizes(a_dmg)}", ax=plt.subplot(121))
-# persim.plot_diagrams(a_dmg, show=True, title=f"{a_loc},\n{sc.diagram_sizes(a_dmg)}", ax=plt.subplot(122),
+persim.plot_diagrams(a_dmg, show=False, title=f"{a_loc},\n{ph.diagram_sizes(a_dmg)}", ax=plt.subplot(121))
+# persim.plot_diagrams(a_dmg, show=True, title=f"{a_loc},\n{ph.diagram_sizes(a_dmg)}", ax=plt.subplot(122),
 #                      lifetime=True, legend=False)
 
 del(a_loc, a_loc_data, a_dmg)
@@ -254,11 +246,8 @@ del(a_loc, a_loc_data, a_dmg)
 a_loc = locations[0]
 a_loc_data = all_locs_years_smooth_2Sided.loc[all_locs_years_smooth_2Sided.station_name==a_loc]
 a_dmg = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"])["dgms"]
-persim.plot_diagrams(a_dmg, show=False, title=f"{a_loc},\n{sc.diagram_sizes(a_dmg)}", ax=plt.subplot(122))
+persim.plot_diagrams(a_dmg, show=False, title=f"{a_loc},\n{ph.diagram_sizes(a_dmg)}", ax=plt.subplot(122))
 del(a_loc, a_loc_data, a_dmg)
-
-# %%
-# SNOTEL_join_PMW_grids.rename(columns={"pmw_lat_lon": "lat_lon"}, inplace=True)
 
 # %% [raw]
 # fig, axs = plt.subplots(1, 2, layout="constrained")
@@ -266,11 +255,11 @@ del(a_loc, a_loc_data, a_dmg)
 #     all_locs_years_smooth_1Sided.station_name=="Howell Canyon", "day_1":"day_365"]
 #
 # Howell_dmg = ripser.ripser(Howell, maxdim=1)["dgms"]
-# persim.plot_diagrams(Howell_dmg, show=False, title=f"Howell Canyon,\n {sc.diagram_sizes(Howell_dmg)}", ax=axs[0])
+# persim.plot_diagrams(Howell_dmg, show=False, title=f"Howell Canyon,\n {ph.diagram_sizes(Howell_dmg)}", ax=axs[0])
 #
 # Fish = all_locs_years_smooth_1Sided.loc[all_locs_years_smooth_1Sided.station_name=="Fish Creek", "day_1":"day_365"]
 # Fish_dmg = ripser.ripser(Fish, maxdim=1)["dgms"]
-# persim.plot_diagrams(Fish_dmg, show=False, title=f"Fish Creek,\n {sc.diagram_sizes(Fish_dmg)}", ax=axs[1])
+# persim.plot_diagrams(Fish_dmg, show=False, title=f"Fish Creek,\n {ph.diagram_sizes(Fish_dmg)}", ax=axs[1])
 #
 # axs[1].set(ylabel=None, xlabel=None)
 # axs[0].set(ylabel=None, xlabel=None)
@@ -282,7 +271,6 @@ del(a_loc, a_loc_data, a_dmg)
 
 
 # %%
-# %autoreload
 Howell = all_locs_years_smooth_1Sided.loc[all_locs_years_smooth_1Sided.station_name=="Howell Canyon"]
 Howell=Howell.loc[:, "day_1":"day_365"]
 Howell_dmg = ripser.ripser(Howell, maxdim=1)["dgms"]
@@ -294,11 +282,10 @@ fig, axs = plt.subplots(1, 2, figsize=(6, 2.5), sharex=False, sharey=False, # sh
                        gridspec_kw={'hspace': 0.15, 'wspace': .3});
 ax_min_=-50
 ax_max_=round(Howell_dmg[0][:, 1][-2]+Fish_dmg[0][:, 1][-2]*0.1)
-scp.plot_aDMG_maxDim2(dgm=Howell_dmg, ax=axs[0], ax_min=ax_min_, ax_max=ax_max_, title_="Howell Canyon")
+spl.plot_aDMG_maxDim2(dgm=Howell_dmg, ax=axs[0], ax_min=ax_min_, ax_max=ax_max_, title_="Howell Canyon")
 
 ax_max_=round(Fish_dmg[0][:, 1][-2]+Fish_dmg[0][:, 1][-2]*0.1)
-scp.plot_aDMG_maxDim2(dgm=Fish_dmg, ax=axs[1],   ax_min=ax_min_, ax_max=ax_max_, title_="Fish Creek")
-
+spl.plot_aDMG_maxDim2(dgm=Fish_dmg, ax=axs[1],   ax_min=ax_min_, ax_max=ax_max_, title_="Fish Creek")
 
 fig.supxlabel(t="Birth", x=0.5, y=-0.1); # common x-axis label
 fig.supylabel("Death");                 # common y-axis label
@@ -311,8 +298,9 @@ fig.supylabel("Death");                 # common y-axis label
 
 # %%
 # %autoreload
-import snow_core as sc
-import snow_plot_core as scp
+import PH as ph
+import processing as sp
+import snow_plot_core as spl
 
 Howell = all_locs_years_smooth_1Sided.loc[all_locs_years_smooth_1Sided.station_name=="Howell Canyon"]
 Howell=Howell.loc[:, "day_1":"day_365"]
@@ -333,14 +321,14 @@ ax_min_=-20
 ax_max_=1400
 
 ax_max_=round(Howell_dmg[0][:, 1][-2]+Fish_dmg[0][:, 1][-2]*0.1)
-scp.plot_aDMG_maxDim2(dgm=Howell_dmg, ax=axs[0], ax_min=ax_min_, ax_max=ax_max_, title_="Howell Canyon")
+spl.plot_aDMG_maxDim2(dgm=Howell_dmg, ax=axs[0], ax_min=ax_min_, ax_max=ax_max_, title_="Howell Canyon")
 
 ax_max_=round(Howell_no_2001_dmg[0][:, 1][-2]+Fish_dmg[0][:, 1][-2]*0.1)
-scp.plot_aDMG_maxDim2(dgm=Howell_no_2001_dmg, ax=axs[1], ax_min=ax_min_, ax_max=ax_max_, 
+spl.plot_aDMG_maxDim2(dgm=Howell_no_2001_dmg, ax=axs[1], ax_min=ax_min_, ax_max=ax_max_, 
                       title_="Howell Canyon (no 2001)")
 
 ax_max_=round(Fish_dmg[0][:, 1][-2]+Fish_dmg[0][:, 1][-2]*0.1)
-scp.plot_aDMG_maxDim2(dgm=Fish_dmg, ax=axs[2], ax_min=ax_min_, ax_max=ax_max_, title_="Fish Creek")
+spl.plot_aDMG_maxDim2(dgm=Fish_dmg, ax=axs[2], ax_min=ax_min_, ax_max=ax_max_, title_="Fish Creek")
 
 # %% [markdown]
 # #### persim plot
@@ -350,11 +338,11 @@ scp.plot_aDMG_maxDim2(dgm=Fish_dmg, ax=axs[2], ax_min=ax_min_, ax_max=ax_max_, t
 #                        gridspec_kw={'hspace': 0.15, 'wspace': .3}); # layout="constrained"
 #
 # persim.plot_diagrams(Howell_dmg, show=False, 
-#                      title=f"Howell Canyon,\n {sc.diagram_sizes(Howell_dmg)}", ax=axs[0])
+#                      title=f"Howell Canyon,\n {ph.diagram_sizes(Howell_dmg)}", ax=axs[0])
 # persim.plot_diagrams(Howell_no_2001_dmg, show=False, 
-#                      title=f"Howell Canyon (no 2001),\n {sc.diagram_sizes(Howell_no_2001_dmg)}", ax=axs[1])
+#                      title=f"Howell Canyon (no 2001),\n {ph.diagram_sizes(Howell_no_2001_dmg)}", ax=axs[1])
 # persim.plot_diagrams(Fish_dmg, show=False, 
-#                      title=f"Fish Creek,\n {sc.diagram_sizes(Fish_dmg)}", ax=axs[2])
+#                      title=f"Fish Creek,\n {ph.diagram_sizes(Fish_dmg)}", ax=axs[2])
 #
 # axs[2].set(ylabel=None, xlabel=None)
 # axs[1].set(ylabel=None, xlabel=None)
@@ -366,7 +354,7 @@ scp.plot_aDMG_maxDim2(dgm=Fish_dmg, ax=axs[2], ax_min=ax_min_, ax_max=ax_max_, t
 # del(Howell, Howell_dmg, Fish, Fish_dmg, Howell_no_2001, Howell_no_2001_dmg)
 
 # %%
-a_loc, b_loc = "Howell Canyon", "Fish Creek"
+a_loc, b_loc  = "Howell Canyon", "Fish Creek"
 Howell_Canyon = all_locs_years_smooth_1Sided.loc[all_locs_years_smooth_1Sided.station_name==a_loc]
 Fish_Creek    = all_locs_years_smooth_1Sided.loc[all_locs_years_smooth_1Sided.station_name==b_loc]
 
@@ -394,80 +382,9 @@ for a_year in sorted(curr_data.year.unique()):
     axs[0].set(xlabel=None, ylabel=None)
     axs[0].set_title(f"{curr_location}, {curr_data.year.unique().min()} - {curr_data.year.unique().max()}", 
                   fontdict={"fontsize": 10});
-# fig_name = output_dir + "FishCreend_HowwellCanyon_SNOTEL.pdf"
+# fig_name = output_dir + "FishCreend_HowellCanyon_SNOTEL.pdf"
 # plt.savefig(fname = fig_name, dpi=100, bbox_inches='tight')
 del(a_loc, b_loc, curr_data, curr_location, a_year, a_year_data)
-
-# %%
-params = {"axes.titlepad" : 10,
-          "axes.titlesize": 20,
-          "axes.titlepad": 10}
-plt.rcParams.update(params)
-
-# persim.sliced_wasserstein(dgms[1], dgms[1])
-number_of_cols = int(np.floor(np.sqrt(len(locations))))
-print (f"{number_of_cols} columns in the figure ")
-extra_plots = len(locations) - number_of_cols**2
-number_of_rows = number_of_cols + int(np.ceil(extra_plots/number_of_cols))
-print (f"{number_of_rows} rows in the figure ")
-
-row_count, col_count= 0, 0
-subplot_size = 3
-fig, axs = plt.subplots(number_of_rows, number_of_cols, 
-                        figsize=(number_of_cols*subplot_size, number_of_rows*subplot_size),
-                        sharey=False, # "col", "row", True, False
-                        gridspec_kw={"hspace":0.3, "wspace":.01})
-
-for a_loc in locations:
-    a_loc_data = all_locs_years_smooth_1Sided.loc[all_locs_years_smooth_1Sided.station_name==a_loc]
-    ripser_output = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"], maxdim=1)
-    dgms = ripser_output["dgms"]
-
-    persim.plot_diagrams(dgms, show=False, legend=False,
-                         # title=f"{a_loc},\n{sc.diagram_sizes(dgms)}", 
-                         ax=axs[row_count][col_count])
-
-    axs[row_count][col_count].set(xlabel=None, ylabel=None)
-    axs[row_count][col_count].set_title(f"{a_loc}", # \n{sc.diagram_sizes(dgms)}
-                                        fontdict={"fontsize": 15});
-
-    col_count += 1
-    if col_count % number_of_cols == 0:
-        row_count += 1
-        col_count = 0
-
-del(a_loc, a_loc_data, ripser_output)
-
-# %%
-# persim.sliced_wasserstein(dgms[1], dgms[1])
-number_of_rows = len(locations)
-number_of_cols = 1
-print (f"{number_of_rows} rows in the figure ")
-print (f"{number_of_cols} columns in the figure ")
-
-row_count, col_count= 0, 0
-subplot_size = 3
-fig, axs = plt.subplots(number_of_rows, 1, figsize=(12, number_of_rows*3),
-                        sharey=True, # "col", "row", True, False
-                        gridspec_kw={"hspace":0.3, "wspace":.01})
-loc_count=0
-for a_loc in locations:
-    a_loc_data = all_locs_years_smooth_1Sided.loc[all_locs_years_smooth_1Sided.station_name==a_loc]
-
-    min_year = a_loc_data.year.unique().min()
-    max_year = a_loc_data.year.unique().max()
-    curr_location = a_loc_data.station_name.unique()[0]
-    for a_year in sorted(a_loc_data.year.unique()):
-        a_year_data = a_loc_data.loc[a_loc_data.year==a_year]
-        axs[loc_count].plot(np.arange(365), a_year_data.loc[:, "day_1":"day_365"].values[0], 
-                            linewidth = 3, ls = "-", label = f"{a_year}");
-        axs[loc_count].set(xlabel=None, ylabel=None)
-        axs[loc_count].set_title(f"{curr_location}, {min_year} - {max_year}", 
-                                 fontdict={"fontsize": 10});
-    loc_count+=1
-# fig_name = output_dir + "allLocations_allYears_SNOTEL.pdf"
-# plt.savefig(fname = fig_name, dpi=100, bbox_inches="tight")
-del(a_loc, a_loc_data, min_year, max_year, a_year, a_year_data)
 
 # %%
 

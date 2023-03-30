@@ -30,12 +30,7 @@ import pandas as pd
 from datetime import date, datetime
 import time
 
-import random
-from random import seed
-from random import random
-
-import os, os.path
-import shutil
+import os, os.path, sys
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -46,15 +41,16 @@ from matplotlib.dates import MonthLocator, DateFormatter
 from pylab import imshow
 import pickle
 import h5py
-import sys
 
 # %%
 from scipy.cluster.hierarchy import dendrogram, linkage
 from scipy.spatial.distance import squareform
 
 # %%
-sys.path.append('/Users/hn/Documents/00_GitHub/Ag_Others/Bhupi/snow/')
-import snow_core as sc
+sys.path.append('/Users/hn/Documents/00_GitHub/Ag_Others/Bhupi/snow/src/')
+import PH as ph
+import processing as sp
+import snow_plot_core as spl
 
 # %%
 # # !pip3 install ripser
@@ -100,7 +96,7 @@ all_stations_years.head(2)
 
 # %%
 # %%time
-all_stations_years_smooth = sc.one_sided_smoothing(all_stations_years, window_size=5)
+all_stations_years_smooth = spr.one_sided_smoothing(all_stations_years, window_size=5)
 all_stations_years_smooth.head(2)
 
 # %%
@@ -118,9 +114,9 @@ a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_nam
 
 # ripser.ripser(all_locs_smooth_after_2004[["time_xAxis", "48.97191_-121.05145"]])['dgms']
 a_dmg = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"])['dgms']
-persim.plot_diagrams(a_dmg, show=False, title=f"{a_loc}\n{sc.diagram_sizes(a_dmg)}", ax=plt.subplot(121))
+persim.plot_diagrams(a_dmg, show=False, title=f"{a_loc}\n{ph.diagram_sizes(a_dmg)}", ax=plt.subplot(121))
 
-persim.plot_diagrams(a_dmg, show=True,  title=f"{a_loc}\n{sc.diagram_sizes(a_dmg)}", ax=plt.subplot(122),
+persim.plot_diagrams(a_dmg, show=True,  title=f"{a_loc}\n{ph.diagram_sizes(a_dmg)}", ax=plt.subplot(122),
                      lifetime=True, legend=False)
 
 del(a_loc, a_loc_data, a_dmg)
@@ -134,11 +130,11 @@ b_loc = "Fish Creek"
 
 a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==a_loc, "day_1":"day_365"]
 a_dmg = ripser.ripser(a_loc_data, maxdim=1)['dgms']
-persim.plot_diagrams(a_dmg, show=False, title=f"{a_loc}, \n{sc.diagram_sizes(a_dmg)}", ax=plt.subplot(121))
+persim.plot_diagrams(a_dmg, show=False, title=f"{a_loc}, \n{ph.diagram_sizes(a_dmg)}", ax=plt.subplot(121))
 
 b_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==b_loc, "day_1":"day_365"]
 b_dmg = ripser.ripser(b_loc_data, maxdim=1)['dgms']
-persim.plot_diagrams(b_dmg, show=False, title=f"{b_loc},\n{sc.diagram_sizes(a_dmg)}", ax=plt.subplot(122))
+persim.plot_diagrams(b_dmg, show=False, title=f"{b_loc},\n{ph.diagram_sizes(a_dmg)}", ax=plt.subplot(122))
 
 del(a_loc, a_loc_data, a_dmg)
 del(b_loc, b_loc_data, b_dmg)
@@ -178,24 +174,18 @@ fig, axs = plt.subplots(1, 2, figsize=(7, 7), sharex=False, sharey=True, # share
 
 ax1.grid(False); ax2.grid(False)
 
-persim.plot_diagrams(b_dmg, show=False, 
-                     title=f"{b_loc},\n{sc.diagram_sizes(b_dmg)}", 
-                     ax=ax1)
-
-ax1.set_title(f"{b_loc},\n{sc.diagram_sizes(b_dmg)}", fontdict={"fontsize": 12});
+persim.plot_diagrams(b_dmg, show=False, ax=ax1)
+ax1.set_title(f"{b_loc},\n{ph.diagram_sizes(b_dmg)}", fontdict={"fontsize": 10});
 
 persim.plot_diagrams(b_dmg, show=False, 
-                     title=f"{b_loc},\n{sc.diagram_sizes(b_dmg)}", 
-                     ax=ax2)
+                     title=f"{b_loc},\n{ph.diagram_sizes(b_dmg)}", ax=ax2)
 
 ax2.set(xlabel=None);
-
 del(b_loc, b_loc_data, b_dmg)
 
 # %%
 params = {'axes.titlepad' : 10,
-          'axes.titlesize': 20,
-          'axes.titlepad': 10}
+          'axes.titlesize': 20}
 plt.rcParams.update(params)
 
 # persim.sliced_wasserstein(dgms[1], dgms[1])
@@ -218,12 +208,10 @@ for a_loc in locations:
     dgms = ripser_output["dgms"]
 
     persim.plot_diagrams(dgms, show=False, legend=False, 
-                         # title=f"{a_loc},\n{sc.diagram_sizes(dgms)}", 
                          ax=axs[row_count][col_count])
 
     axs[row_count][col_count].set(xlabel=None, ylabel=None)
-    axs[row_count][col_count].set_title(f"{a_loc}",  # \n{sc.diagram_sizes(dgms)}
-                                          fontdict={"fontsize": 15});
+    axs[row_count][col_count].set_title(f"{a_loc}", fontdict={"fontsize": 15});
 
     col_count += 1
     if col_count % number_of_cols == 0:
@@ -254,8 +242,7 @@ for ii in np.arange(len(locations)):
         
         loc_2_loc_H1_distances.loc[ii_loc, jj_loc] = persim.sliced_wasserstein(ii_dgms_H1, jj_dgms_H1)
 
-"""
-   Replace NAs with zeros so we can add the dataframe
+"""Replace NAs with zeros so we can add the dataframe
    to its transpose to get a symmetric matrix
 """
 loc_2_loc_H1_distances.fillna(0, inplace=True)
@@ -294,7 +281,6 @@ fig.show()
 params = {"figure.figsize":[25, 25],
           "axes.titlepad" : 10,
           "axes.titlesize": 30,
-          "axes.titlepad": 10,
           "font.size":15
          }
 plt.rcParams.update(params)
@@ -342,8 +328,7 @@ plt.show()
 
 # %%
 plt.rcParams['figure.figsize'] = [7, 3]
-a_loc = "Howell Canyon"
-b_loc = "Fish Creek"
+a_loc, b_loc = "Howell Canyon", "Fish Creek"
 
 aa_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==a_loc]
 bb_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==b_loc]
@@ -360,3 +345,5 @@ persim.plot_diagrams(ripser.ripser(bb_data.loc[:, "day_1":"day_365"], maxdim=2)[
 
 del(a_loc, aa_data, aa_dgms_H1)
 del(b_loc, bb_data, bb_dgms_H1)
+
+# %%

@@ -31,12 +31,7 @@ import pandas as pd
 from datetime import date, datetime
 import time
 
-import random
-from random import seed
-from random import random
-
-import os, os.path
-import shutil
+import os, os.path, sys
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -45,17 +40,17 @@ import matplotlib.dates as mdates
 from matplotlib.dates import MonthLocator, DateFormatter
 
 from pylab import imshow
-import pickle
-import h5py
-import sys
+import pickle, h5py
 
 # %%
 from scipy.cluster.hierarchy import dendrogram, linkage
 from scipy.spatial.distance import squareform
 
 # %%
-sys.path.append('/Users/hn/Documents/00_GitHub/Ag_Others/Bhupi/snow/')
-import snow_core as sc
+sys.path.append('/Users/hn/Documents/00_GitHub/Ag_Others/Bhupi/snow/src/')
+import PH as ph
+import processing as spr
+import snow_plot_core as spl
 
 # %%
 # # !pip3 install ripser
@@ -90,7 +85,7 @@ all_stations_years.head(2)
 
 # %%
 # %%time
-all_stations_years_smooth = sc.one_sided_smoothing(all_stations_years, window_size=5)
+all_stations_years_smooth = spr.one_sided_smoothing(all_stations_years, window_size=5)
 all_stations_years_smooth.head(2)
 
 # %%
@@ -114,8 +109,8 @@ print (f"{len(a_year_data.station_name.unique())=}")
 
 # ripser.ripser(all_locs_smooth_after_2004[["time_xAxis", "48.97191_-121.05145"]])['dgms']
 a_dmg = ripser.ripser(a_year_data.loc[:, "day_1":"day_365"])['dgms']
-persim.plot_diagrams(a_dmg, show=False, title=f"{a_year}, \n{sc.diagram_sizes(a_dmg)}", ax=plt.subplot(121))
-persim.plot_diagrams(a_dmg, show=True, title=f"{a_year},\n{sc.diagram_sizes(a_dmg)}", ax=plt.subplot(122),
+persim.plot_diagrams(a_dmg, show=False, title=f"{a_year}, \n{ph.diagram_sizes(a_dmg)}", ax=plt.subplot(121))
+persim.plot_diagrams(a_dmg, show=True, title=f"{a_year},\n{ph.diagram_sizes(a_dmg)}", ax=plt.subplot(122),
                      lifetime=True, legend=False)
 
 del(a_year, a_year_data, a_dmg)
@@ -128,12 +123,12 @@ a_year=years[-1]
 
 a_year_data = all_stations_years_smooth.loc[all_stations_years_smooth.year==a_year, "day_1":"day_365"]
 a_dmg = ripser.ripser(a_year_data, maxdim=2)['dgms']
-persim.plot_diagrams(a_dmg, show=False, title=f"{a_year}\n {sc.diagram_sizes(a_dmg)}", ax=plt.subplot(121))
+persim.plot_diagrams(a_dmg, show=False, title=f"{a_year}\n {ph.diagram_sizes(a_dmg)}", ax=plt.subplot(121))
 
 b_year=years[-2]
 b_year_data = all_stations_years_smooth.loc[all_stations_years_smooth.year==b_year, "day_1":"day_365"]
 b_dmg = ripser.ripser(b_year_data, maxdim=2)['dgms']
-persim.plot_diagrams(b_dmg, show=False, title=f"{b_year}\n {sc.diagram_sizes(a_dmg)}", ax=plt.subplot(122))
+persim.plot_diagrams(b_dmg, show=False, title=f"{b_year}\n {ph.diagram_sizes(a_dmg)}", ax=plt.subplot(122))
 
 
 del(a_year, a_year_data, a_dmg)
@@ -187,12 +182,10 @@ for a_year in years:
     dgms = ripser_output["dgms"]
 
     persim.plot_diagrams(dgms, show=False, legend=False, 
-                         # title=f"{a_year},\n{sc.diagram_sizes(dgms)}", 
                          ax=axs[row_count][col_count])
 
     axs[row_count][col_count].set(xlabel=None, ylabel=None)
-    axs[row_count][col_count].set_title(f"{a_year}",  # \n{sc.diagram_sizes(dgms)}
-                                        fontdict={"fontsize": 10, "fontweight":"bold"});
+    axs[row_count][col_count].set_title(f"{a_year}", fontdict={"fontsize": 10, "fontweight":"bold"});
 
     col_count += 1
     if col_count % number_of_cols == 0:
@@ -304,7 +297,6 @@ fig.show()
 params = {"figure.figsize":[25, 25],
           "axes.titlepad" : 10,
           "axes.titlesize": 30,
-          "axes.titlepad": 10,
           "font.size":15
          }
 plt.rcParams.update(params)
@@ -317,8 +309,12 @@ plt.colorbar()
 plt.show()
 
 # %%
-a_year = years[-1]
-b_year = years[-2]
+# plt.rcParams["figure.figsize"] = [25, 25]
+params = {"figure.figsize":[10, 10],
+          "font.size" : 10}
+plt.rcParams.update(params)
+
+a_year, b_year = years[-1], years[-2]
 
 aa_data = all_stations_years_smooth.loc[all_stations_years_smooth.year==a_year]
 bb_data = all_stations_years_smooth.loc[all_stations_years_smooth.year==b_year]

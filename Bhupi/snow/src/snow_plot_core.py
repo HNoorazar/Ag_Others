@@ -5,11 +5,10 @@ import numpy as np
 
 
 def plot_aDMG_maxDim2(dgm, ax, ax_min, ax_max, title_):
-    """Returns A plot of presistence homology diagram.
-       The Birth/Death plot. Currently, it does it only for 2-dimensions;
-       H_0 and H_1. The reason is that I have two colors listed here
-       in ```color_dict```.
-
+    """Returns a plot of presistence homology diagram.
+               The Birth/Death plot. Currently, it does it only for 2-dimensions;
+               H_0, H_1, and H_2. The reason is that I have three colors listed here
+               in ```color_dict```.
 
        Side Note:
        The reason for creating this funciton is that presim's plot
@@ -21,8 +20,7 @@ def plot_aDMG_maxDim2(dgm, ax, ax_min, ax_max, title_):
        2. It also disfunctions when doing subplots. Fonts of different subplots
           come out differently. I also could not make a 2-by-2 subplots with it.
 
-          Hossein: March 29, 2023
-
+    Hossein: March 29, 2023
 
     Arguments
     ---------
@@ -43,7 +41,7 @@ def plot_aDMG_maxDim2(dgm, ax, ax_min, ax_max, title_):
 
     Returns
     -------
-    A plot.
+    A plot of Birth/Death from persistent homology diagram.
     """
     len_dgm = len(dgm)
     color_dict = {"dgm0_c": "dodgerblue", "dgm1_c": "orange", "dgm2_c": "green"}
