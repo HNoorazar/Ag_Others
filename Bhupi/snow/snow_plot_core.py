@@ -5,7 +5,24 @@ import numpy as np
 
 
 def plot_aDMG_maxDim2(dgm, ax, ax_min, ax_max, title_):
-    """Returns A plot with of a given VI (NDVI or EVI) with SOS and EOS points.
+    """Returns A plot of presistence homology diagram.
+       The Birth/Death plot. Currently, it does it only for 2-dimensions;
+       H_0 and H_1. The reason is that I have two colors listed here
+       in ```color_dict```.
+
+
+       Side Note:
+       The reason for creating this funciton is that presim's plot
+       function is crazy. Anytime I change the format of figures
+       (i.e. settings of matplotlib), presim behaves strangely;
+       e.g.
+       1. if I run the same cell containing presim twice, the size of figure changes.
+          The font and font size changes.
+       2. It also disfunctions when doing subplots. Fonts of different subplots
+          come out differently. I also could not make a 2-by-2 subplots with it.
+
+          Hossein: March 29, 2023
+
 
     Arguments
     ---------
