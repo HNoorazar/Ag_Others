@@ -72,7 +72,7 @@ import tadasets
 import kmapper as km # Import the class
 
 # %%
-snow_TS_dir_base = "/Users/hn/Documents/01_research_data/Bhupi/snow/EithyYearsClustering/"
+snow_TS_dir_base = "/Users/hn/Documents/01_research_data/Bhupi/snow/EightyYearsClustering/"
 SNOTEL_dir = snow_TS_dir_base + "SNOTEL_observations/"
 
 # %%

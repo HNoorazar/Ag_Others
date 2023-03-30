@@ -1,26 +1,20 @@
 import numpy as np
 import pandas as pd
-
 import scipy
 from scipy import fft, fftpack
-
 import os, os.path
 import sys
 import io
 
-
 # search path for modules
 # look @ https://stackoverflow.com/questions/67631/how-to-import-a-module-given-the-full-path
-
 from numpy.fft import rfft, irfft, rfftfreq, ifft
-
-
 from datetime import timedelta
 
 # from pprint import pprint
 import matplotlib.pylab as pylab
-from pylab import rcParams
 import matplotlib.pyplot as plt
+from pylab import rcParams
 import seaborn as sb
 import matplotlib.dates as mdates
 from matplotlib.dates import MonthLocator, DateFormatter

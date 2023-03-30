@@ -75,7 +75,7 @@ import kmapper as km # Import the class
 # # Directories
 
 # %%
-snow_TS_dir_base = "/Users/hn/Documents/01_research_data/Bhupi/snow/EithyYearsClustering/"
+snow_TS_dir_base = "/Users/hn/Documents/01_research_data/Bhupi/snow/EightyYearsClustering/"
 in_dir = snow_TS_dir_base + "Brightness_temperature/"
 
 SNOTEL_dir = snow_TS_dir_base + "SNOTEL_observations/"
