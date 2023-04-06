@@ -45,7 +45,6 @@ from matplotlib.dates import MonthLocator, DateFormatter
 from pylab import imshow
 import pickle
 import h5py
-import sys
 
 # %%
 from scipy.cluster.hierarchy import dendrogram, linkage
@@ -60,9 +59,10 @@ import tadasets
 import kmapper as km # Import the class
 
 # %%
+import sys
 sys.path.append('/Users/hn/Documents/00_GitHub/Ag_Others/Bhupi/snow/src/')
 import PH as ph
-import processing as sp
+import processing as spr
 import snow_plot_core as spl
 
 # %% [markdown]
@@ -362,7 +362,7 @@ curr_data = Fish_Creek.copy()
 curr_location = curr_data.station_name.unique()[0]
 
 subplot_size = 3
-fig, axs = plt.subplots(2, 1, figsize=(12, 6), sharey=True, # "col", "row", True, False
+fig, axs = plt.subplots(2, 1, figsize=(10, 6), sharey=True, # "col", "row", True, False
                         gridspec_kw={'hspace':0.3, 'wspace':.15})
 
 for a_year in sorted(curr_data.year.unique()):

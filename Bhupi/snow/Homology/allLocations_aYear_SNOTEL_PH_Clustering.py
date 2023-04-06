@@ -109,28 +109,39 @@ print (f"{len(a_year_data.station_name.unique())=}")
 
 # ripser.ripser(all_locs_smooth_after_2004[["time_xAxis", "48.97191_-121.05145"]])['dgms']
 a_dmg = ripser.ripser(a_year_data.loc[:, "day_1":"day_365"])['dgms']
+
+fig_size_, font_s_=10, 10
+params = {"figure.figsize":[fig_size_, fig_size_],"font.size":font_s_}
+plt.rcParams.update(params)
 persim.plot_diagrams(a_dmg, show=False, title=f"{a_year}, \n{ph.diagram_sizes(a_dmg)}", ax=plt.subplot(121))
+
+plt.rcParams.update(params)
 persim.plot_diagrams(a_dmg, show=True, title=f"{a_year},\n{ph.diagram_sizes(a_dmg)}", ax=plt.subplot(122),
                      lifetime=True, legend=False)
-
+plt.tight_layout();
 del(a_year, a_year_data, a_dmg)
 
 # %%
 # SNOTEL_join_PMW_grids.rename(columns={"pmw_lat_lon": "lat_lon"}, inplace=True)
 
 # %%
-a_year=years[-1]
+a_year, b_year=years[-1], years[-2]
 
 a_year_data = all_stations_years_smooth.loc[all_stations_years_smooth.year==a_year, "day_1":"day_365"]
 a_dmg = ripser.ripser(a_year_data, maxdim=2)['dgms']
-persim.plot_diagrams(a_dmg, show=False, title=f"{a_year}\n {ph.diagram_sizes(a_dmg)}", ax=plt.subplot(121))
 
-b_year=years[-2]
 b_year_data = all_stations_years_smooth.loc[all_stations_years_smooth.year==b_year, "day_1":"day_365"]
 b_dmg = ripser.ripser(b_year_data, maxdim=2)['dgms']
+
+fig_size_, font_s_=8, 10
+params = {"figure.figsize":[fig_size_, fig_size_],"font.size":font_s_}
+plt.rcParams.update(params)
+persim.plot_diagrams(a_dmg, show=False, title=f"{a_year}\n {ph.diagram_sizes(a_dmg)}", ax=plt.subplot(121))
+
+plt.rcParams.update(params)
 persim.plot_diagrams(b_dmg, show=False, title=f"{b_year}\n {ph.diagram_sizes(a_dmg)}", ax=plt.subplot(122))
 
-
+plt.tight_layout();
 del(a_year, a_year_data, a_dmg)
 del(b_year, b_year_data, b_dmg)
 
@@ -310,10 +321,7 @@ plt.show()
 
 # %%
 # plt.rcParams["figure.figsize"] = [25, 25]
-params = {"figure.figsize":[10, 10],
-          "font.size" : 10}
-plt.rcParams.update(params)
-
+params = {"figure.figsize":[10, 10], "font.size" : 10}
 a_year, b_year = years[-1], years[-2]
 
 aa_data = all_stations_years_smooth.loc[all_stations_years_smooth.year==a_year]
@@ -324,12 +332,17 @@ bb_dgms_H1 = ripser.ripser(bb_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms'][
 
 print(f"{persim.sliced_wasserstein(aa_dgms_H1, bb_dgms_H1).round(3)=:}")
 
+fig_size_, font_s_=8, 10
+params = {"figure.figsize":[fig_size_, fig_size_],"font.size":font_s_}
+plt.rcParams.update(params)
 persim.plot_diagrams(ripser.ripser(aa_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms'], 
                      title=f"{a_year}", ax=plt.subplot(121))
 
+plt.rcParams.update(params)
 persim.plot_diagrams(ripser.ripser(bb_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms'], 
                      title=f"{b_year}", ax=plt.subplot(122))
 
+plt.tight_layout();
 del(a_year, aa_data, aa_dgms_H1)
 del(b_year, bb_data, bb_dgms_H1)
 
