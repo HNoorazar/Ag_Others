@@ -30,8 +30,6 @@ import pandas as pd
 from datetime import date, datetime
 import time
 
-import os, os.path
-
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import cm
@@ -39,9 +37,8 @@ import matplotlib.dates as mdates
 from matplotlib.dates import MonthLocator, DateFormatter
 
 from pylab import imshow
-import pickle
-import h5py
-import sys
+import pickle,  h5py
+import sys, os, os.path
 
 # %%
 from scipy.cluster.hierarchy import dendrogram, linkage
@@ -76,19 +73,54 @@ all_stations_years = all_stations_years["all_locs_all_years_eachDayAColumn"]
 all_stations_years.head(2)
 
 # %% [markdown]
+# ### There are locations whose whole year is zero. Remove them!
+
+# %%
+print (all_stations_years.shape)
+for a_row in range(all_stations_years.shape[0]):
+    if len(set(all_stations_years.loc[a_row, "day_1":"day_365"])) == 1:
+        all_stations_years.drop(labels=a_row, axis="index", inplace=True)
+print (all_stations_years.shape)
+
+# %%
+all_stations_years.reset_index(drop=True, inplace=True)
+
+# %% [markdown]
 # # Smoothen
 
 # %%
 # %%time
 all_stations_years_smooth = spr.one_sided_smoothing(all_stations_years, window_size=5)
 
+# %% [markdown]
+# # Normalize
+
 # %%
-locations = sorted(all_stations_years["station_name"].unique())
-years = all_stations_years["year"].unique()
+# from sklearn.preprocessing import MinMaxScaler
+# scaler = MinMaxScaler()
+# mixMax_Normalized_data = scaler.fit_transform(all_stations_years_smooth.loc[:, "day_1":"day_365"].transpose())
+
+# from sklearn import preprocessing
+# x_array = np.array([2,3,5,6,7,4,8,7,6])
+# preprocessing.normalize([x_array]) # norm is changed to 1
+
+# %%
+all_stations_years_smooth.head(2)
+
+# %%
+all_stations_years_smooth_normalized = all_stations_years_smooth.copy()
+for a_row in range(all_stations_years_smooth_normalized.shape[0]):
+    row_vec = all_stations_years_smooth_normalized.loc[a_row, "day_1":"day_365"]
+    row_vec = (row_vec-row_vec.mean())/row_vec.std()
+    all_stations_years_smooth_normalized.loc[a_row, "day_1":"day_365"]=row_vec
+
+# %%
+locations = sorted(all_stations_years_smooth_normalized["station_name"].unique())
+years = all_stations_years_smooth_normalized["year"].unique()
 print (f"{len(locations)=}")
 
 a_loc = locations[0]
-a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==a_loc]
+a_loc_data = all_stations_years_smooth_normalized.loc[all_stations_years_smooth_normalized.station_name==a_loc]
 # a_loc_specific_years = a_loc_data.year.unique()
 # a_year = a_loc_specific_years[9]
 # a_year_data = a_loc_data.loc[a_loc_data.year==a_year]
@@ -111,83 +143,64 @@ del(a_loc, a_loc_data, a_dmg)
 
 # %%
 # output dir
-output_dir=SNOTEL_dir + "aLoc_allYears/"
+output_dir=SNOTEL_dir + "aLoc_allYears_normal/"
 os.makedirs(output_dir, exist_ok=True)
 
 # %%
 a_loc, b_loc = "Howell Canyon", "Fish Creek"
-
-fig_size_, font_s_=6, 10
-params = {"figure.figsize":[fig_size_, fig_size_],"font.size":font_s_}
-plt.rcParams.update(params)
-persim.plot_diagrams(ripser.ripser(all_stations_years_smooth.loc[all_stations_years_smooth.station_name==a_loc, 
-                                                                "day_1":"day_365"], maxdim=2)["dgms"], 
-                     show=False, title=f"{a_loc}", ax=plt.subplot(121))
-
-plt.rcParams.update(params)
-persim.plot_diagrams(ripser.ripser(all_stations_years_smooth.loc[all_stations_years_smooth.station_name==b_loc, 
-                                                                  "day_1":"day_365"], maxdim=2)["dgms"], 
-                     show=False, title=f"{b_loc}", ax=plt.subplot(122))
-
-plt.tight_layout()
-fig_name = output_dir + a_loc.replace(" ", "_") + "_" + b_loc.replace(" ", "_") + "_SNOTEL_PH.pdf"
-plt.savefig(fname = fig_name, dpi=100, bbox_inches='tight')
-
-del(a_loc, b_loc, fig_name)
-
-
-# %%
 a_loc, b_loc = "Cougar Mountain", "Cool Creek"
 a_loc, b_loc = "Blewett Pass", "Cool Creek"
 
 fig_size_, font_s_=6, 10
 params = {"figure.figsize":[fig_size_, fig_size_],"font.size":font_s_}
 plt.rcParams.update(params)
-persim.plot_diagrams(ripser.ripser(all_stations_years_smooth.loc[all_stations_years_smooth.station_name==a_loc, 
+persim.plot_diagrams(ripser.ripser(all_stations_years_smooth.loc[
+                               all_stations_years_smooth.station_name==a_loc, 
                                                                 "day_1":"day_365"], maxdim=2)["dgms"], 
                      show=False, title=f"{a_loc}", ax=plt.subplot(121))
 
 plt.rcParams.update(params)
-persim.plot_diagrams(ripser.ripser(all_stations_years_smooth.loc[all_stations_years_smooth.station_name==b_loc, 
+persim.plot_diagrams(ripser.ripser(all_stations_years_smooth.loc[
+                                      all_stations_years_smooth.station_name==b_loc, 
                                                                   "day_1":"day_365"], maxdim=2)["dgms"], 
                      show=False, title=f"{b_loc}", ax=plt.subplot(122))
 
 plt.tight_layout()
-fig_name = output_dir + a_loc.replace(" ", "_") + "_" + b_loc.replace(" ", "_") + "_SNOTEL_PH.pdf"
+
+del(a_loc, b_loc)
+
+# %%
+a_loc, b_loc = "Howell Canyon", "Fish Creek"
+a_loc, b_loc = "Cougar Mountain", "Cool Creek"
+a_loc, b_loc = "Blewett Pass", "Cool Creek"
+
+fig_size_, font_s_=6, 10
+params = {"figure.figsize":[fig_size_, fig_size_],"font.size":font_s_}
+plt.rcParams.update(params)
+persim.plot_diagrams(ripser.ripser(all_stations_years_smooth_normalized.loc[
+                               all_stations_years_smooth_normalized.station_name==a_loc, 
+                                                                "day_1":"day_365"], maxdim=2)["dgms"], 
+                     show=False, title=f"{a_loc} (normalized)", ax=plt.subplot(121))
+
+plt.rcParams.update(params)
+persim.plot_diagrams(ripser.ripser(all_stations_years_smooth_normalized.loc[
+                                      all_stations_years_smooth_normalized.station_name==b_loc, 
+                                                                  "day_1":"day_365"], maxdim=2)["dgms"], 
+                     show=False, title=f"{b_loc} (normalized)", ax=plt.subplot(122))
+
+plt.tight_layout()
+fig_name = output_dir + a_loc.replace(" ", "_") + "_" + b_loc.replace(" ", "_") + "_SNOTEL_PH_normal.pdf"
 plt.savefig(fname = fig_name, dpi=100, bbox_inches='tight')
 
-del(a_loc, b_loc, fig_name)
+del(a_loc, b_loc)
 
-# %%
 
-# %%
-# a_loc, b_loc = "Howell Canyon", "Fish Creek"
-
-# aa_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==a_loc]
-# bb_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==b_loc]
-
-# fig_size_, font_s_=6, 10
-# params = {"figure.figsize":[fig_size_, fig_size_],"font.size":font_s_}
-# plt.rcParams.update(params)
-# fig, axs = plt.subplots(1, 2, figsize=(fig_size_, fig_size_),
-#                         sharey=False, # "col", "row", True, False
-#                         gridspec_kw={'hspace':0.3, 'wspace':.5})
-
-# axs[0] = persim.plot_diagrams(ripser.ripser(aa_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms'], 
-#                               title=f"{a_loc}", ax=plt.subplot(121))
-
-# plt.rcParams.update(params)
-# axs[1] = persim.plot_diagrams(ripser.ripser(bb_data.loc[:, "day_1":"day_365"], maxdim=2)['dgms'], 
-#                               title=f"{b_loc}", ax=plt.subplot(122))
-# plt.tight_layout()
-# del(a_loc, aa_data);
-# del(b_loc, bb_data);
-
-# %%
+# %% [markdown]
+# ### Save PHs on the Disk for future use.
 
 # %%
 for a_loc in locations:
-    a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==a_loc]
+    a_loc_data = all_stations_years_smooth_normalized.loc[all_stations_years_smooth_normalized.station_name==a_loc]
     ripser_output = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"], maxdim=2)
     ripser_output["jupyterNotebook_GeneratedThisdata"] = "aLocation_allYears_SNOTEL_PH_Clustering"
     ripser_output["creation_time"] = datetime.now().strftime("%Y_%m_%d_Time_%H_%M")
@@ -200,8 +213,7 @@ for a_loc in locations:
 del(a_loc, a_loc_data, ripser_output, file_Name)
 
 # %%
-params = {"axes.titlepad" : 10,
-          "axes.titlesize": 20}
+params = {"axes.titlepad" : 10, "axes.titlesize": 20}
 plt.rcParams.update(params)
 
 # persim.sliced_wasserstein(dgms[1], dgms[1])
@@ -219,7 +231,7 @@ fig, axs = plt.subplots(number_of_rows, number_of_cols,
                         gridspec_kw={"hspace":0.3, "wspace":.01})
 
 for a_loc in locations:
-    a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==a_loc]
+    a_loc_data = all_stations_years_smooth_normalized.loc[all_stations_years_smooth_normalized.station_name==a_loc]
     ripser_output = ripser.ripser(a_loc_data.loc[:, "day_1":"day_365"], maxdim=1)
     dgms = ripser_output["dgms"]
 
@@ -234,15 +246,10 @@ for a_loc in locations:
         row_count += 1
         col_count = 0
 plt.tight_layout()
-fig_name = output_dir + "aLocation_allYears_SNOTEL_PH" + ".pdf"
+fig_name = output_dir + "aLocation_allYears_SNOTEL_PH_normal" + ".pdf"
 plt.savefig(fname = fig_name, dpi=100, bbox_inches="tight")
 # plt.close('all')
-
 del(a_loc, a_loc_data, ripser_output)
-
-# %%
-# persim.sliced_wasserstein(dgms[1], dgms[1])
-# SNOTEL_join_PMW_grids.rename(columns={"pmw_lat_lon": "lat_lon"}, inplace=True)
 
 # %% [markdown]
 # # Form distance matrix
@@ -255,8 +262,8 @@ for ii in np.arange(len(locations)):
     for jj in np.arange(ii, len(locations)):
         ii_loc, jj_loc = locations[ii], locations[jj]
 
-        ii_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==ii_loc]
-        jj_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==jj_loc]
+        ii_data = all_stations_years_smooth_normalized.loc[all_stations_years_smooth_normalized.station_name==ii_loc]
+        jj_data = all_stations_years_smooth_normalized.loc[all_stations_years_smooth_normalized.station_name==jj_loc]
 
         ii_dgms_H1 = ripser.ripser(ii_data.loc[:, "day_1":"day_365"], maxdim=2)["dgms"][1]
         jj_dgms_H1 = ripser.ripser(jj_data.loc[:, "day_1":"day_365"], maxdim=2)["dgms"][1]
@@ -275,41 +282,14 @@ del(jj, jj_loc, jj_data, jj_dgms_H1)
 
 # %%
 loc_2_loc_H1_distances_dict={"loc_2_loc_H1_distances":loc_2_loc_H1_distances,
-                             "jupyterNotebook_GeneratedThisdata":"aLocation_allYears_SNOTEL_PH_Clustering",
+                             "jupyterNotebook_GeneratedThisdata":"aLocation_allYears_Normalized_SNOTEL_PH_Clustering",
                              "creation_time": datetime.now().strftime("%Y_%m_%d_Time_%H_%M")
                             }
 
-file_Name = "location_2_location_H1_distanceMatrix_SNOTEL.pkl"
+file_Name = "loc_2_loc_H1_distanceMatrix_normalized_SNOTEL.pkl"
 f = open(output_dir + file_Name, "wb")
 pickle.dump(loc_2_loc_H1_distances_dict, f) 
 f.close() # close file
-
-# %%
-# size = 10
-# title_FontSize = 2
-# legend_FontSize = 8
-# tick_FontSize = 12
-# label_FontSize = 14
-
-# params = {"legend.fontsize": 15, # medium, large
-#           # "figure.figsize": (6, 4),
-#           "axes.labelsize": size*2,
-#           "axes.titlesize": size*1.5,
-#           "xtick.labelsize": size*0.00015, #  * 0.75
-#           "ytick.labelsize": size, #  * 0.75
-#           # "axes.titlepad":3
-#          }
-
-# #
-# #  Once set, you cannot change them, unless restart the notebook
-# #
-# # plt.rc("font", family = "Palatino")
-# plt.rcParams["xtick.bottom"] = True
-# plt.rcParams["ytick.left"] = True
-# plt.rcParams["xtick.labelbottom"] = True
-# plt.rcParams["ytick.labelleft"] = True
-# plt.rcParams["figure.figsize"] = [15, 4]
-# plt.rcParams.update(params)
 
 # %%
 plt.rcParams["figure.figsize"] = [15, 4]
@@ -319,14 +299,14 @@ loc_2_loc_H1_distances_array = squareform(loc_2_loc_H1_distances)
 loc_2_loc_H1_linkage_matrix = linkage(loc_2_loc_H1_distances_array, "single")
 dendrogram(loc_2_loc_H1_linkage_matrix, labels=list(loc_2_loc_H1_distances.columns))
 plt.tick_params(axis="both", which="major", labelsize=10)
-plt.title("location to location (based on H1. Actual Values).", 
+plt.title("location to location (based on H1 - normalized).", 
           {"fontsize": 15, # plt.rcParams["axes.titlesize"],
            "fontweight" : plt.rcParams["axes.titleweight"],
            "verticalalignment": "baseline",
            "horizontalalignment": "center"}
          )
 
-fig_name = output_dir + "aLocation_allYears_SNOTEL_PH_dend_AV" + ".pdf"
+fig_name = output_dir + "aLocation_allYears_SNOTEL_PH_dend_normal" + ".pdf"
 plt.savefig(fname = fig_name, dpi=100, bbox_inches="tight")
 
 plt.show()
@@ -356,14 +336,14 @@ plt.xticks(np.arange(0.5, len(loc_2_loc_H1_distances.columns), 1), loc_2_loc_H1_
 plt.xticks(rotation = 90)
 plt.colorbar()
 
-plt.title("location to location (based on H1. Actual Values).", 
+
+plt.title("location to location (based on H1. normalized).", 
           {"fontsize": 20, # plt.rcParams["axes.titlesize"],
            "fontweight" : plt.rcParams["axes.titleweight"],
            "verticalalignment": "baseline",
            "horizontalalignment": "center"}
          )
-
-fig_name = output_dir + "HeatMap_SNOTEL_aLoc_allYrs.pdf"
+fig_name = output_dir + "HeatMap_SNOTEL_aLoc_allYrs_normal.pdf"
 plt.savefig(fname = fig_name, dpi=100, bbox_inches='tight')
 plt.show()
 
@@ -397,15 +377,15 @@ plt.xticks(np.arange(0.5, len(L2L_H1_dist_rcm.columns), 1), L2L_H1_dist_rcm.colu
 plt.xticks(rotation = 90)
 plt.colorbar()
 
-plt.title("location to location - Reordered by RCM. (based on H1. Actual Values).", 
+plt.title("location to location - Reordered by RCM. (based on H1. normalized).", 
           {"fontsize": 20, # plt.rcParams["axes.titlesize"],
            "fontweight" : plt.rcParams["axes.titleweight"],
            "verticalalignment": "baseline",
            "horizontalalignment": "center"}
          )
-fig_name = output_dir + "HeatMap_SNOTEL_aLoc_allYrs_RCM.pdf"
-plt.savefig(fname = fig_name, dpi=100, bbox_inches='tight')
 
+fig_name = output_dir + "HeatMap_SNOTEL_aLoc_allYrs_RCM_normal.pdf"
+plt.savefig(fname = fig_name, dpi=100, bbox_inches='tight')
 plt.show()
 
 # %% [markdown]
@@ -541,11 +521,11 @@ plt.show()
 
 # %%
 a_loc, b_loc = "Howell Canyon", "Fish Creek"
-# a_loc, b_loc = "Cougar Mountain", "Cool Creek"
-# a_loc, b_loc = "Blewett Pass", "Cool Creek"
+a_loc, b_loc = "Cougar Mountain", "Cool Creek"
+a_loc, b_loc = "Blewett Pass", "Cool Creek"
 
-Howell_Canyon = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==a_loc]
-Fish_Creek    = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==b_loc]
+Howell_Canyon = all_stations_years_smooth_normalized.loc[all_stations_years_smooth_normalized.station_name==a_loc]
+Fish_Creek    = all_stations_years_smooth_normalized.loc[all_stations_years_smooth_normalized.station_name==b_loc]
 
 curr_data = Fish_Creek.copy()
 curr_location = curr_data.station_name.unique()[0]
@@ -560,9 +540,10 @@ for a_year in sorted(curr_data.year.unique()):
     axs[1].plot(np.arange(365), a_year_data.loc[:, "day_1":"day_365"].values[0], 
                         linewidth = 3, ls = '-', label = f'{a_year}');
     
-    axs[1].set(xlabel=None, ylabel=None)
-    axs[1].set_title(f"{curr_location}, {curr_data.year.unique().min()} - {curr_data.year.unique().max()}", 
-                  fontdict={"fontsize": 10});
+axs[1].set(xlabel=None, ylabel=None)
+axs[1].set_title(f"{curr_location}, \
+{curr_data.year.unique().min()} - {curr_data.year.unique().max()} (normalized)", 
+                 fontdict={"fontsize": 10});
     
 curr_data = Howell_Canyon.copy()
 curr_location = curr_data.station_name.unique()[0]
@@ -573,14 +554,18 @@ for a_year in sorted(curr_data.year.unique()):
     axs[0].plot(np.arange(365), a_year_data.loc[:, "day_1":"day_365"].values[0], 
                         linewidth = 3, ls = '-', label = f'{a_year}');
     
-    axs[0].set(xlabel=None, ylabel=None)
-    axs[0].set_title(f"{curr_location}, {curr_data.year.unique().min()} - {curr_data.year.unique().max()}", 
-                  fontdict={"fontsize": 10});
+axs[0].set(xlabel=None, ylabel=None)
+axs[0].set_title(f"{curr_location}, \
+{curr_data.year.unique().min()} - {curr_data.year.unique().max()} (normalized)", 
+              fontdict={"fontsize": 10});
 
-fig_name = output_dir + a_loc.replace(" ", "_") + "_" + b_loc.replace(" ", "_") + "_SNOTEL.pdf"
+
+fig_name = output_dir + a_loc.replace(" ", "_") + "_" + b_loc.replace(" ", "_")  + "_SNOTEL_normal.pdf"
 plt.savefig(fname = fig_name, dpi=100, bbox_inches='tight')
 
-del(a_loc, b_loc, curr_data, curr_location, a_year, a_year_data, fig_name)
+del(a_loc, b_loc, curr_data, curr_location, a_year, a_year_data)
+
+# %%
 
 # %%
 # persim.sliced_wasserstein(dgms[1], dgms[1])
@@ -597,7 +582,7 @@ fig, axs = plt.subplots(number_of_rows, 1,
                         gridspec_kw={"hspace":0.3, "wspace":.01})
 loc_count=0
 for a_loc in locations:
-    a_loc_data = all_stations_years_smooth.loc[all_stations_years_smooth.station_name==a_loc]
+    a_loc_data = all_stations_years_smooth_normalized.loc[all_stations_years_smooth_normalized.station_name==a_loc]
 
     min_year = a_loc_data.year.unique().min()
     max_year = a_loc_data.year.unique().max()
@@ -613,7 +598,9 @@ for a_loc in locations:
                                   fontdict={"fontsize": 10});
     loc_count+=1
 
-fig_name = output_dir + "allLocations_allYears_SNOTEL.pdf"
-plt.savefig(fname = fig_name, dpi=100, bbox_inches="tight")
+fig_name = output_dir + "allLocs_allYrs_SNOTEL_normalized.pdf"
+# plt.savefig(fname = fig_name, dpi=100, bbox_inches="tight")
 
 del(a_loc, a_loc_data, min_year, max_year, a_year, a_year_data)
+
+# %%

@@ -60,7 +60,7 @@ def plot_aDMG_maxDim2(dgm, ax, ax_min, ax_max, title_):
     ax.set_title(title_)
     ax.set_ylim([ax_min, ax_max])
     ax.set_xlim([ax_min, ax_max])
-    x = np.linspace(ax_min, ax_max, 100)
+    x = np.linspace(ax_min, ax_max, 2)
     ax.plot(x, x, linewidth=1.0, linestyle="dashed", c="k")
     ax.plot(x, [y_hor] * len(x), linewidth=1.0, linestyle="dashed", c="k")
     ax.legend(loc="lower right")

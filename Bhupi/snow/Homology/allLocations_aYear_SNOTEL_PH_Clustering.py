@@ -148,7 +148,7 @@ del(b_year, b_year_data, b_dmg)
 
 # %%
 # output dir
-output_dir=SNOTEL_dir + "allLocations_aYear_grouped_dgms/"
+output_dir=SNOTEL_dir + "allLocs_aYear/"
 os.makedirs(output_dir, exist_ok=True)
 
 # %%

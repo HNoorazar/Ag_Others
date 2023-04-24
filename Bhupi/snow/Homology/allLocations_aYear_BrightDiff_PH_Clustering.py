@@ -151,7 +151,7 @@ all_stations_years_smooth_2003.shape
 
 # %%
 # output dir
-output_dir = in_dir + "allLocations_aYear_grouped_dgms/"
+output_dir = in_dir + "allLocs_aYear/"
 os.makedirs(output_dir, exist_ok=True)
 
 # %%
