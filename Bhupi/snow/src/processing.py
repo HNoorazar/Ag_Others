@@ -2,6 +2,47 @@ import numpy as np
 import pandas as pd
 
 
+def form_slopes(TS_df, window_size=4):
+    """Returns slopes of connecting points that are window_size days apart.
+        Here I assume TS_df has 365 days in it already where each day
+        is a column day_1, day_2, ..., day_365 and each row is associated with
+        an station in a given year.
+
+    Hossein: April 26, 2023
+
+    Arguments
+    ---------
+    TS_df : DataFrame
+        pandas DataFrame. Each row is 365 days data and a given location and year.
+
+    window_size : int
+        Size of the window to consider.
+
+    Returns
+    -------
+    Slopes connecting points that are window_size days apart.
+    """
+    columns_ = list(TS_df.columns)
+    end = 365 - window_size + 1
+    NA_columns = ["day_"] * window_size
+    day_post = list(range(end, 366))
+    assert len(NA_columns) == len(day_post)
+    NA_columns = [m + str(n) for m, n in zip(NA_columns, day_post)]
+
+    # for a_col in NA_columns:
+    #     columns_.remove(a_col)
+    left_columns_ = columns_[2 : end + 1]
+    right_columns_ = columns_[2 + window_size :]
+
+    for a in zip(left_columns_, right_columns_):
+        LC = a[0]
+        RC = a[1]
+        TS_df.loc[:, LC] = TS_df.loc[:, RC] - TS_df.loc[:, LC]
+
+    TS_df.drop(labels=NA_columns, axis="columns", inplace=True)
+    TS_df[left_columns_] = TS_df[left_columns_] / window_size
+
+
 def one_sided_smoothing(all_stations_years, window_size=5):
     """Returns a smoothed version of signal where signals are soomthed by the old neighbors.
                In other words, only past data contribute to adjusting the current value and
@@ -16,10 +57,8 @@ def one_sided_smoothing(all_stations_years, window_size=5):
     all_stations_years : DataFrame
         pandas DataFrame. Each row is 365 days data for a given location and year.
 
-
     window_size : int
         Size of the window to consider.
-
 
     Returns
     -------
@@ -52,9 +91,19 @@ def one_sided_smoothing(all_stations_years, window_size=5):
         So, we replace them here
     """
     end = window_size - 1
-    NA_columns = list(all_locs_years_smooth_1Sided.columns[0:end])
+    # NA_columns = list(all_locs_years_smooth_1Sided.columns[0:end])
+    NA_columns = ["day_"] * end
+
+    day_post = list(range(1, window_size))
+    assert len(NA_columns) == len(day_post)
+
+    NA_columns = [m + str(n) for m, n in zip(NA_columns, day_post)]
+
     for a_col in NA_columns:
-        all_locs_years_smooth_1Sided.loc[:, a_col] = all_locs_years_smooth_1Sided.iloc[:, end]
+        # all_locs_years_smooth_1Sided.loc[:, a_col] = all_locs_years_smooth_1Sided.iloc[:, end]
+        all_locs_years_smooth_1Sided.loc[:, a_col] = all_locs_years_smooth_1Sided.loc[
+            :, "day_" + str(end + 1)
+        ]
 
     return all_locs_years_smooth_1Sided
 

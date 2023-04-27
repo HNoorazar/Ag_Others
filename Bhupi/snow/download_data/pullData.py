@@ -12,6 +12,9 @@
 #     name: python3
 # ---
 
+# %% [markdown]
+# - [Some varibale handbook stuff](http://ncss-tech.github.io/AQP/soilDB/fetchSCAN-demo.html)
+
 # %%
 import pandas as pd
 import numpy as np
@@ -22,6 +25,7 @@ import simplejson
 __file__ = "/Users/hn/Documents/01_research_data/Bhupi/snow/00/pull_Data_NWCC/willBeDropped/"
 
 # %%
+# %%time
 # -*- coding: utf-8 -*-
 """
 Created on Tue Dec 28 09:42:48 2021
@@ -35,7 +39,7 @@ import zeep
 import pandas as pd
 import simplejson
 
-SENSOR = "STO"
+SENSOR = "TAVG"
 
 THIS_DIR = path.dirname(path.abspath(__file__))
 DATA_DIR = path.join(THIS_DIR, "data_export")
@@ -145,6 +149,5 @@ for i, station_elements in enumerate(sensor_stations):
 
 
 # %%
-stations
 
 # %%
