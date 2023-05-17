@@ -8,9 +8,6 @@ library(data.table)
 library(rgdal) # package for geospatial analysis. This shit is not on Aeolus and I cannot install it.
 library(dplyr)
 
-
-source_path = "/home/hnoorazar/Sid/sidFabio/SidFabio_core.R"
-source(source_path)
 options(digit=9)
 options(digits=9)
 
