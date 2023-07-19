@@ -18,6 +18,9 @@ options(digits=9)
 
 args = commandArgs(trailingOnly=TRUE)
 veg_type = args[1]
+
+# data_type_ is model type; observed modeled_hist, or GFDL-ESM2M HadGEM2-ES365 MIROC-ESM-CHEM IPSL-CM5A-LR NorESM1-M
+# to use right time span of the binary files
 model_type = args[2]
 
 ######################################################################
@@ -57,7 +60,7 @@ start_time <- Sys.time()
 
 
 if (model_type=="observed"){
-  path_="/data/project/agaid/rajagopalan_agroecosystems/commondata/meteorologicaldata/gridded/gridMET/gridmet/historical/"
+  path_ = "/data/project/agaid/rajagopalan_agroecosystems/commondata/meteorologicaldata/gridded/gridMET/gridmet/historical/"
 
   for(file in local_files$file_name){
     print (paste0("line 64: ", file)) 
