@@ -348,8 +348,6 @@ slprj/
 *.tif
 *.tiff
 *.TIFF
-*.ipynb
-
 
 #
 *.pdf
