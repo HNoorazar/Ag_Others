@@ -88,7 +88,7 @@ plt.gca().xaxis.set_major_locator(plt.NullLocator())
 plt.gca().yaxis.set_major_locator(plt.NullLocator())
 
 file_name = plot_dir + "orig_data.pdf"
-plt.savefig(fname = file_name, dpi=100, bbox_inches='tight', transparent=False)
+# plt.savefig(fname = file_name, dpi=100, bbox_inches='tight', transparent=False)
 plt.show()
 
 # %%
@@ -141,7 +141,7 @@ plt.gca().xaxis.set_major_locator(plt.NullLocator())
 plt.gca().yaxis.set_major_locator(plt.NullLocator())
 
 file_name = plot_dir + "PCA_coord_1.pdf"
-plt.savefig(fname = file_name, dpi=100, bbox_inches='tight', transparent=False)
+# plt.savefig(fname = file_name, dpi=100, bbox_inches='tight', transparent=False)
 plt.show()
 
 # %%
@@ -172,7 +172,7 @@ with plt.xkcd():
     plt.gca().yaxis.set_major_locator(plt.NullLocator())
 
     file_name = plot_dir + "PCA_coord_xkcd.pdf"
-    plt.savefig(fname = file_name, dpi=100, bbox_inches='tight', transparent=False)
+    # plt.savefig(fname = file_name, dpi=100, bbox_inches='tight', transparent=False)
     plt.show()
 
 ##############
@@ -200,7 +200,7 @@ plt.gca().xaxis.set_major_locator(plt.NullLocator())
 plt.gca().yaxis.set_major_locator(plt.NullLocator())
 
 file_name = plot_dir + "PCA_coord.pdf"
-plt.savefig(fname = file_name, dpi=100, bbox_inches='tight', transparent=False)
+# plt.savefig(fname = file_name, dpi=100, bbox_inches='tight', transparent=False)
 plt.show()
 
 # %%
@@ -208,14 +208,12 @@ import random
 random.uniform(-1, 1)
 
 # %%
-
-# %%
 # seed random number generator
 seed(1)
-print(random())
+print(random.random())
 
 seed(1)
-print(random())
+print(random.random())
 
 # %%
 np.random.seed(1)
@@ -247,7 +245,7 @@ with plt.xkcd():
     plt.ylim(4.5, 5.5)
 
     file_name = plot_dir + "PCA_coord_dim1_xkcd.pdf"
-    plt.savefig(fname = file_name, dpi=100, bbox_inches='tight', transparent=False)
+    # plt.savefig(fname = file_name, dpi=100, bbox_inches='tight', transparent=False)
     plt.show()
 
 #####
@@ -276,7 +274,84 @@ plt.xlim(-1, 11)
 plt.ylim(4.5, 5.5)
 
 file_name = plot_dir + "PCA_coord_dim1.pdf"
-plt.savefig(fname = file_name, dpi=100, bbox_inches='tight', transparent=False)
+# plt.savefig(fname = file_name, dpi=100, bbox_inches='tight', transparent=False)
 plt.show()
+
+# %%
+
+# %%
+import matplotlib.patches as patches
+
+with plt.xkcd():
+    fig, axs = plt.subplots(1, 1, figsize=(5, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+    # axs.grid(axis="y", which="both")
+
+    vec_len = 100
+    x = np.arange(0, 8.1, 0.1);
+    y = .5 * x
+
+    # axs.plot(x, y, color="r", linewidth=1, zorder=-1);
+    axs.vlines(x = 8, ymin = 0, ymax = max(y), color = 'dodgerblue', linestyles="--")
+    axs.hlines(y = max(y), xmin = 0, xmax = max(x), color = 'dodgerblue', linestyles="--")
+
+    # arrow
+    axs.annotate("", xy=(max(x), max(y)), xytext=(0, 0), arrowprops=dict(arrowstyle="->", color="dodgerblue"))
+    axs.annotate("", xy=(max(x), 0), xytext=(0, 0), arrowprops=dict(arrowstyle="->", color="red"))
+    axs.annotate("", xy=(0, max(y)), xytext=(0, 0), arrowprops=dict(arrowstyle="->", color="red"))
+    
+    axs.annotate('$v=(x, y)$', xy=(max(x) - 0.2, max(y)+0.2))
+    axs.annotate('$v_x = (x, 0)$', xy=(max(x) + 0.2, 0.1))
+    axs.annotate('$v=(0, y)$', xy=(.1, max(y) + 0.2))
+
+    square = patches.Rectangle((7.6, 0), .4, .4, edgecolor='dodgerblue', facecolor='none')
+    axs.add_patch(square)
+
+    square = patches.Rectangle((0, 3.6), .4, .4, edgecolor='dodgerblue', facecolor='none')
+    axs.add_patch(square)
+
+    plt.xlim(0, 10)
+    plt.ylim(0, 10)
+
+    plt.gca().xaxis.set_major_locator(plt.NullLocator())
+    plt.gca().yaxis.set_major_locator(plt.NullLocator())
+    file_name = plot_dir + "orth_proj_xkcd.pdf"
+    plt.savefig(fname = file_name, dpi=100, bbox_inches='tight', transparent=False)
+    plt.show()
+
+
+fig, axs = plt.subplots(1, 1, figsize=(5, 5), sharex=True, gridspec_kw={"hspace": 0.15, "wspace": 0.05})
+axs.vlines(x = 8, ymin = 0, ymax = max(y), color = 'dodgerblue', linestyles="--")
+axs.hlines(y = max(y), xmin = 0, xmax = max(x), color = 'dodgerblue', linestyles="--")
+
+# arrow
+axs.annotate("", xy=(max(x), max(y)), xytext=(0, 0), arrowprops=dict(arrowstyle="->", color="dodgerblue"))
+axs.annotate("", xy=(max(x), 0), xytext=(0, 0), arrowprops=dict(arrowstyle="->", color="red"))
+axs.annotate("", xy=(0, max(y)), xytext=(0, 0), arrowprops=dict(arrowstyle="->", color="red"))
+
+axs.annotate('$v=(x, y)$', xy=(max(x), max(y)))
+axs.annotate('$v_x = (x, 0)$', xy=(max(x) + 0.2, 0.1))
+axs.annotate('$v=(0, y)$', xy=(.1, max(y) + 0.2))
+
+
+square = patches.Rectangle((7.6, 0), .4, .4, edgecolor='dodgerblue', facecolor='none')
+axs.add_patch(square)
+
+square = patches.Rectangle((0, 3.6), .4, .4, edgecolor='dodgerblue', facecolor='none')
+axs.add_patch(square)
+
+
+plt.xlim(0, 10)
+plt.ylim(0, 10)
+
+plt.gca().xaxis.set_major_locator(plt.NullLocator())
+plt.gca().yaxis.set_major_locator(plt.NullLocator())
+file_name = plot_dir + "orth_proj.pdf"
+plt.savefig(fname = file_name, dpi=100, bbox_inches='tight', transparent=False)
+
+plt.show()
+
+# %%
+
+# %%
 
 # %%
