@@ -41,6 +41,62 @@ data_2023_nofilter = pd.read_csv(data_dir_ + "data_2023_nofilter.csv")
 data_2023_nofilter.head(2)
 
 # %%
+len(sorted(data_2022_nofilter.CropTyp.unique()))
+
+# %%
+data_2022_nofilter['CropTyp'] = data_2022_nofilter['CropTyp'].str.lower()
+data_2023_nofilter['CropTyp'] = data_2023_nofilter['CropTyp'].str.lower()
+
+# %%
+
+all_crops = sorted(data_2023_nofilter.CropTyp.unique())
+all_crops
+
+# %%
+# Check w/ Kirti.
+# Some of these are new to me
+# Is tea and kiwi produced here?!
+
+bad_crops_2Drop = ['0',
+                   'CRP/Conservation',
+                   'Christmas Tree',
+                   'Cover Crop',
+                   'Dandelion',
+                   'Developed',
+                   'Driving Range',
+                   'Echinacea',
+#                   'Fallow',
+#                   'Fallow, Idle',
+#                   'Fallow, Tilled',
+                   'Golf Course',
+                   'Hemp',
+                   'Herb, Unknown',
+                   'Kiwi',
+#                   'Nursery, Caneberry',
+#                   'Nursery, Greenhouse',
+#                   'Nursery, Lavender',
+#                   'Nursery, Orchard/Vineyard',
+#                   'Nursery, Ornamental',
+                   'Peony',
+                   'Reclamation Seed',
+                   'Research Station',
+                   'Silviculture',
+                   'Sod Farm',
+                   'Tea',
+                   'Unknown',
+                   'Wildlife Feed']
+bad_crops_2Drop = [x.lower() for x in bad_crops_2Drop]
+
+# %%
+data_2022_nofilter = data_2022_nofilter[~data_2022_nofilter.CropTyp.isin(bad_crops_2Drop)]
+data_2023_nofilter = data_2023_nofilter[~data_2023_nofilter.CropTyp.isin(bad_crops_2Drop)]
+
+data_2022_nofilter.reset_index(drop=True, inplace=True)
+data_2023_nofilter.reset_index(drop=True, inplace=True)
+
+# %%
+
+# %%
 print (f"{data_2022_nofilter.shape = }")
 print (f"{data_2023_nofilter.shape = }")
 
@@ -57,7 +113,6 @@ data_2022_nofilter.head(2)
 data_2022_nofilter.drop(columns=['Unnamed: 0'], inplace=True)
 data_2023_nofilter.drop(columns=['Unnamed: 0'], inplace=True)
 data_2023_nofilter.head(2)
-
 
 # %% [markdown]
 # ### Rename column names: lower case for consistency
@@ -127,7 +182,7 @@ print (f"{data_2023_surveyFilter.shape = }")
 # - Extra tables can have crop types in it as well.
 
 # %% [markdown]
-# ### General tables 2022
+# ### No-Filter tables 2022
 
 # %%
 print ("total acre is [{}].".format(data_2022_nofilter["acres"].sum()))
@@ -139,7 +194,7 @@ pd.DataFrame(data_2022_nofilter.groupby("label")["id"].count()).reset_index()
 pd.DataFrame(data_2022_nofilter.groupby("label")["acres"].sum()).reset_index()
 
 # %% [markdown]
-# ##### General tables 2022: counties
+# ### No-Filter tables 2022: counties
 
 # %%
 field_count_counties = pd.DataFrame(data_2022_nofilter.groupby(["county"])["id"].count()).reset_index()
@@ -163,9 +218,9 @@ data_2022_nofilter_labelAcr = pd.DataFrame(data_2022_nofilter.groupby(["county",
                                               ["acres"].sum()).reset_index()
 data_2022_nofilter_labelAcr.head(2)
 
-county_field_labelsCountAcr_2022 = pd.merge(data_2022_nofilter_labelAcr, data_2022_nofilter_labelCounts, 
+county_2022_nofilter_labelsCountAcr = pd.merge(data_2022_nofilter_labelAcr, data_2022_nofilter_labelCounts, 
                                             on=['county', "label"], how='left')
-county_field_labelsCountAcr_2022.head(2)
+county_2022_nofilter_labelsCountAcr.head(2)
 
 # %%
 tick_legend_FontSize = 10
@@ -185,43 +240,76 @@ plt.rcParams['xtick.labelbottom'] = True
 plt.rcParams['ytick.labelleft'] = True
 plt.rcParams.update(params)
 
-color_dict = {"single": "#DDCC77",
-              "double": "#332288",
+color_dict = {"single-cropped": "#DDCC77",
+              "double-cropped": "#332288",
+             }
+
+color_dict = {"single-cropped": "dodgerblue",
+              "double-cropped": "red",
              }
 
 # %%
-df = county_field_labelsCountAcr_2022.copy()
-df_single = df[df.label == "single-cropped"].copy()
-df_double = df[df.label == "double-cropped"].copy()
+plot_col = "acres"
+df = county_2022_nofilter_labelsCountAcr.copy()
+df = df.pivot(index='county', columns='label', values=plot_col).reset_index(drop=False)
+df.columns = df.columns.values
+df.plot(x='county', kind='bar', stacked=False); # title=plot_col
+plt.xlabel('county');
+plt.ylabel(plot_col);
 
-df_single.sort_values(by=["county"], inplace=True)
-df_double.sort_values(by=["county"], inplace=True)
+# %%
 
-df_single.reset_index(drop=True, inplace=True)
-df_double.reset_index(drop=True, inplace=True)
-plot_col = "field_count"
-#########################################################
+# %%
+import plotly.express as px
+df = county_2022_nofilter_labelsCountAcr.copy()
+fig = px.bar(df, x="county", y="acres",
+             color='label', barmode='group', text="acres", height=400)
 
-fig, axs = plt.subplots(1, 1, figsize=(12, 3), sharex=False, # sharey='col', # sharex=True, sharey=True,
+fig.update_xaxes(categoryorder='array', 
+                 categoryarray= df.county.unique())
+
+# fig.update_layout(font=dict(# textfont_size=20,
+#                             family="Courier New, monospace",
+#                             size=18,  # Set the font size here
+#                             color="RebeccaPurple")
+#              )
+fig.update_traces( textfont_size=80)
+
+# file_name = data_dir_ + "county_2022_nofilter_labelsAcr.pdf"
+# fig.write_image(file_name) need to install kaleido
+fig.show()
+
+# %%
+
+# %%
+plot_col = "acres"
+df = county_2022_nofilter_labelsCountAcr.copy()
+df = df.pivot(index='county', columns='label', values=plot_col).reset_index(drop=False)
+df.fillna(0, inplace=True)
+df.sort_values(by=["county"], inplace=True)
+df.reset_index(drop=True, inplace=True)
+
+fig, axs = plt.subplots(1, 1, figsize=(10, 3), sharex=False, # sharey='col', # sharex=True, sharey=True,
                        gridspec_kw={'hspace': 0.35, 'wspace': .05});
 axs.grid(axis='y', which='both')
 
-X_axis = np.arange(len(df.county.unique()))
+X_axis = np.arange(len(df.county))
 
 bar_width_ = 1
 step_size_ = 5*bar_width_
-X_axis = np.array(range(0, step_size_*len(df.county.unique()), step_size_))
+X_axis = np.array(range(0, step_size_*len(df.county), step_size_))
 
-axs.bar(X_axis - bar_width_*2, df_single[plot_col], color = color_dict["single"], 
-        width = bar_width_, label="single")
+axs.bar(X_axis - bar_width_*2, df["double-cropped"], 
+        color = color_dict["double-cropped"], width = bar_width_, label="double-cropped")
 
-axs.bar(X_axis - bar_width_, df_double[plot_col], color = color_dict["double"], 
-        width = bar_width_, label="double")
+axs.bar(X_axis - bar_width_, df["single-cropped"], 
+        color = color_dict["single-cropped"], width = bar_width_, label="single-cropped")
+
 
 axs.tick_params(axis='x', labelrotation = 90)
-axs.set_xticks(X_axis, df_single.county)
+axs.set_xticks(X_axis, df.county)
 
-axs.set_ylabel(plot_col)
+axs.set_ylabel("acreage")
 # axs.set_xlabel("crop type")
 # axs.set_title("5-step NDVI")
 # axs.set_ylim([0, 105])
@@ -232,57 +320,304 @@ axs.xaxis.set_ticks_position('none')
 ymin, ymax = axs.get_ylim()
 axs.set(ylim=(ymin-1, ymax+25), axisbelow=True);
 
+# %%
+tick_legend_FontSize = 10
+
+params = {'legend.fontsize': tick_legend_FontSize*1.5, # medium, large
+          # 'figure.figsize': (6, 4),
+          'axes.labelsize': tick_legend_FontSize*1.7,
+          'axes.titlesize': tick_legend_FontSize*1.7,
+          'xtick.labelsize': tick_legend_FontSize*1.5, #  * 0.75
+          'ytick.labelsize': tick_legend_FontSize*1.5, #  * 0.75
+          'axes.titlepad': 10,
+          'font.size' : 14}
+
+plt.rc('font', family = 'Palatino')
+plt.rcParams['xtick.bottom'] = True
+plt.rcParams['ytick.left'] = True
+plt.rcParams['xtick.labelbottom'] = True
+plt.rcParams['ytick.labelleft'] = True
+plt.rcParams.update(params)
+
 
 # %%
-county_field_labelsCountAcr_2022.head(1)
-
-# %%
+# https://matplotlib.org/stable/gallery/lines_bars_and_markers/barchart.html
 plot_col = "acres"
-df = county_field_labelsCountAcr_2022.copy()
+df = county_2022_nofilter_labelsCountAcr.copy()
 df = df.pivot(index='county', columns='label', values=plot_col).reset_index(drop=False)
-df.columns = df.columns.values
-df.plot(x='county', kind='bar', stacked=False, title=plot_col);
+df.fillna(0, inplace=True)
+df.sort_values(by=["county"], inplace=True)
+df.reset_index(drop=True, inplace=True)
+counties = list(df.county.unique())
 
-# %%
-import plotly.express as px
-fig = px.bar(county_field_labelsCountAcr_2022, 
-             x="county", y="acres",
-             color='label', barmode='group',text="acres",
-             height=400)
-
-fig.update_xaxes(categoryorder='array', 
-                 categoryarray= county_field_labelsCountAcr_2022.county.unique())
-fig.show()
-
-# %%
-county_field_labelsCountAcr_2022.head(2)
-
-# %%
-
-# %%
-x = np.arange(len(county_field_labelsCountAcr_2022.county.unique())) # the label locations
+x = np.arange(len(counties))  # the label locations
 width = 0.25  # the width of the bars
 multiplier = 0
 
-fig, ax = plt.subplots(layout='constrained')
+fig, ax = plt.subplots(1, 1, figsize=(20, 3), sharex=False, # sharey='col', # sharex=True, sharey=True,
+                       gridspec_kw={'hspace': 0.35, 'wspace': .05});
+ax.grid(axis='y', which='both')
 
-for attribute, measurement in county_field_labelsCountAcr_2022.items():
+for a_col in ["double-cropped", "single-cropped"]:
     offset = width * multiplier
-    rects = ax.bar(x + offset, measurement, width, label=attribute)
-    ax.bar_label(rects, padding=3)
+    rects = ax.bar(x + offset, df[a_col], width, label=a_col)
+    ax.bar_label(rects, padding=3, label_type='edge')
     multiplier += 1
 
-# Add some text for labels, title and custom x-axis tick labels, etc.
-ax.set_xticks(x + width, species)
-ax.legend(loc='upper left', ncols=3)
-ax.set_ylim(0, 250)
-
+ax.set_ylim([0, 550000])
+ax.set_ylabel(plot_col)
+ax.set_xticks(x + width, counties)
+ax.legend(loc='upper left', ncols=1)
+ax.tick_params(axis='x', labelrotation = 90)
+file_name = data_dir_ + "county_2022_nofilter_labelsAcr.pdf"
+plt.savefig(fname = file_name, dpi=200, bbox_inches='tight', transparent=False);
 plt.show()
 
 # %%
 
 # %%
-penguin_means
+# https://matplotlib.org/stable/gallery/lines_bars_and_markers/barchart.html
+plot_col = "field_count"
+df = county_2022_nofilter_labelsCountAcr.copy()
+df = df.pivot(index='county', columns='label', values=plot_col).reset_index(drop=False)
+df.fillna(0, inplace=True)
+df.sort_values(by=["county"], inplace=True)
+df.reset_index(drop=True, inplace=True)
+counties = list(df.county.unique())
+
+x = np.arange(len(counties))  # the label locations
+width = 0.25  # the width of the bars
+multiplier = 0
+
+fig, ax = plt.subplots(1, 1, figsize=(20, 3), sharex=False, # sharey='col', # sharex=True, sharey=True,
+                       gridspec_kw={'hspace': 0.35, 'wspace': .05});
+ax.grid(axis='y', which='both')
+
+for a_col in ["double-cropped", "single-cropped"]:
+    offset = width * multiplier
+    rects = ax.bar(x + offset, df[a_col], width, label=a_col)
+    ax.bar_label(rects, padding=3, label_type='edge')
+    multiplier += 1
+
+ax.set_ylim([0, 20000])
+ax.set_ylabel(plot_col)
+ax.set_xticks(x + width, counties)
+ax.legend(loc='upper left', ncols=1)
+ax.tick_params(axis='x', labelrotation = 90)
+file_name = data_dir_ + "county_2022_nofilter_labelsCount.pdf"
+plt.savefig(fname = file_name, dpi=200, bbox_inches='tight', transparent=False);
+plt.show()
+
+# %% [markdown]
+# ## No-Filter tables 2023
+
+# %%
+print ("total acre is [{}].".format(data_2022_nofilter["acres"].sum()))
+
+# %%
+pd.DataFrame(data_2023_nofilter.groupby("label")["id"].count()).\
+reset_index().rename(columns={"id":"total_field_count"})
+
+# %%
+pd.DataFrame(data_2023_nofilter.groupby("label")["acres"].sum()).reset_index()
+
+# %%
+
+# %% [markdown]
+# ## Filtered 2022
+
+# %%
+L = len(data_2022_surveyFilter["id"].unique())
+print ("total number of fields is [{}].".format(L))
+print ("total acre is [{}].".format(data_2022_surveyFilter["acres"].sum()))
+
+# %%
+pd.DataFrame(data_2022_surveyFilter.groupby("label")["id"].count()).reset_index()
+
+# %%
+pd.DataFrame(data_2022_surveyFilter.groupby("label")["acres"].sum()).reset_index()
+
+# %% [markdown]
+# ## Crop Specific 2022
+
+# %%
+pd.DataFrame(data_2022_surveyFilter.groupby(["croptyp", "label"])["id"].count()).reset_index()\
+.rename(columns={"id":"field_count"})
+
+# %%
+pd.DataFrame(data_2022_surveyFilter.groupby(["croptyp", "label"])["acres"].sum()).reset_index()
+
+# %% [markdown]
+# # Put all seed crops in one category
+
+# %%
+seed_idx = data_2022_surveyFilter.loc[data_2022_surveyFilter['croptyp'].str.contains("seed")].index
+data_2022_surveyFilter.loc[seed_idx, "croptyp"] = "seed crops"
+
+
+seed_idx = data_2023_surveyFilter.loc[data_2023_surveyFilter['croptyp'].str.contains("seed")].index
+data_2023_surveyFilter.loc[seed_idx, "croptyp"] = "seed crops"
+
+# %%
+potential_2D = ['alfalfa hay',
+                'alfalfa/grass hay',
+                'barley',
+                'barley hay',
+                'bean, dry',
+                'bean, garbanzo',
+                'bean, green',
+                'buckwheat',
+                'canola',
+                'carrot',
+                'clover/grass hay',
+                'corn, field',
+                'corn, sweet',
+                'grass hay',
+                'hops',
+                'market crops',
+                'oat',
+                'oat hay',
+                'onion',
+                'pasture',
+                'pea hay',
+                'pea, dry',
+                'pea, green',
+                'potato',
+                'pumpkin',
+                'rye',
+                'rye hay',
+                'seed crops',
+                'soybean',
+                'spinach',
+                'sudangrass',
+                'sunflower',
+                'timothy',
+                'tomato',
+                'triticale',
+                'triticale hay',
+                'wheat',
+                'wheat fallow',
+                'wheat hay',
+                'yellow mustard']
+
+perennials = [x for x in sorted(list(data_2022_surveyFilter.croptyp.unique())) if not(x in potential_2D)]
+
+# %%
+# https://matplotlib.org/stable/gallery/lines_bars_and_markers/barchart.html
+plot_col = "id"
+df = pd.DataFrame(data_2022_surveyFilter.groupby(["croptyp", "label"])["id"].count()).reset_index()
+df = df[df.croptyp.isin(potential_2D)]
+y_lim_max_ = df[plot_col].max() + df[plot_col].max() * .12
+
+df = df.pivot(index='croptyp', columns='label', values=plot_col).reset_index(drop=False)
+df.fillna(0, inplace=True)
+df.sort_values(by=["croptyp"], inplace=True)
+df.reset_index(drop=True, inplace=True)
+counties = list(df["croptyp"].unique())
+
+x = np.arange(len(counties))  # the label locations
+width = 0.25  # the width of the bars
+multiplier = 0
+
+fig, ax = plt.subplots(1, 1, figsize=(20, 3), sharex=False, # sharey='col', # sharex=True, sharey=True,
+                       gridspec_kw={'hspace': 0.35, 'wspace': .05});
+ax.grid(axis='y', which='both')
+
+for a_col in ["double-cropped", "single-cropped"]:
+    offset = width * multiplier
+    rects = ax.bar(x + offset, df[a_col], width, label=a_col)
+    ax.bar_label(rects, padding=3, label_type='edge')
+    multiplier += 1
+
+ax.set_ylim([0, y_lim_max_])
+if plot_col=="id":
+    ax.set_ylabel("field count")
+else:
+    ax.set_ylabel(plot_col)
+
+ax.set_xticks(x + width, counties)
+ax.legend(loc='upper left', ncols=1)
+ax.tick_params(axis='x', labelrotation = 90)
+file_name = data_dir_ + "crop_2022_filter_labelsCount_potential2D.pdf"
+# plt.savefig(fname = file_name, dpi=200, bbox_inches='tight', transparent=False);
+plt.show()
+
+# %%
+# https://matplotlib.org/stable/gallery/lines_bars_and_markers/barchart.html
+plot_col = "id"
+df = pd.DataFrame(data_2022_surveyFilter.groupby(["croptyp", "label"])["id"].count()).reset_index()
+df = df[df.croptyp.isin(perennials)]
+y_lim_max_ = df[plot_col].max() + df[plot_col].max() * .12
+
+df = df.pivot(index='croptyp', columns='label', values=plot_col).reset_index(drop=False)
+df.fillna(0, inplace=True)
+df.sort_values(by=["croptyp"], inplace=True)
+df.reset_index(drop=True, inplace=True)
+counties = list(df["croptyp"].unique())
+
+x = np.arange(len(counties))  # the label locations
+width = 0.25  # the width of the bars
+multiplier = 0
+
+fig, ax = plt.subplots(1, 1, figsize=(20, 3), sharex=False, # sharey='col', # sharex=True, sharey=True,
+                       gridspec_kw={'hspace': 0.35, 'wspace': .05});
+ax.grid(axis='y', which='both')
+
+for a_col in ["double-cropped", "single-cropped"]:
+    offset = width * multiplier
+    rects = ax.bar(x + offset, df[a_col], width, label=a_col)
+    ax.bar_label(rects, padding=3, label_type='edge')
+    multiplier += 1
+
+ax.set_ylim([0, y_lim_max_])
+if plot_col=="id":
+    ax.set_ylabel("field count")
+else:
+    ax.set_ylabel(plot_col)
+        
+ax.set_xticks(x + width, counties)
+ax.legend(loc='best', ncols=1)
+ax.tick_params(axis='x', labelrotation = 90)
+file_name = data_dir_ + "crop_2022_filter_labelsCount_perennials.pdf"
+# plt.savefig(fname = file_name, dpi=200, bbox_inches='tight', transparent=False);
+plt.show()
+
+# %%
+
+# %% [markdown]
+# ## Filtered tables 2023
+
+# %%
+L = len(data_2023_surveyFilter["id"].unique())
+print ("total number of fields is [{}].".format(L))
+print ("total acre is [{}].".format(data_2023_surveyFilter["acres"].sum()))
+
+# %%
+pd.DataFrame(data_2023_surveyFilter.groupby("label")["id"].count()).reset_index()
+
+# %%
+pd.DataFrame(data_2023_surveyFilter.groupby("label")["acres"].sum()).reset_index()
+
+# %%
+
+# %%
+
+# %%
+
+# %% [markdown]
+# # Crop Specific 2023
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
 
 # %%
 # https://matplotlib.org/stable/gallery/lines_bars_and_markers/barchart.html
@@ -313,76 +648,5 @@ ax.legend(loc='upper left', ncols=3)
 ax.set_ylim(0, 250)
 
 plt.show()
-
-# %%
-measurement
-
-# %%
-attribute
-
-# %%
-type(species)
-
-# %%
-
-# %%
-
-# %%
-
-# %% [markdown]
-# ### General tables 2023
-
-# %%
-print ("total acre is [{}].".format(data_2022_nofilter["acres"].sum()))
-
-# %%
-pd.DataFrame(data_2023_nofilter.groupby("label")["id"].count()).reset_index()
-
-# %%
-pd.DataFrame(data_2023_nofilter.groupby("label")["acres"].sum()).reset_index()
-
-# %%
-
-# %% [markdown]
-# ### Specific (filtered) tables 2022
-
-# %%
-L = len(data_2022_surveyFilter["id"].unique())
-print ("total number of fields is [{}].".format(L))
-print ("total acre is [{}].".format(data_2022_surveyFilter["acres"].sum()))
-
-# %%
-pd.DataFrame(data_2022_surveyFilter.groupby("label")["id"].count()).reset_index()
-
-# %%
-pd.DataFrame(data_2022_surveyFilter.groupby("label")["acres"].sum()).reset_index()
-
-# %% [markdown]
-# ### Specific (filtered) tables 2023
-
-# %%
-L = len(data_2023_surveyFilter["id"].unique())
-print ("total number of fields is [{}].".format(L))
-print ("total acre is [{}].".format(data_2023_surveyFilter["acres"].sum()))
-
-# %%
-pd.DataFrame(data_2023_surveyFilter.groupby("label")["id"].count()).reset_index()
-
-# %%
-pd.DataFrame(data_2023_surveyFilter.groupby("label")["acres"].sum()).reset_index()
-
-# %% [markdown]
-# # Crop Specific 2022
-
-# %%
-pd.DataFrame(data_2022_surveyFilter.groupby(["croptyp", "label"])["id"].count()).reset_index()
-
-# %%
-pd.DataFrame(data_2022_surveyFilter.groupby(["croptyp", "label"])["acres"].sum()).reset_index()
-
-# %%
-
-# %% [markdown]
-# # Crop Specific 2023
 
 # %%
