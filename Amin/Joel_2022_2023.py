@@ -15,8 +15,6 @@
 # %%
 import warnings
 warnings.filterwarnings('ignore')
-
-import time  # , shutil
 import numpy as np
 import pandas as pd
 from datetime import date
@@ -24,10 +22,7 @@ from datetime import date
 import matplotlib
 import matplotlib.pyplot as plt
 from pylab import imshow
-
-import pickle  # , h5py
-import sys, os, os.path
-
+import sys, os, os.path,  pickle, time
 
 sys.path.append("/Users/hn/Documents/00_GitHub/Ag/NASA/Python_codes/")
 import NASA_core as nc
@@ -38,19 +33,71 @@ data_dir_ = "/Users/hn/Documents/01_research_data/Amin/Joel/"
 # %%
 data_2022_nofilter = pd.read_csv(data_dir_ + "data_2022_nofilter.csv")
 data_2023_nofilter = pd.read_csv(data_dir_ + "data_2023_nofilter.csv")
-data_2023_nofilter.head(2)
 
-# %%
-len(sorted(data_2022_nofilter.CropTyp.unique()))
-
-# %%
 data_2022_nofilter['CropTyp'] = data_2022_nofilter['CropTyp'].str.lower()
 data_2023_nofilter['CropTyp'] = data_2023_nofilter['CropTyp'].str.lower()
 
-# %%
+data_2022_nofilter.drop(columns=['Unnamed: 0'], inplace=True)
+data_2023_nofilter.drop(columns=['Unnamed: 0'], inplace=True)
 
-all_crops = sorted(data_2023_nofilter.CropTyp.unique())
-all_crops
+
+
+### Rename column names: lower case for consistency
+data_2022_nofilter.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
+data_2023_nofilter.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
+
+data_2023_nofilter.head(2)
+
+
+##### Sort by id
+data_2022_nofilter.sort_values(by=["id"], inplace=True)
+data_2023_nofilter.sort_values(by=["id"], inplace=True)
+
+data_2022_nofilter.reset_index(drop=True, inplace=True)
+data_2023_nofilter.reset_index(drop=True, inplace=True)
+
+data_2023_nofilter.head(2)
+
+# %%
+### Convert type of lstsrvd from string to date
+
+data_2022_nofilter.lstsrvd = pd.to_datetime(data_2022_nofilter.lstsrvd)
+
+data_2023_nofilter.lstsrvd = pd.to_datetime(data_2023_nofilter.lstsrvd)
+data_2023_nofilter.head(2)
+
+# %%
+data_2022_nofilter["last_survey_year"] = data_2022_nofilter.lstsrvd.dt.year
+data_2023_nofilter["last_survey_year"] = data_2023_nofilter.lstsrvd.dt.year
+data_2023_nofilter.head(2)
+
+data_2022_nofilter["image_year"] = 2022
+data_2023_nofilter["image_year"] = 2023
+
+data_2023_nofilter.head(2)
+
+# %%
+len(sorted(data_2022_nofilter.croptyp.unique()))
+
+# %%
+all_crops = sorted(data_2023_nofilter.croptyp.unique())
+
+# %% [markdown]
+# # Export data for Jeol and Kirti
+
+# %%
+data_2022_2023 = pd.concat([data_2023_nofilter, data_2022_nofilter])
+data_2022_2023.shape
+
+# %%
+data_2022_2023["correct_year"] = "False"
+data_2022_2023.loc[data_2022_2023.last_survey_year == data_2022_2023.image_year, "correct_year"] = "True"
+data_2022_2023.head(2)
+
+# %%
+data_2022_2023.to_csv(data_dir_ + "double_cropLabels_2022_2023.csv", index=False)
+
+# %%
 
 # %%
 # Check w/ Kirti.
@@ -88,72 +135,19 @@ bad_crops_2Drop = ['0',
 bad_crops_2Drop = [x.lower() for x in bad_crops_2Drop]
 
 # %%
-data_2022_nofilter = data_2022_nofilter[~data_2022_nofilter.CropTyp.isin(bad_crops_2Drop)]
-data_2023_nofilter = data_2023_nofilter[~data_2023_nofilter.CropTyp.isin(bad_crops_2Drop)]
+data_2022_nofilter = data_2022_nofilter[~data_2022_nofilter.croptyp.isin(bad_crops_2Drop)]
+data_2023_nofilter = data_2023_nofilter[~data_2023_nofilter.croptyp.isin(bad_crops_2Drop)]
 
 data_2022_nofilter.reset_index(drop=True, inplace=True)
 data_2023_nofilter.reset_index(drop=True, inplace=True)
-
-# %%
 
 # %%
 print (f"{data_2022_nofilter.shape = }")
 print (f"{data_2023_nofilter.shape = }")
+print ()
 
-# %%
-print (f"{len(data_2022_nofilter.ID.unique()) = }")
-print (f"{len(data_2023_nofilter.ID.unique()) = }")
-
-# %%
-
-# %%
-data_2022_nofilter.head(2)
-
-# %%
-data_2022_nofilter.drop(columns=['Unnamed: 0'], inplace=True)
-data_2023_nofilter.drop(columns=['Unnamed: 0'], inplace=True)
-data_2023_nofilter.head(2)
-
-# %% [markdown]
-# ### Rename column names: lower case for consistency
-
-# %%
-data_2022_nofilter.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
-data_2023_nofilter.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
-
-data_2023_nofilter.head(2)
-
-# %% [markdown]
-# ### Sort by ID
-
-# %%
-data_2022_nofilter.sort_values(by=["id"], inplace=True)
-data_2023_nofilter.sort_values(by=["id"], inplace=True)
-
-data_2022_nofilter.reset_index(drop=True, inplace=True)
-data_2023_nofilter.reset_index(drop=True, inplace=True)
-
-data_2023_nofilter.head(2)
-
-# %% [markdown]
-# ### Convert type of lstsrvd from string to date
-
-# %%
-data_2022_nofilter.lstsrvd = pd.to_datetime(data_2022_nofilter.lstsrvd)
-
-data_2023_nofilter.lstsrvd = pd.to_datetime(data_2023_nofilter.lstsrvd)
-data_2023_nofilter.head(2)
-
-# %%
-data_2022_nofilter["last_survey_year"] = data_2022_nofilter.lstsrvd.dt.year
-data_2023_nofilter["last_survey_year"] = data_2023_nofilter.lstsrvd.dt.year
-data_2023_nofilter.head(2)
-
-# %%
-data_2022_nofilter["image_year"] = 2022
-data_2023_nofilter["image_year"] = 2023
-
-data_2023_nofilter.head(2)
+print (f"{len(data_2022_nofilter.id.unique()) = }")
+print (f"{len(data_2023_nofilter.id.unique()) = }")
 
 # %%
 data_2022_surveyFilter = data_2022_nofilter[data_2022_nofilter.last_survey_year == \
@@ -223,6 +217,20 @@ county_2022_nofilter_labelsCountAcr = pd.merge(data_2022_nofilter_labelAcr, data
 county_2022_nofilter_labelsCountAcr.head(2)
 
 # %%
+data_2023_nofilter_labelCounts = pd.DataFrame(data_2023_nofilter.groupby(["county", "label"])\
+                                              ["id"].count()).reset_index()
+data_2023_nofilter_labelCounts.rename(columns={"id":"field_count"}, inplace=True)
+data_2023_nofilter_labelCounts.head(2)
+
+data_2023_nofilter_labelAcr = pd.DataFrame(data_2023_nofilter.groupby(["county", "label"])\
+                                              ["acres"].sum()).reset_index()
+data_2023_nofilter_labelAcr.head(2)
+
+county_2023_nofilter_labelsCountAcr = pd.merge(data_2023_nofilter_labelAcr, data_2023_nofilter_labelCounts, 
+                                            on=['county', "label"], how='left')
+county_2023_nofilter_labelsCountAcr.head(2)
+
+# %%
 tick_legend_FontSize = 10
 
 params = {'legend.fontsize': tick_legend_FontSize, # medium, large
@@ -273,7 +281,7 @@ fig.update_xaxes(categoryorder='array',
 #                             size=18,  # Set the font size here
 #                             color="RebeccaPurple")
 #              )
-fig.update_traces( textfont_size=80)
+# fig.update_traces(textfont_size=80)
 
 # file_name = data_dir_ + "county_2022_nofilter_labelsAcr.pdf"
 # fig.write_image(file_name) need to install kaleido
@@ -289,8 +297,7 @@ df.fillna(0, inplace=True)
 df.sort_values(by=["county"], inplace=True)
 df.reset_index(drop=True, inplace=True)
 
-fig, axs = plt.subplots(1, 1, figsize=(10, 3), sharex=False, # sharey='col', # sharex=True, sharey=True,
-                       gridspec_kw={'hspace': 0.35, 'wspace': .05});
+fig, axs = plt.subplots(1, 1, figsize=(10, 3), sharex=False, gridspec_kw={'hspace': 0.35, 'wspace': .05});
 axs.grid(axis='y', which='both')
 
 X_axis = np.arange(len(df.county))
@@ -305,26 +312,19 @@ axs.bar(X_axis - bar_width_*2, df["double-cropped"],
 axs.bar(X_axis - bar_width_, df["single-cropped"], 
         color = color_dict["single-cropped"], width = bar_width_, label="single-cropped")
 
-
 axs.tick_params(axis='x', labelrotation = 90)
-axs.set_xticks(X_axis, df.county)
+axs.set_xticks(X_axis, df.county);
+
 
 axs.set_ylabel("acreage")
-# axs.set_xlabel("crop type")
-# axs.set_title("5-step NDVI")
-# axs.set_ylim([0, 105])
 axs.legend(loc="best");
 axs.xaxis.set_ticks_position('none')
-
-# send the guidelines to the back
 ymin, ymax = axs.get_ylim()
-axs.set(ylim=(ymin-1, ymax+25), axisbelow=True);
+axs.set(ylim=(ymin-1, ymax+25), axisbelow=True); # send the guidelines back
 
 # %%
 tick_legend_FontSize = 10
-
 params = {'legend.fontsize': tick_legend_FontSize*1.5, # medium, large
-          # 'figure.figsize': (6, 4),
           'axes.labelsize': tick_legend_FontSize*1.7,
           'axes.titlesize': tick_legend_FontSize*1.7,
           'xtick.labelsize': tick_legend_FontSize*1.5, #  * 0.75
@@ -341,72 +341,6 @@ plt.rcParams.update(params)
 
 
 # %%
-# https://matplotlib.org/stable/gallery/lines_bars_and_markers/barchart.html
-plot_col = "acres"
-df = county_2022_nofilter_labelsCountAcr.copy()
-df = df.pivot(index='county', columns='label', values=plot_col).reset_index(drop=False)
-df.fillna(0, inplace=True)
-df.sort_values(by=["county"], inplace=True)
-df.reset_index(drop=True, inplace=True)
-counties = list(df.county.unique())
-
-x = np.arange(len(counties))  # the label locations
-width = 0.25  # the width of the bars
-multiplier = 0
-
-fig, ax = plt.subplots(1, 1, figsize=(20, 3), sharex=False, # sharey='col', # sharex=True, sharey=True,
-                       gridspec_kw={'hspace': 0.35, 'wspace': .05});
-ax.grid(axis='y', which='both')
-
-for a_col in ["double-cropped", "single-cropped"]:
-    offset = width * multiplier
-    rects = ax.bar(x + offset, df[a_col], width, label=a_col)
-    ax.bar_label(rects, padding=3, label_type='edge')
-    multiplier += 1
-
-ax.set_ylim([0, 550000])
-ax.set_ylabel(plot_col)
-ax.set_xticks(x + width, counties)
-ax.legend(loc='upper left', ncols=1)
-ax.tick_params(axis='x', labelrotation = 90)
-file_name = data_dir_ + "county_2022_nofilter_labelsAcr.pdf"
-plt.savefig(fname = file_name, dpi=200, bbox_inches='tight', transparent=False);
-plt.show()
-
-# %%
-
-# %%
-# https://matplotlib.org/stable/gallery/lines_bars_and_markers/barchart.html
-plot_col = "field_count"
-df = county_2022_nofilter_labelsCountAcr.copy()
-df = df.pivot(index='county', columns='label', values=plot_col).reset_index(drop=False)
-df.fillna(0, inplace=True)
-df.sort_values(by=["county"], inplace=True)
-df.reset_index(drop=True, inplace=True)
-counties = list(df.county.unique())
-
-x = np.arange(len(counties))  # the label locations
-width = 0.25  # the width of the bars
-multiplier = 0
-
-fig, ax = plt.subplots(1, 1, figsize=(20, 3), sharex=False, # sharey='col', # sharex=True, sharey=True,
-                       gridspec_kw={'hspace': 0.35, 'wspace': .05});
-ax.grid(axis='y', which='both')
-
-for a_col in ["double-cropped", "single-cropped"]:
-    offset = width * multiplier
-    rects = ax.bar(x + offset, df[a_col], width, label=a_col)
-    ax.bar_label(rects, padding=3, label_type='edge')
-    multiplier += 1
-
-ax.set_ylim([0, 20000])
-ax.set_ylabel(plot_col)
-ax.set_xticks(x + width, counties)
-ax.legend(loc='upper left', ncols=1)
-ax.tick_params(axis='x', labelrotation = 90)
-file_name = data_dir_ + "county_2022_nofilter_labelsCount.pdf"
-plt.savefig(fname = file_name, dpi=200, bbox_inches='tight', transparent=False);
-plt.show()
 
 # %% [markdown]
 # ## No-Filter tables 2023
@@ -503,84 +437,6 @@ potential_2D = ['alfalfa hay',
 perennials = [x for x in sorted(list(data_2022_surveyFilter.croptyp.unique())) if not(x in potential_2D)]
 
 # %%
-# https://matplotlib.org/stable/gallery/lines_bars_and_markers/barchart.html
-plot_col = "id"
-df = pd.DataFrame(data_2022_surveyFilter.groupby(["croptyp", "label"])["id"].count()).reset_index()
-df = df[df.croptyp.isin(potential_2D)]
-y_lim_max_ = df[plot_col].max() + df[plot_col].max() * .12
-
-df = df.pivot(index='croptyp', columns='label', values=plot_col).reset_index(drop=False)
-df.fillna(0, inplace=True)
-df.sort_values(by=["croptyp"], inplace=True)
-df.reset_index(drop=True, inplace=True)
-counties = list(df["croptyp"].unique())
-
-x = np.arange(len(counties))  # the label locations
-width = 0.25  # the width of the bars
-multiplier = 0
-
-fig, ax = plt.subplots(1, 1, figsize=(20, 3), sharex=False, # sharey='col', # sharex=True, sharey=True,
-                       gridspec_kw={'hspace': 0.35, 'wspace': .05});
-ax.grid(axis='y', which='both')
-
-for a_col in ["double-cropped", "single-cropped"]:
-    offset = width * multiplier
-    rects = ax.bar(x + offset, df[a_col], width, label=a_col)
-    ax.bar_label(rects, padding=3, label_type='edge')
-    multiplier += 1
-
-ax.set_ylim([0, y_lim_max_])
-if plot_col=="id":
-    ax.set_ylabel("field count")
-else:
-    ax.set_ylabel(plot_col)
-
-ax.set_xticks(x + width, counties)
-ax.legend(loc='upper left', ncols=1)
-ax.tick_params(axis='x', labelrotation = 90)
-file_name = data_dir_ + "crop_2022_filter_labelsCount_potential2D.pdf"
-# plt.savefig(fname = file_name, dpi=200, bbox_inches='tight', transparent=False);
-plt.show()
-
-# %%
-# https://matplotlib.org/stable/gallery/lines_bars_and_markers/barchart.html
-plot_col = "id"
-df = pd.DataFrame(data_2022_surveyFilter.groupby(["croptyp", "label"])["id"].count()).reset_index()
-df = df[df.croptyp.isin(perennials)]
-y_lim_max_ = df[plot_col].max() + df[plot_col].max() * .12
-
-df = df.pivot(index='croptyp', columns='label', values=plot_col).reset_index(drop=False)
-df.fillna(0, inplace=True)
-df.sort_values(by=["croptyp"], inplace=True)
-df.reset_index(drop=True, inplace=True)
-counties = list(df["croptyp"].unique())
-
-x = np.arange(len(counties))  # the label locations
-width = 0.25  # the width of the bars
-multiplier = 0
-
-fig, ax = plt.subplots(1, 1, figsize=(20, 3), sharex=False, # sharey='col', # sharex=True, sharey=True,
-                       gridspec_kw={'hspace': 0.35, 'wspace': .05});
-ax.grid(axis='y', which='both')
-
-for a_col in ["double-cropped", "single-cropped"]:
-    offset = width * multiplier
-    rects = ax.bar(x + offset, df[a_col], width, label=a_col)
-    ax.bar_label(rects, padding=3, label_type='edge')
-    multiplier += 1
-
-ax.set_ylim([0, y_lim_max_])
-if plot_col=="id":
-    ax.set_ylabel("field count")
-else:
-    ax.set_ylabel(plot_col)
-        
-ax.set_xticks(x + width, counties)
-ax.legend(loc='best', ncols=1)
-ax.tick_params(axis='x', labelrotation = 90)
-file_name = data_dir_ + "crop_2022_filter_labelsCount_perennials.pdf"
-# plt.savefig(fname = file_name, dpi=200, bbox_inches='tight', transparent=False);
-plt.show()
 
 # %%
 
@@ -598,12 +454,6 @@ pd.DataFrame(data_2023_surveyFilter.groupby("label")["id"].count()).reset_index(
 # %%
 pd.DataFrame(data_2023_surveyFilter.groupby("label")["acres"].sum()).reset_index()
 
-# %%
-
-# %%
-
-# %%
-
 # %% [markdown]
 # # Crop Specific 2023
 
@@ -611,42 +461,292 @@ pd.DataFrame(data_2023_surveyFilter.groupby("label")["acres"].sum()).reset_index
 
 # %%
 
-# %%
+# %% [markdown]
+# # Write for-loops
+#
+# There are too may options:
+#   - filtered or not
+#   - 2022 or 2023
+#   - crop-wise or county-wise
+#     - in case of crop-wise: 2D or perennials
+#    - Acres or fiel-count
+
+# %% [markdown]
+# ## For-loop for county-wise
+#
+# Since we do not have 2D or perennials I am writing two for-loops. Easier to manage the loops as well.
 
 # %%
+params = {'legend.fontsize': tick_legend_FontSize, # medium, large
+          'axes.labelsize': tick_legend_FontSize*1,
+          'axes.titlesize': tick_legend_FontSize*1,
+          'xtick.labelsize': tick_legend_FontSize, #  * 0.75
+          'ytick.labelsize': tick_legend_FontSize}
+plt.rcParams.update(params)
+
+params = {'legend.fontsize': tick_legend_FontSize*1.5, # medium, large
+          'axes.labelsize': tick_legend_FontSize*1.7,
+          'axes.titlesize': tick_legend_FontSize*1.7,
+          'xtick.labelsize': tick_legend_FontSize*1.5, #  * 0.75
+          'ytick.labelsize': tick_legend_FontSize*1.5}
+plt.rcParams.update(params)
 
 # %%
+filter_ = [True, False]
+years = [2022, 2023]
+plot_what = ["id", "acres"]
+
+counter = 1
+for a_year in years:
+    for a_filter in filter_:
+        for plot_col in plot_what:
+            if plot_col == "id":
+                if a_year == 2022 and a_filter==True:
+                    df = data_2022_surveyFilter.copy()
+                elif a_year == 2023 and a_filter==True:
+                    df = data_2023_surveyFilter.copy()
+                elif a_year == 2022 and a_filter==False:
+                    df = data_2022_nofilter.copy()
+                elif a_year == 2023 and a_filter==False:
+                    df = data_2023_nofilter.copy()
+            
+                y_label_ = "field count"
+                df = pd.DataFrame(df.groupby(["county", "label"])["id"].count()).reset_index()
+                y_lim_max_ = df[plot_col].max() + df[plot_col].max() * .12
+
+                df = df.pivot(index='county', columns='label', values=plot_col).reset_index(drop=False)
+                df.fillna(0, inplace=True)
+                df.sort_values(by=["county"], inplace=True)
+                df.reset_index(drop=True, inplace=True)
+                counties = list(df["county"].unique())
+
+                x = np.arange(len(counties)) # the label locations
+                width = 0.25  # the width of the bars
+                multiplier = 0
+
+                fig, ax = plt.subplots(1, 1, figsize=(20, 3), sharex=False,\
+                                       gridspec_kw={'hspace': 0.35, 'wspace': .05});
+                ax.grid(axis='y', which='both')
+
+                for a_col in ["double-cropped", "single-cropped"]:
+                    offset = width * multiplier
+                    rects = ax.bar(x + offset, df[a_col], width, label=a_col)
+                    ax.bar_label(rects, padding=3, label_type='edge')
+                    multiplier += 1
+
+                ax.set_ylim([0, y_lim_max_])
+                if plot_col=="id":
+                    ax.set_ylabel(y_label_)
+                else:
+                    ax.set_ylabel(plot_col)
+
+                ax.set_xticks(x + width, counties)
+                ax.legend(loc='best', ncols=1)
+                ax.tick_params(axis='x', labelrotation = 90)
+                ymin, ymax = ax.get_ylim() # send the guidelines back
+                ax.set(ylim=(ymin-1, ymax+25), axisbelow=True); # send the guidelines back
+                ax.set_title(f'Year {a_year}. srvy filter: {a_filter}. {y_label_}')
+                file_name = data_dir_ + "plots/" + \
+                               f"county_{a_year}_filter{a_filter}_{y_label_.replace(' ', '_')}.pdf"
+
+                plt.savefig(fname = file_name, dpi=200, bbox_inches='tight', transparent=False);
+                plt.close()
+                
+            if plot_col == "acres":
+                if a_year == 2022 and a_filter==True:
+                    df = data_2022_surveyFilter.copy()
+                elif a_year == 2023 and a_filter==True:
+                    df = data_2023_surveyFilter.copy()
+                elif a_year == 2022 and a_filter==False:
+                    df = data_2022_nofilter.copy()
+                elif a_year == 2023 and a_filter==False:
+                    df = data_2023_nofilter.copy()
+                    
+                df = df[["county", "label", "acres"]]
+                df = pd.DataFrame(df.groupby(["county", "label"])["acres"].sum()).reset_index()
+                y_lim_max_ = df[plot_col].max() + df[plot_col].max() * .12
+                df = df.pivot(index='county', columns='label', values=plot_col).reset_index(drop=False)
+
+                df.fillna(0, inplace=True)
+                df.sort_values(by=["county"], inplace=True)
+                df.reset_index(drop=True, inplace=True)
+                counties = list(df.county.unique())
+
+                x = np.arange(len(counties)) # the label locations
+                width = 0.35  # the width of the bars
+                multiplier = 0
+
+                fig, ax = plt.subplots(1, 1, figsize=(20, 3), sharex=False, \
+                                       gridspec_kw={'hspace': 0.35, 'wspace': .05});
+                ax.grid(axis='y', which='both')
+
+                for a_col in ["double-cropped", "single-cropped"]:
+                    offset = width * multiplier
+                    rects = ax.bar(x + offset, df[a_col], width, label=a_col)
+                    ax.bar_label(rects, padding=3, label_type='edge')
+                    multiplier += 1
+
+                ax.set_ylim([0, y_lim_max_])
+                ax.set_ylabel(plot_col)
+                ax.set_xticks(x + width, counties)
+                ax.legend(loc='best', ncols=1)
+                ax.tick_params(axis='x', labelrotation = 90)
+                
+                ymin, ymax = ax.get_ylim() # send the guidelines back
+                ax.set(ylim=(ymin-1, ymax+25), axisbelow=True); # send the guidelines back
+
+                ax.set_title(f'Year {a_year}. srvy filter: {a_filter}. {plot_col}')
+                file_name = data_dir_ + "plots/" + \
+                               f"county_{a_year}_filter{a_filter}_{plot_col}.pdf"
+
+                plt.savefig(fname = file_name, dpi=200, bbox_inches='tight', transparent=False);
+                plt.close()
+
+# %% [markdown]
+# # Crop-wise plots
+#
+# filter_ must be True
+
+# %%
+params = {'legend.fontsize': tick_legend_FontSize*1.5, # medium, large
+          'axes.labelsize': tick_legend_FontSize*1.7,
+          'axes.titlesize': tick_legend_FontSize*1.7,
+          'xtick.labelsize': tick_legend_FontSize*1.5, #  * 0.75
+          'ytick.labelsize': tick_legend_FontSize*1.5}
+plt.rcParams.update(params)
+
+# %%
+perennials_choice = [True, False]
+filter_ = [True]
+counter = 1
+
+for a_year in years:
+    for a_filter in filter_:
+        for plot_col in plot_what:
+            for perennial in perennials_choice:                        
+                if plot_col == "id":
+                    if a_year == 2022 and a_filter==True:
+                        df = data_2022_surveyFilter.copy()
+                    elif a_year == 2023 and a_filter==True:
+                        df = data_2023_surveyFilter.copy()
+                    elif a_year == 2022 and a_filter==False:
+                        df = data_2022_nofilter.copy()
+                    elif a_year == 2023 and a_filter==False:
+                        df = data_2023_nofilter.copy()
+                    if perennial == True:
+                        df = df[df.croptyp.isin(perennials)].copy()
+                        lastName = "perennial"
+                        plot_width_ = 20
+                    else:
+                        df = df[df.croptyp.isin(potential_2D)].copy()
+                        lastName = "2D"
+                        plot_width_ = 30
+
+                    y_label_ = "acres"
+                    df = pd.DataFrame(df.groupby(["croptyp", "label"])["id"].count()).reset_index()
+                    y_lim_max_ = df[plot_col].max() + df[plot_col].max() * .12
+
+                    df = df.pivot(index='croptyp', columns='label', values=plot_col).reset_index(drop=False)
+                    df.fillna(0, inplace=True)
+                    df.sort_values(by=["croptyp"], inplace=True)
+                    df.reset_index(drop=True, inplace=True)
+                    counties = list(df["croptyp"].unique())
+
+                    x = np.arange(len(counties)) # the label locations
+                    width = 0.25  # the width of the bars
+                    multiplier = 0
+
+                    fig, ax = plt.subplots(1, 1, figsize=(plot_width_, 3), sharex=False,\
+                                           gridspec_kw={'hspace': 0.35, 'wspace': .05});
+                    ax.grid(axis='y', which='both')
+
+                    for a_col in ["double-cropped", "single-cropped"]:
+                        offset = width * multiplier
+                        rects = ax.bar(x + offset, df[a_col], width, label=a_col)
+                        ax.bar_label(rects, padding=3, label_type='edge')
+                        multiplier += 1
+
+                    ax.set_ylim([0, y_lim_max_])
+                    if plot_col=="id":
+                        ax.set_ylabel(y_label_)
+                    else:
+                        ax.set_ylabel(plot_col)
+
+                    ax.set_xticks(x + width, counties)
+                    ax.legend(loc='best', ncols=1)
+                    ax.tick_params(axis='x', labelrotation = 90)
+                    ax.set_title(f'Year {a_year}. srvy filter: {a_filter}. {y_label_}')
+                    
+                    ymin, ymax = ax.get_ylim() # send the guidelines back
+                    ax.set(ylim=(ymin-1, ymax+25), axisbelow=True); # send the guidelines back
+
+                    file_name = data_dir_ + "plots/" + \
+                            f"crop_{a_year}_filter{a_filter}_{y_label_.replace(' ', '_')}_{lastName}.pdf"
+
+                    plt.savefig(fname = file_name, dpi=200, bbox_inches='tight', transparent=False);
+                    plt.close()
+
+                if plot_col == "acres":
+                    if a_year == 2022 and a_filter==True:
+                        df = data_2022_surveyFilter.copy()
+                    elif a_year == 2023 and a_filter==True:
+                        df = data_2023_surveyFilter.copy()
+                    elif a_year == 2022 and a_filter==False:
+                        df = data_2022_nofilter.copy()
+                    elif a_year == 2023 and a_filter==False:
+                        df = data_2023_nofilter.copy()
+                    
+                    if perennial == True:
+                        df = df[df.croptyp.isin(perennials)].copy()
+                        lastName = "perennial"
+                    else:
+                        df = df[df.croptyp.isin(potential_2D)].copy()
+                        lastName = "2D"
+                    df = pd.DataFrame(df.groupby(["croptyp", "label"])["acres"].sum()).reset_index()
+                    y_lim_max_ = df[plot_col].max() + df[plot_col].max() * .12
+                    df = df.pivot(index='croptyp', columns='label', values=plot_col).reset_index(drop=False)
+
+                    df.fillna(0, inplace=True)
+                    df.sort_values(by=["croptyp"], inplace=True)
+                    df.reset_index(drop=True, inplace=True)
+                    counties = list(df.croptyp.unique())
+
+                    x = np.arange(len(counties)) # the label locations
+                    width = 0.35  # the width of the bars
+                    multiplier = 0
+
+                    fig, ax = plt.subplots(1, 1, figsize=(plot_width_, 3), sharex=False, \
+                                           gridspec_kw={'hspace': 0.35, 'wspace': .05});
+                    ax.grid(axis='y', which='both')
+
+                    for a_col in ["double-cropped", "single-cropped"]:
+                        offset = width * multiplier
+                        rects = ax.bar(x + offset, df[a_col], width, label=a_col)
+                        ax.bar_label(rects, padding=3, label_type='edge')
+                        multiplier += 1
+
+                    ax.set_ylim([0, y_lim_max_])
+                    ax.set_ylabel(plot_col)
+                    ax.set_xticks(x + width, counties)
+                    ax.legend(loc='best', ncols=1)
+                    ax.tick_params(axis='x', labelrotation = 90)
+                    ymin, ymax = ax.get_ylim() # send the guidelines back
+                    ax.set(ylim=(ymin-1, ymax+25), axisbelow=True); # send the guidelines back
+
+                    ax.set_title(f'Year {a_year}. srvy filter: {a_filter}. {y_label_}')
+                    file_name = data_dir_ + "plots/" + \
+                                   f"crop_{a_year}_filter{a_filter}_{plot_col}_{lastName}.pdf"
+
+                    plt.savefig(fname = file_name, dpi=200, bbox_inches='tight', transparent=False);
+                    plt.close()
+
+# %%
+len(perennials)
+
+# %%
+len(potential_2D)
 
 # %%
 
 # %%
 # https://matplotlib.org/stable/gallery/lines_bars_and_markers/barchart.html
-species = ["Adelie", "Chinstrap", "Gentoo"]
-penguin_means = {
-    'Bill Depth': [18.35, 18.43, 14.98],
-    'Bill Length': [38.79, 48.83, 47.50],
-    'Flipper Length': [189.95, 195.82, 217.19],
-}
-
-x = np.arange(len(species))  # the label locations
-width = 0.25  # the width of the bars
-multiplier = 0
-
-fig, ax = plt.subplots(layout='constrained')
-
-for attribute, measurement in penguin_means.items():
-    offset = width * multiplier
-    rects = ax.bar(x + offset, measurement, width, label=attribute)
-    ax.bar_label(rects, padding=3)
-    multiplier += 1
-
-# Add some text for labels, title and custom x-axis tick labels, etc.
-ax.set_ylabel('Length (mm)')
-ax.set_title('Penguin attributes by species')
-ax.set_xticks(x + width, species)
-ax.legend(loc='upper left', ncols=3)
-ax.set_ylim(0, 250)
-
-plt.show()
-
-# %%
