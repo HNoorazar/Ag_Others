@@ -93,6 +93,11 @@ plt.rcParams.update(params)
 
 # %%
 df = data_2022_nofilter.copy()
+df[["id", "last_survey_year"]].groupby("last_survey_year").count().reset_index()
+
+# %%
+df = data_2022_nofilter.copy()
+
 fig, axs = plt.subplots(1, 1, figsize=(10, 3), sharex=False, gridspec_kw={"hspace": 0.35, "wspace": 0.05})
 axs.grid(axis="y", which="both")
 
@@ -100,20 +105,19 @@ LL = len(df["last_survey_year"].unique())
 X_axis = np.arange(LL)
 
 bar_width_ = 1
-step_size_ = 5 * bar_width_
+step_size_ = 2*bar_width_
 X_axis = np.array(range(0, step_size_ * LL, step_size_))
 
 df = df[["id", "last_survey_year"]].groupby("last_survey_year").count().reset_index()
-
-
-axs.bar(X_axis - bar_width_ * 2, df["id"], color="dodgerblue", width=bar_width_);
+axs.bar(2 + X_axis - bar_width_ * 2, df["id"], color="dodgerblue", width=bar_width_);
 axs.set_ylabel("field count");
 axs.set_xlabel("year");
 axs.set_xticks(X_axis, df["last_survey_year"]);
 
 # %%
+2+ X_axis - bar_width_ * 2
 
 # %%
-df[["id", "last_survey_year"]].groupby("last_survey_year").count().reset_index()
+X_axis - bar_width_ * 5
 
 # %%

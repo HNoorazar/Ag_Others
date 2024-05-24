@@ -333,7 +333,6 @@ df.reset_index(drop=True, inplace=True)
 
 fig, axs = plt.subplots(1, 1, figsize=(10, 3), sharex=False, gridspec_kw={"hspace": 0.35, "wspace": 0.05})
 axs.grid(axis="y", which="both")
-
 X_axis = np.arange(len(df.county))
 
 bar_width_ = 1
