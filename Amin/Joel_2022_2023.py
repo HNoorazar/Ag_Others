@@ -51,7 +51,6 @@ data_2023_nofilter.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace
 
 data_2023_nofilter.head(2)
 
-
 ##### Sort by id
 data_2022_nofilter.sort_values(by=["id"], inplace=True)
 data_2023_nofilter.sort_values(by=["id"], inplace=True)
@@ -63,9 +62,7 @@ data_2023_nofilter.head(2)
 
 # %%
 ### Convert type of lstsrvd from string to date
-
 data_2022_nofilter.lstsrvd = pd.to_datetime(data_2022_nofilter.lstsrvd)
-
 data_2023_nofilter.lstsrvd = pd.to_datetime(data_2023_nofilter.lstsrvd)
 data_2023_nofilter.head(2)
 
@@ -334,9 +331,7 @@ df.fillna(0, inplace=True)
 df.sort_values(by=["county"], inplace=True)
 df.reset_index(drop=True, inplace=True)
 
-fig, axs = plt.subplots(
-    1, 1, figsize=(10, 3), sharex=False, gridspec_kw={"hspace": 0.35, "wspace": 0.05}
-)
+fig, axs = plt.subplots(1, 1, figsize=(10, 3), sharex=False, gridspec_kw={"hspace": 0.35, "wspace": 0.05})
 axs.grid(axis="y", which="both")
 
 X_axis = np.arange(len(df.county))
@@ -345,32 +340,23 @@ bar_width_ = 1
 step_size_ = 5 * bar_width_
 X_axis = np.array(range(0, step_size_ * len(df.county), step_size_))
 
-axs.bar(
-    X_axis - bar_width_ * 2,
-    df["double-cropped"],
-    color=color_dict["double-cropped"],
-    width=bar_width_,
-    label="double-cropped",
-)
+axs.bar(X_axis - bar_width_ * 2, df["double-cropped"], color=color_dict["double-cropped"],
+        width=bar_width_, label="double-cropped",)
 
-axs.bar(
-    X_axis - bar_width_,
-    df["single-cropped"],
-    color=color_dict["single-cropped"],
-    width=bar_width_,
-    label="single-cropped",
-)
+axs.bar(X_axis - bar_width_, df["single-cropped"], color=color_dict["single-cropped"],
+        width=bar_width_, label="single-cropped")
 
 axs.tick_params(axis="x", labelrotation=90)
 axs.set_xticks(X_axis, df.county)
 
-
 axs.set_ylabel("acreage")
 axs.legend(loc="best")
 axs.xaxis.set_ticks_position("none")
+
+# send the guidelines back
 ymin, ymax = axs.get_ylim()
 axs.set(ylim=(ymin - 1, ymax + 25), axisbelow=True)
-# send the guidelines back
+
 
 # %%
 tick_legend_FontSize = 10
