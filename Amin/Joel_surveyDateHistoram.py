@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -27,8 +27,8 @@ import matplotlib.pyplot as plt
 from pylab import imshow
 import sys, os, os.path, pickle, time
 
-sys.path.append("/Users/hn/Documents/00_GitHub/Ag/NASA/Python_codes/")
-import NASA_core as nc
+# sys.path.append("/Users/hn/Documents/00_GitHub/Ag/NASA/Python_codes/")
+# import NASA_core as nc
 
 # %%
 data_dir_ = "/Users/hn/Documents/01_research_data/Amin/Joel/"
@@ -103,11 +103,17 @@ bar_width_ = 1
 step_size_ = 5 * bar_width_
 X_axis = np.array(range(0, step_size_ * LL, step_size_))
 
-# axs.bar(X_axis - bar_width_ * 2, df[["id", "last_survey_year"]], 
-#         color="dodgerblue",
-#         width=bar_width_)
+df = df[["id", "last_survey_year"]].groupby("last_survey_year").count().reset_index()
+
+
+axs.bar(X_axis - bar_width_ * 2, df["id"], color="dodgerblue", width=bar_width_);
+axs.set_ylabel("field count");
+axs.set_xlabel("year");
+axs.set_xticks(X_axis, df["last_survey_year"]);
 
 # %%
-df[df["last_survey_year"] == df["last_survey_year"].unique().max()]
+
+# %%
+df[["id", "last_survey_year"]].groupby("last_survey_year").count().reset_index()
 
 # %%

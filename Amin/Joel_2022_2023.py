@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -357,6 +357,14 @@ axs.xaxis.set_ticks_position("none")
 ymin, ymax = axs.get_ylim()
 axs.set(ylim=(ymin - 1, ymax + 25), axisbelow=True)
 
+
+# %%
+len(X_axis - bar_width_)
+
+# %%
+df["single-cropped"].shape
+
+# %%
 
 # %%
 tick_legend_FontSize = 10
