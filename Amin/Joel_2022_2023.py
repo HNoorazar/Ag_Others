@@ -146,81 +146,16 @@ SF.to_file(filename = data_dir_ + "To_Joel/" + 'SF_2021_to_2023_DC_May272024.shp
 # %%
 
 # %%
-
-# %%
 Whitman = SF[SF.County == "Whitman"].copy()
 Whitman[Whitman.label == "double-cropped"]
-
-# %%
 
 # %% [markdown]
 # # Export data for Jeol and Kirti
 
 # %%
-# data_2022_nofilter = pd.read_csv(data_dir_ + "data_2022_nofilter.csv")
-# data_2023_nofilter = pd.read_csv(data_dir_ + "data_2023_nofilter.csv")
-
-# data_2022_nofilter["CropTyp"] = data_2022_nofilter["CropTyp"].str.lower()
-# data_2023_nofilter["CropTyp"] = data_2023_nofilter["CropTyp"].str.lower()
-
-# data_2022_nofilter.drop(columns=["Unnamed: 0"], inplace=True)
-# data_2023_nofilter.drop(columns=["Unnamed: 0"], inplace=True)
-
-
-# ### Rename column names: lower case for consistency
-# data_2022_nofilter.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
-# data_2023_nofilter.rename(columns=lambda x: x.lower().replace(" ", "_"), inplace=True)
-
-# data_2023_nofilter.head(2)
-
-# ##### Sort by id
-# data_2022_nofilter.sort_values(by=["id"], inplace=True)
-# data_2023_nofilter.sort_values(by=["id"], inplace=True)
-
-# data_2022_nofilter.reset_index(drop=True, inplace=True)
-# data_2023_nofilter.reset_index(drop=True, inplace=True)
-
-# data_2023_nofilter.head(2)
-
-# ### Convert type of lstsrvd from string to date
-# data_2022_nofilter.lstsrvd = pd.to_datetime(data_2022_nofilter.lstsrvd)
-# data_2023_nofilter.lstsrvd = pd.to_datetime(data_2023_nofilter.lstsrvd)
-# data_2023_nofilter.head(2)
-
-
-# data_2022_nofilter["last_survey_year"] = data_2022_nofilter.lstsrvd.dt.year
-# data_2023_nofilter["last_survey_year"] = data_2023_nofilter.lstsrvd.dt.year
-# data_2023_nofilter.head(2)
-
-# data_2022_nofilter["image_year"] = 2022
-# data_2023_nofilter["image_year"] = 2023
-
-# data_2023_nofilter.head(2)
-
-# len(sorted(data_2022_nofilter.croptyp.unique()))
-
-# all_crops = sorted(data_2023_nofilter.croptyp.unique())
-
-# data_2022_2023 = pd.concat([data_2023_nofilter, data_2022_nofilter])
-
-# data_2022_2023["correct_year"] = "False"
-# data_2022_2023.loc[
-#     data_2022_2023.last_survey_year == data_2022_2023.image_year, "correct_year"
-# ] = "True"
-# data_2022_2023.head(2)
-
-# data_2022_2023.shape
-
-# data_2022_2023.to_csv(data_dir_ + "To_Joel/" + "double_cropLabels_2022_2023.csv", index=False)
 
 # %%
-
-# %%
-
-# %%
-# Check w/ Kirti.
-# Some of these are new to me
-# Is tea and kiwi produced here?!
+# Check w/ Kirti. Some of these are new to me. Is tea and kiwi produced here?!
 
 bad_crops_2Drop = [
     "0",
@@ -255,44 +190,13 @@ bad_crops_2Drop = [
 bad_crops_2Drop = [x.lower() for x in bad_crops_2Drop]
 
 # %%
-# data_2022_nofilter = data_2022_nofilter[
-#     ~data_2022_nofilter.croptyp.isin(bad_crops_2Drop)
-# ]
-# data_2023_nofilter = data_2023_nofilter[
-#     ~data_2023_nofilter.croptyp.isin(bad_crops_2Drop)
-# ]
-
-# data_2022_nofilter.reset_index(drop=True, inplace=True)
-# data_2023_nofilter.reset_index(drop=True, inplace=True)
-
 all_no_filter = all_no_filter[~all_no_filter.croptyp.isin(bad_crops_2Drop)]
 all_no_filter.reset_index(drop=True, inplace=True)
 all_no_filter.head(2)
 
-
 all_correct_year = all_correct_year[~all_correct_year.croptyp.isin(bad_crops_2Drop)]
 all_correct_year.reset_index(drop=True, inplace=True)
 all_correct_year.head(2)
-
-# %%
-# print(f"{data_2022_nofilter.shape = }")
-# print(f"{data_2023_nofilter.shape = }")
-# print()
-
-# print(f"{len(data_2022_nofilter.id.unique()) = }")
-# print(f"{len(data_2023_nofilter.id.unique()) = }")
-
-# %%
-# data_2022_surveyFilter = data_2022_nofilter[
-#     data_2022_nofilter.last_survey_year == data_2022_nofilter.image_year
-# ].copy()
-
-
-# data_2023_surveyFilter = data_2023_nofilter[
-#     data_2023_nofilter.last_survey_year == data_2023_nofilter.image_year
-# ].copy()
-
-# data_2023_surveyFilter.head(2)
 
 # %%
 all_correct_year.head(2)
@@ -549,33 +453,7 @@ file_name = data_dir_ + "county_2022_nofilter_labelsCount.pdf"
 # plt.savefig(fname=file_name, dpi=200, bbox_inches="tight", transparent=False)
 plt.show()
 
-# %% [markdown]
-# ## Filtered 2022
-
 # %%
-yr = 2022
-
-L = len(all_correct_year[all_correct_year["image_year"] == yr]["id"].unique())
-print("total number of fields is [{}].".format(L))
-print("total acre is [{}].".format(all_correct_year[all_correct_year["image_year"] == yr]["acres"].sum()))
-
-# %%
-pd.DataFrame(all_correct_year[all_correct_year["image_year"] == yr].groupby("label")["id"].count()).reset_index()
-
-# %%
-pd.DataFrame(all_correct_year[all_correct_year["image_year"] == yr].groupby("label")["acres"].sum()).reset_index()
-
-# %% [markdown]
-# ## Crop Specific 2022
-
-# %%
-pd.DataFrame(all_correct_year[all_correct_year["image_year"] == yr]\
-             .groupby(["croptyp", "label"])["id"].count()).reset_index().rename(columns={"id": "field_count"})
-
-# %%
-pd.DataFrame(
-    all_correct_year[all_correct_year["image_year"] == yr].groupby(["croptyp", "label"])["acres"].sum()
-).reset_index()
 
 # %% [markdown]
 # # Put all seed crops in one category
@@ -715,8 +593,6 @@ ax.tick_params(axis="x", labelrotation=90)
 file_name = data_dir_ + "crop_2022_filter_labelsCount_perennials.pdf"
 # plt.savefig(fname = file_name, dpi=200, bbox_inches='tight', transparent=False);
 plt.show()
-
-# %%
 
 # %% [markdown]
 # ## Filtered tables
