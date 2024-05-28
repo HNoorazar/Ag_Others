@@ -72,8 +72,6 @@ all_no_filter.head(2)
 # %%
 
 # %%
-
-# %%
 all_correct_year = all_no_filter[all_no_filter.correct_year == True].copy()
 
 all_correct_year.drop(columns=["correct_year"], inplace=True)
@@ -287,8 +285,7 @@ field_count_counties.rename(columns={"id": "total_field_count"}, inplace=True)
 field_acr_counties = pd.DataFrame(df.groupby(["county"])["acres"].sum()).reset_index()
 field_acr_counties.rename(columns={"id": "acres"}, inplace=True)
 
-county_field_countAcr = pd.merge(
-    field_count_counties, field_acr_counties, on=["county"], how="left")
+county_field_countAcr = pd.merge(field_count_counties, field_acr_counties, on=["county"], how="left")
 county_field_countAcr.head(2)
 
 # %%
@@ -345,17 +342,12 @@ plt.ylabel(plot_col)
 import plotly.express as px
 
 df = county_nofilter_labelsCountAcr.copy()
-fig = px.bar(
-    df, x="county", y="acres", color="label", barmode="group", text="acres", height=400
-)
-
+fig = px.bar(df, x="county", y="acres", color="label", barmode="group", text="acres", height=400)
 fig.update_xaxes(categoryorder="array", categoryarray=df.county.unique())
 
-# fig.update_layout(font=dict(# textfont_size=20,
-#                             family="Courier New, monospace",
+# fig.update_layout(font=dict(# textfont_size=20, family="Courier New, monospace",
 #                             size=18,  # Set the font size here
-#                             color="RebeccaPurple")
-#              )
+#                             color="RebeccaPurple"))
 # fig.update_traces(textfont_size=80)
 
 # file_name = data_dir_ + "county_2022_nofilter_labelsAcr.pdf"
@@ -440,7 +432,7 @@ ax.grid(axis="y", which="both")
 for a_col in ["double-cropped", "single-cropped"]:
     offset = width * multiplier
     rects = ax.bar(x + offset, df[a_col], width, label=a_col)
-    ax.bar_label(rects, padding=3, label_type="edge")
+    ax.bar_label(rects, padding=3, label_type="edge", rotation=45)
     multiplier += 1
 
 ax.set_ylim([0, 550000])
@@ -473,7 +465,7 @@ ax.grid(axis="y", which="both")
 for a_col in ["double-cropped", "single-cropped"]:
     offset = width * multiplier
     rects = ax.bar(x + offset, df[a_col], width, label=a_col)
-    ax.bar_label(rects, padding=3, label_type="edge")
+    ax.bar_label(rects, padding=3, label_type="edge", rotation=45)
     multiplier += 1
 
 ax.set_ylim([0, 20000])
@@ -545,11 +537,13 @@ perennials = [x for x in sorted(list(all_correct_year.croptyp.unique())) if not 
 yr = 2022
 plot_col = "id"
 
+y_lim_multi = 0.2
+
 df = pd.DataFrame(
     all_correct_year[all_correct_year["image_year"] == yr].groupby(["croptyp", "label"])["id"].count()
 ).reset_index()
 df = df[df.croptyp.isin(potential_2D)]
-y_lim_max_ = df[plot_col].max() + df[plot_col].max() * 0.12
+y_lim_max_ = df[plot_col].max() + df[plot_col].max() * y_lim_multi
 
 df = df.pivot(index="croptyp", columns="label", values=plot_col).reset_index(drop=False)
 df.fillna(0, inplace=True)
@@ -566,7 +560,7 @@ ax.grid(axis="y", which="both")
 for a_col in ["double-cropped", "single-cropped"]:
     offset = width * multiplier
     rects = ax.bar(x + offset, df[a_col], width, label=a_col)
-    ax.bar_label(rects, padding=3, label_type="edge")
+    ax.bar_label(rects, padding=3, label_type="edge", rotation=45)
     multiplier += 1
 
 ax.set_ylim([0, y_lim_max_])
@@ -589,7 +583,7 @@ df = pd.DataFrame(
     all_correct_year[all_correct_year["image_year"] == yr].groupby(["croptyp", "label"])["id"].count()
 ).reset_index()
 df = df[df.croptyp.isin(perennials)]
-y_lim_max_ = df[plot_col].max() + df[plot_col].max() * 0.12
+y_lim_max_ = df[plot_col].max() + df[plot_col].max() * y_lim_multi
 
 df = df.pivot(index="croptyp", columns="label", values=plot_col).reset_index(drop=False)
 df.fillna(0, inplace=True)
@@ -606,7 +600,7 @@ ax.grid(axis="y", which="both")
 for a_col in ["double-cropped", "single-cropped"]:
     offset = width * multiplier
     rects = ax.bar(x + offset, df[a_col], width, label=a_col)
-    ax.bar_label(rects, padding=5, label_type="edge")
+    ax.bar_label(rects, padding=5, label_type="edge", rotation=45)
     multiplier += 1
 
 ax.set_ylim([0, y_lim_max_])
@@ -685,7 +679,7 @@ for a_year in years:
 
                 y_label_ = "field count"
                 df = pd.DataFrame(df.groupby(["county", "label"])["id"].count()).reset_index()
-                y_lim_max_ = df[plot_col].max() + df[plot_col].max() * 0.12
+                y_lim_max_ = df[plot_col].max() + df[plot_col].max() * y_lim_multi
 
                 df = df.pivot(index="county", columns="label", values=plot_col).reset_index(drop=False)
                 df.fillna(0, inplace=True)
@@ -703,7 +697,7 @@ for a_year in years:
                 for a_col in ["double-cropped", "single-cropped"]:
                     offset = width * multiplier
                     rects = ax.bar(x + offset, df[a_col], width, label=a_col)
-                    ax.bar_label(rects, padding=3, label_type="edge")
+                    ax.bar_label(rects, padding=3, label_type="edge", rotation=45)
                     multiplier += 1
 
                 ax.set_ylim([0, y_lim_max_])
@@ -732,7 +726,7 @@ for a_year in years:
                     
                 df = df[["county", "label", "acres"]]
                 df = pd.DataFrame(df.groupby(["county", "label"])["acres"].sum()).reset_index()
-                y_lim_max_ = df[plot_col].max() + df[plot_col].max() * 0.12
+                y_lim_max_ = df[plot_col].max() + df[plot_col].max() * y_lim_multi
                 df = df.pivot(index="county", columns="label", values=plot_col).reset_index(drop=False)
 
                 df.fillna(0, inplace=True)
@@ -750,7 +744,7 @@ for a_year in years:
                 for a_col in ["double-cropped", "single-cropped"]:
                     offset = width * multiplier
                     rects = ax.bar(x + offset, df[a_col], width, label=a_col)
-                    ax.bar_label(rects, padding=3, label_type="edge")
+                    ax.bar_label(rects, padding=3, label_type="edge", rotation=45)
                     multiplier += 1
 
                 ax.set_ylim([0, y_lim_max_])
@@ -786,6 +780,8 @@ params = {
 }
 plt.rcParams.update(params)
 
+y_lim_multi = 0.25
+
 # %%
 perennials_choice = [True, False]
 filter_ = [True]
@@ -810,9 +806,9 @@ for a_year in years:
                         lastName = "2D"
                         plot_width_ = 30
 
-                    y_label_ = "acres"
+                    y_label_ = "field count"
                     df = pd.DataFrame(df.groupby(["croptyp", "label"])["id"].count()).reset_index()
-                    y_lim_max_ = df[plot_col].max() + df[plot_col].max() * 0.12
+                    y_lim_max_ = df[plot_col].max() + df[plot_col].max() * y_lim_multi
 
                     df = df.pivot(index="croptyp", columns="label", values=plot_col).reset_index(drop=False)
                     df.fillna(0, inplace=True)
@@ -830,7 +826,8 @@ for a_year in years:
                     for a_col in ["double-cropped", "single-cropped"]:
                         offset = width * multiplier
                         rects = ax.bar(x + offset, df[a_col], width, label=a_col)
-                        ax.bar_label(rects, padding=3, label_type="edge")
+                        ax.bar_label(rects, padding=3, label_type="edge", rotation=90,
+                                     fontsize=tick_legend_FontSize*1.7)
                         multiplier += 1
 
                     ax.set_ylim([0, y_lim_max_])
@@ -855,6 +852,7 @@ for a_year in years:
                     plt.close()
 
                 if plot_col == "acres":
+                    y_label_ = "acres"
                     if a_filter == True:
                         df = all_correct_year[all_correct_year["image_year"] == a_year].copy()
                     elif a_filter == False:
@@ -867,7 +865,7 @@ for a_year in years:
                         df = df[df.croptyp.isin(potential_2D)].copy()
                         lastName = "2D"
                     df = pd.DataFrame(df.groupby(["croptyp", "label"])["acres"].sum()).reset_index()
-                    y_lim_max_ = df[plot_col].max() + df[plot_col].max() * 0.12
+                    y_lim_max_ = df[plot_col].max() + df[plot_col].max() * y_lim_multi
                     df = df.pivot(index="croptyp", columns="label", values=plot_col).reset_index(drop=False)
 
                     df.fillna(0, inplace=True)
@@ -885,7 +883,8 @@ for a_year in years:
                     for a_col in ["double-cropped", "single-cropped"]:
                         offset = width * multiplier
                         rects = ax.bar(x + offset, df[a_col], width, label=a_col)
-                        ax.bar_label(rects, padding=3, label_type="edge")
+                        ax.bar_label(rects, padding=3, label_type="edge", rotation=90, 
+                                     fontsize=tick_legend_FontSize*1.7)
                         multiplier += 1
 
                     ax.set_ylim([0, y_lim_max_])
@@ -903,9 +902,6 @@ for a_year in years:
 
                     plt.savefig(fname=file_name, dpi=200, bbox_inches="tight", transparent=False)
                     plt.close()
-
-# %%
-# %who
 
 # %%
 all_no_filter[all_no_filter.id == 21552]

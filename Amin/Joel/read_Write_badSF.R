@@ -20,6 +20,13 @@ years <- seq(from = 2021, to = 2023, by = 1)
 WSDA <- read_sf(paste0(data_dir, "From_Joel/WSDA2023DoubleCropOnly_May2024/", "WSDA2023DoubleCropOnly.shp"))
 
 gdb <- path.expand(paste0(data_dir, "From_Joel/WSDA2023DoubleCropOnly_May2024/"))
+# WSDA_V2 <- readOGR(gdb, "WSDACrop_2015")
+
+fc <- sf::st_read(paste0(data_dir, "From_Joel/WSDA2023DoubleCropOnly_May2024/"), layer = "gdb")
+fc <- sf::st_read(paste0(data_dir, "From_Joel/WSDA2023DoubleCropOnly_May2024/"), layer = "a00000001")
+fc <- sf::st_read(paste0(data_dir, "From_Joel/WSDA2023DoubleCropOnly_May2024/"), layer = "a0000000")
+fc <- sf::st_read(paste0(data_dir, "From_Joel/WSDA2023DoubleCropOnly_May2024/"), layer = "a0000000a")
+
 
 for (yr in years){
   WSDA <- readOGR(paste0(data_dir, "WSDACrop_", yr, "/WSDACrop_", yr, ".shp"),
