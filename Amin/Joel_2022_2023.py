@@ -70,6 +70,10 @@ for year in years:
 all_no_filter.head(2)
 
 # %%
+
+# %%
+
+# %%
 all_correct_year = all_no_filter[all_no_filter.correct_year == True].copy()
 
 all_correct_year.drop(columns=["correct_year"], inplace=True)
@@ -109,7 +113,7 @@ import folium, json
 import geopandas as gpd
 
 # %%
-# %time
+# %%time
 SF = gpd.read_file(data_dir_ + "From_Joel/" + "Joel_shp/WSDACrop_2023_WSUDoubleCrop.shp", crs='EPSG:4326')
 SF.OBJECTID = SF.OBJECTID.astype(int)
 SF.head(2)
@@ -125,29 +129,69 @@ SF.drop(columns="id", inplace=True)
 SF.head(2)
 
 # %%
+# SF.to_file(filename = data_dir_ + "To_Joel/" + 'SF_2021_to_2023_DC_May272024.shp.zip', driver='ESRI Shapefile')
 
 # %%
+Whitman = SF[SF.County == "Whitman"].copy()
+Whitman[Whitman.label == "double-cropped"]
 
 # %%
-SF.to_file(filename = data_dir_ + "To_Joel/" + 'SF_2021_to_2023_DC_May272024.shp.zip', driver='ESRI Shapefile')
-
-# %%
-# %time
+# %%time
 # WSDA2023DoubleCropOnly_May2024 = gpd.read_file(data_dir_ + "From_Joel/WSDA2023DoubleCropOnly_Mat2024/" + 
 #                                                'WSDA2023DoubleCropOnly.shp', crs='EPSG:4326')
 # WSDA2023DoubleCropOnly_May2024.head(2)
 
 # %%
-# weird_SF_dir = data_dir_ + "From_Joel/WSDACrop_2023_WSUDoubleCrop_V2/"
+# %%time
 
-# mallard_0 = gpd.read_file(weird_SF_dir + "a0000000.gdb", layer=1)
-# # mallard_1 = gpd.read_file(weird_SF_dir + "a0000000a.gdb", layer=1)
+Joel_QAQC_V3 = gpd.read_file(data_dir_ + "From_Joel/" + "Joel_QAQC_V3/updated_shp.shp", 
+                             crs='EPSG:4326')
+
+Joel_QAQC_V3.OBJECTID = SF.OBJECTID.astype(int)
+Joel_QAQC_V3.head(2)
 
 # %%
+needed_cols = ['id', 'prob_single', 'label', 'last_survey_year', 'image_year']
+Joel_QAQC_V3 = pd.merge(Joel_QAQC_V3, all_correct_year[needed_cols], 
+                        left_on=["OBJECTID"], right_on=["id"], how="left")
+Joel_QAQC_V3.drop(columns="id", inplace=True)
+
+Joel_QAQC_V3.head(2)
 
 # %%
-Whitman = SF[SF.County == "Whitman"].copy()
-Whitman[Whitman.label == "double-cropped"]
+# %%time
+Joel_QAQC_V3.to_file(filename = data_dir_ + "To_Joel/" + 'SF_2021_to_2023_DC_May272024.shp.zip', 
+                     driver='ESRI Shapefile')
+
+# %%
+Joel_QAQC_V3_df = pd.DataFrame(Joel_QAQC_V3)
+Joel_QAQC_V3_df = Joel_QAQC_V3_df[['OBJECTID', 'CropType', 'Acres', 'Irrigation',
+                                   'LastSurvey', 'DataSource',
+                                   'Notes', 'County', 'ExactAcres', 'DoubleCrop', 'label',
+                                   'last_survey_year', 'image_year']].copy()
+
+Joel_QAQC_V3_df = Joel_QAQC_V3_df[Joel_QAQC_V3_df.DoubleCrop=="Yes"].copy()
+Joel_QAQC_V3_df.reset_index(drop=True, inplace=True)
+
+print (Joel_QAQC_V3_df.shape)
+Joel_QAQC_V3_df.head(2)
+
+# %%
+values = {"label": "unknown"}
+Joel_QAQC_V3_df.fillna(value=values, inplace=True)
+
+single_idx = Joel_QAQC_V3_df.loc[Joel_QAQC_V3_df["label"].str.contains("single")].index
+double_idx = Joel_QAQC_V3_df.loc[Joel_QAQC_V3_df["label"].str.contains("double")].index
+
+Joel_QAQC_V3_df["DoubleCrop_pred"] = "unknown"
+Joel_QAQC_V3_df.loc[single_idx, "DoubleCrop_pred"] = "No"
+Joel_QAQC_V3_df.loc[double_idx, "DoubleCrop_pred"] = "Yes"
+Joel_QAQC_V3_df.head(2)
+
+# %%
+Joel_QAQC_V3_df.to_csv(data_dir_ + "To_Joel/" + "QAQC_111fields.csv", index=False)
+
+# %%
 
 # %% [markdown]
 # # Export data for Jeol and Kirti
@@ -264,15 +308,13 @@ county_nofilter_labelsCountAcr.head(2)
 # %%
 tick_legend_FontSize = 10
 
-params = {
-    "legend.fontsize": tick_legend_FontSize,  # medium, large
-    # 'figure.figsize': (6, 4),
-    "axes.labelsize": tick_legend_FontSize * 1.2,
-    "axes.titlesize": tick_legend_FontSize * 1.3,
-    "xtick.labelsize": tick_legend_FontSize,  #  * 0.75
-    "ytick.labelsize": tick_legend_FontSize,  #  * 0.75
-    "axes.titlepad": 10,
-}
+params = {"legend.fontsize": tick_legend_FontSize, # medium, large
+          # 'figure.figsize': (6, 4),
+          "axes.labelsize": tick_legend_FontSize * 1.2,
+          "axes.titlesize": tick_legend_FontSize * 1.3,
+          "xtick.labelsize": tick_legend_FontSize, # * 0.75
+          "ytick.labelsize": tick_legend_FontSize, # * 0.75
+          "axes.titlepad": 10}
 
 plt.rc("font", family="Palatino")
 plt.rcParams["xtick.bottom"] = True
@@ -281,15 +323,11 @@ plt.rcParams["xtick.labelbottom"] = True
 plt.rcParams["ytick.labelleft"] = True
 plt.rcParams.update(params)
 
-color_dict = {
-    "single-cropped": "#DDCC77",
-    "double-cropped": "#332288",
-}
+color_dict = {"single-cropped": "#DDCC77", 
+              "double-cropped": "#332288"}
 
-color_dict = {
-    "single-cropped": "dodgerblue",
-    "double-cropped": "red",
-}
+color_dict = {"single-cropped": "dodgerblue",
+              "double-cropped": "red"}
 
 # %%
 plot_col = "acres"
@@ -359,12 +397,6 @@ axs.xaxis.set_ticks_position("none")
 ymin, ymax = axs.get_ylim();
 axs.set(ylim=(ymin - 1, ymax + 25), axisbelow=True);
 
-
-# %%
-len(X_axis - bar_width_)
-
-# %%
-df["single-cropped"].shape
 
 # %%
 
@@ -506,11 +538,7 @@ potential_2D = [
     "yellow mustard",
 ]
 
-perennials = [
-    x
-    for x in sorted(list(all_correct_year.croptyp.unique()))
-    if not (x in potential_2D)
-]
+perennials = [x for x in sorted(list(all_correct_year.croptyp.unique())) if not (x in potential_2D)]
 
 # %%
 # https://matplotlib.org/stable/gallery/lines_bars_and_markers/barchart.html
@@ -625,22 +653,18 @@ pd.DataFrame(all_correct_year[all_correct_year["image_year"] == yr].groupby("lab
 # Since we do not have 2D or perennials I am writing two for-loops. Easier to manage the loops as well.
 
 # %%
-params = {
-    "legend.fontsize": tick_legend_FontSize,  # medium, large
-    "axes.labelsize": tick_legend_FontSize * 1,
-    "axes.titlesize": tick_legend_FontSize * 1,
-    "xtick.labelsize": tick_legend_FontSize,  #  * 0.75
-    "ytick.labelsize": tick_legend_FontSize,
-}
+params = {"legend.fontsize": tick_legend_FontSize,  # medium, large
+          "axes.labelsize": tick_legend_FontSize * 1,
+          "axes.titlesize": tick_legend_FontSize * 1,
+          "xtick.labelsize": tick_legend_FontSize,  #  * 0.75
+          "ytick.labelsize": tick_legend_FontSize}
 plt.rcParams.update(params)
 
-params = {
-    "legend.fontsize": tick_legend_FontSize * 1.5,  # medium, large
-    "axes.labelsize": tick_legend_FontSize * 1.7,
-    "axes.titlesize": tick_legend_FontSize * 1.7,
-    "xtick.labelsize": tick_legend_FontSize * 1.5,  #  * 0.75
-    "ytick.labelsize": tick_legend_FontSize * 1.5,
-}
+params = {"legend.fontsize": tick_legend_FontSize * 1.5,  # medium, large
+          "axes.labelsize": tick_legend_FontSize * 1.7,
+          "axes.titlesize": tick_legend_FontSize * 1.7,
+          "xtick.labelsize": tick_legend_FontSize * 1.5,  #  * 0.75
+          "ytick.labelsize": tick_legend_FontSize * 1.5}
 plt.rcParams.update(params)
 
 # %%
@@ -851,7 +875,7 @@ for a_year in years:
                     df.reset_index(drop=True, inplace=True)
                     counties = list(df.croptyp.unique())
 
-                    x = np.arange(len(counties))  # the label locations
+                    x = np.arange(len(counties)) # the label locations
                     width, multiplier = 0.35, 0  # the width of the bars
 
                     fig, ax = plt.subplots(1, 1, figsize=(plot_width_, 3), sharex=False,
@@ -881,12 +905,46 @@ for a_year in years:
                     plt.close()
 
 # %%
+# %who
+
+# %%
+all_no_filter[all_no_filter.id == 21552]
+
+# %%
+
+# %%
 len(perennials)
 
 # %%
 len(potential_2D)
 
 # %%
+(Joel_QAQC_V3_df["DoubleCrop"] == Joel_QAQC_V3_df["DoubleCrop_pred"]).sum()
+
+# %%
+Joel_QAQC_V3_df["DoubleCrop"] == Joel_QAQC_V3_df["DoubleCrop_pred"]
+
+# %%
+Joel_QAQC_V3_df.last_survey_year.unique()
+
+# %%
+Joel_QAQC_V3_df[Joel_QAQC_V3_df.OBJECTID == 21552]
+
+
+# %%
+Joel_QAQC_V3_df.head(2)
+
+# %%
+SF.head(2)
+
+# %%
+Joel_QAQC_V3_df[Joel_QAQC_V3_df.OBJECTID == 21552]
+
+# %%
+Joel_QAQC_V3_df[Joel_QAQC_V3_df.last_survey_year == 2023].shape
+
+# %%
+SF[SF.OBJECTID == 21552]
 
 # %%
 # https://matplotlib.org/stable/gallery/lines_bars_and_markers/barchart.html
