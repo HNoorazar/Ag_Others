@@ -944,3 +944,121 @@ SF[SF.OBJECTID == 21552]
 
 # %%
 # https://matplotlib.org/stable/gallery/lines_bars_and_markers/barchart.html
+
+# %%
+
+# %%
+SG = pd.read_pickle(data_dir_ + "qaqc_NDVI_TS.sav")
+SG = SG["SG_TS"]
+SG['human_system_start_time'] = pd.to_datetime(SG['human_system_start_time'])
+SG.head(2)
+
+# %% [markdown]
+# # Big Mistake
+# It seems the following must be double-cropped. And prediction is single. Just plot
+
+# %%
+VI_idx = "NDVI"
+an_ID = "18523"
+a_field = SG[SG.ID==an_ID].copy()
+
+a_field.sort_values(by='human_system_start_time', axis=0, ascending=True, inplace=True)
+
+# Plot
+fig, ax = plt.subplots(1, 1, figsize=(12, 3),
+                       sharex='col', sharey='row',
+                       gridspec_kw={'hspace': 0.2, 'wspace': .05});
+ax.grid(True);
+ax.plot(a_field['human_system_start_time'], a_field[VI_idx],
+        linestyle='-',  linewidth=3.5, color="dodgerblue", alpha=0.8,
+        label=f"smooth {VI_idx}")
+
+ax.legend(loc="lower right");
+plt.ylim([-0.5, 1.2]);
+
+# %%
+from tensorflow.keras.utils import to_categorical, load_img, img_to_array
+from keras.models import Sequential, Model, load_model
+from keras.applications.vgg16 import VGG16
+import tensorflow as tf
+
+# from keras.optimizers import SGD
+from keras.layers import Conv2D, Dense, Flatten, MaxPooling2D
+from tensorflow.keras.optimizers import SGD
+
+# from keras.preprocessing.image import ImageDataGenerator
+from keras.src.legacy.preprocessing.image import ImageDataGenerator
+
+# %%
+
+#### Form predictions' dataframe
+predictions = pd.DataFrame({"ID": list(a_field.ID.unique())})
+predictions["prob_single"] = -1.0
+
+ML_model = load_model(data_dir_ + "01_TL_NDVI_SG_train80_Oct17.h5") # load model
+
+image_dir = data_dir_
+image_name = image_dir + "fly_test.jpg"
+
+for an_ID in a_field.ID.unique():
+    crr_fld = a_field[a_field.ID == an_ID]
+    fig, ax = plt.subplots()
+    fig.set_size_inches(10, 2.5)
+    ax.grid(False)
+    ax.plot(crr_fld["human_system_start_time"], crr_fld[VI_idx], c="dodgerblue", linewidth=5)
+    ax.axis("off")
+    left = crr_fld["human_system_start_time"].values[0]
+    right = crr_fld["human_system_start_time"].values[-1]
+    ax.set_xlim([left, right]);
+    # the following line also works
+    ax.set_ylim([-0.005, 1]);
+
+    plt.savefig(fname = image_name, dpi = 200, bbox_inches = "tight", facecolor = "w")
+    plt.close("all")
+
+    img = nc.load_image(image_name)
+    print (img.shape)
+    predictions.loc[predictions.ID == an_ID, "prob_single"] = ML_model.predict(img, verbose=False)[0][0]
+
+# %%
+#### Form GoogleDrive_predictions' dataframe
+GoogleDrive_predictions = pd.DataFrame({"ID": list(a_field.ID.unique())})
+GoogleDrive_predictions["prob_single"] = -1.0
+
+ML_model_GoogleDrive = load_model(data_dir_ + "TL_NDVI_SG.h5") # load model
+
+image_dir = data_dir_
+image_name = image_dir + "fly_test.jpg"
+
+for an_ID in a_field.ID.unique():
+    crr_fld = a_field[a_field.ID == an_ID]
+    fig, ax = plt.subplots()
+    fig.set_size_inches(10, 2.5)
+    ax.grid(False)
+    ax.plot(crr_fld["human_system_start_time"], crr_fld[VI_idx], c="dodgerblue", linewidth=5)
+    ax.axis("off")
+    left = crr_fld["human_system_start_time"].values[0]
+    right = crr_fld["human_system_start_time"].values[-1]
+    ax.set_xlim([left, right]);
+    # the following line also works
+    ax.set_ylim([-0.005, 1]);
+
+    plt.savefig(fname = image_name, dpi = 200, bbox_inches = "tight", facecolor = "w")
+    plt.close("all")
+
+    img = nc.load_image(image_name)
+    print (img.shape)
+    GoogleDrive_predictions.loc[GoogleDrive_predictions.ID == an_ID, "prob_single"] = \
+                    ML_model_GoogleDrive.predict(img, verbose=False)[0][0]
+    
+GoogleDrive_predictions
+
+# %%
+0.039686 + 0.818489
+
+# %%
+ML_model_GoogleDrive.predict(img, verbose=False)[0][0]
+
+# %%
+
+# %%
