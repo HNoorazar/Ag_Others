@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -38,196 +38,175 @@ import NASA_plot_core as ncp
 
 # %%
 NASA_dir_base = "/Users/hn/Documents/01_research_data/NASA/"
+meta_dir = NASA_dir_base + "0000_parameters/"
 train_TS_dir_base = NASA_dir_base + "VI_TS/"
-training_set_dir = NASA_dir_base + "/ML_data_Oct17/"
 
-meta_dir = NASA_dir_base + "parameters/"
 data_part_of_shapefile_dir = NASA_dir_base + "data_part_of_shapefile/"
 
 
 # %%
-# MacBook directories
-
-NASA_dir_base = "/Users/hn/Documents/01_research_data/Amin/inclusion_prob/"
-data_part_of_shapefile_dir = NASA_dir_base + "data_part_of_shapefile/"
-training_set_dir = NASA_dir_base
+out_name = "/Users/hn/Documents/01_research_data/NASA/" + "all_fields_correct_year_irr_noNass.csv"
+pool = pd.read_csv(out_name)
+pool.head(2)
 
 # %%
-
-# meta = pd.read_csv(meta_dir+"evaluation_set.csv")
-# meta_moreThan10Acr=meta[meta.ExctAcr > 10]
-# print (meta.shape)
-# print (meta_moreThan10Acr.shape)
-# meta.head(2)
+meta_dir = "/Users/hn/Documents/01_research_data/NASA/parameters/"
+meta = pd.read_csv(meta_dir+"evaluation_set.csv")
+meta_moreThan10Acr=meta[meta.ExctAcr>10]
+print (meta.shape)
+print (meta_moreThan10Acr.shape)
+meta.head(2)
 
 # %%
+training_set_dir = "/Users/hn/Documents/01_research_data/NASA/ML_data_Oct17/"
 ground_truth_labels = pd.read_csv(training_set_dir+"groundTruth_labels_Oct17_2022.csv")
 print ("Unique Votes: ", ground_truth_labels.Vote.unique())
 print (len(ground_truth_labels.ID.unique()))
 ground_truth_labels.head(2)
 
 # %%
-csv_data_parts = os.listdir(data_part_of_shapefile_dir)
-csv_data_parts = [x for x in csv_data_parts if x.endswith("csv")]
-csv_data_parts
+GT_wMeta = pd.merge(ground_truth_labels, meta, on="ID", how="left")
+print (GT_wMeta.shape)
+GT_wMeta.head(2)
 
 # %%
-irriigated_SF_data = pd.read_csv(data_part_of_shapefile_dir + "irriigated_SF_data_concatenated.csv")
-irriigated_SF_data.head(2)
+GT_crops = GT_wMeta["CropTyp"].unique()
+meta_crops = meta["CropTyp"].unique()
+
+print (len(GT_crops))
+print (len(meta_crops))
 
 # %%
-irriigated_SF_data.county.unique()
+[x for x in meta_crops if not(x in GT_crops)]
 
 # %%
-irriigated_SF_data["survey_year"] = pd.to_datetime(irriigated_SF_data["LstSrvD"], 
-                                                                format='mixed').dt.year
-
-irriigated_SF_data.head(2)
+GT_wMeta[GT_wMeta["CropTyp"] == "unknown"].shape
 
 # %%
-irriigated_SF_data.head(3)
+# csv_data_parts = os.listdir(data_part_of_shapefile_dir)
+# csv_data_parts = [x for x in csv_data_parts if x.endswith("csv")]
+# csv_data_parts
 
 # %%
-irriigated_SF_data["SF_year"] = irriigated_SF_data["ID"].str.split("_", expand=True)[3]
-irriigated_SF_data["SF_year"] = irriigated_SF_data["SF_year"].astype(int)
-irriigated_SF_data.head(2)
+# irriigated_SF_data_concatenated = pd.read_csv(data_part_of_shapefile_dir + "irriigated_SF_data_concatenated.csv")
+# irriigated_SF_data_concatenated["survey_year"] = pd.to_datetime(irriigated_SF_data_concatenated["LstSrvD"], 
+#                                                                 format='mixed').dt.year
+
+# print (irriigated_SF_data_concatenated.county.unique())
+
+# irriigated_SF_data_concatenated["SF_year"] = irriigated_SF_data_concatenated["ID"].str.split("_", expand=True)[3]
+# irriigated_SF_data_concatenated["SF_year"] = irriigated_SF_data_concatenated["SF_year"].astype(int)
+# irriigated_SF_data_concatenated.head(2)
 
 # %%
-(irriigated_SF_data["SF_year"] == irriigated_SF_data["survey_year"]).sum()
+# (irriigated_SF_data_concatenated["SF_year"] == irriigated_SF_data_concatenated["survey_year"]).sum()
+
+# print (irriigated_SF_data_concatenated.shape)
+# # limit to large fields
+# irriigated_SF_data_concatenated = irriigated_SF_data_concatenated[irriigated_SF_data_concatenated.ExctAcr > 10]
+# print (len(list(irriigated_SF_data_concatenated.CropTyp.unique())))
+# irriigated_SF_data_concatenated.head(2)
 
 # %%
-irriigated_SF_data.shape
+print (len(pool.CropTyp.unique()))
+print (len(GT_wMeta.CropTyp.unique()))
 
 # %%
-# limit to large fields
-# irriigated_SF_data = irriigated_SF_data[irriigated_SF_data.ExctAcr > 10]
+# pool = pool[pool.ExctAcr > 10].copy()
+pool = pool[pool.CropTyp != "unknown"]
+pool = pool[pool.CropTyp.isin(list(GT_wMeta.CropTyp.unique()))]
 
 # %%
-irriigated_SF_data.head(2)
+GT_wMeta = GT_wMeta[GT_wMeta.CropTyp != "unknown"]
+GT_wMeta.head(2)
 
 # %%
-len(list(irriigated_SF_data.CropTyp.unique()))
+numer = pd.DataFrame(GT_wMeta.groupby(["CropTyp"])["ID"].count()).reset_index()
+numer.rename(columns={"ID": "numer"}, inplace=True)
+numer.head(2)
 
 # %%
-ground_truth_labels.shape
+denom = pd.DataFrame(pool.groupby(["CropTyp"])["ID"].count()).reset_index()
+denom.rename(columns={"ID": "denom"}, inplace=True)
+denom.head(2)
 
 # %%
-all_SF_data = pd.read_csv(data_part_of_shapefile_dir + "all_SF_data_concatenated.csv")
-all_SF_data.head(2)
+in_df = pd.DataFrame({"CropTyp" : sorted(pool.CropTyp.unique())})
+in_df.head(2)
 
 # %%
-all_SF_data.shape
+print (in_df.shape)
+in_df = pd.merge(in_df, numer, on="CropTyp", how="outer")
+print (in_df.shape)
+in_df = pd.merge(in_df, denom, on="CropTyp", how="outer")
+print (in_df.shape)
+in_df.head(2)
 
 # %%
-ground_truth_labels = pd.merge(ground_truth_labels, all_SF_data, how="left", on="ID")
-print (f"{ground_truth_labels.shape = }")
-ground_truth_labels.head(2)
+in_df["inclusion_prob"] = in_df["numer"] / in_df["denom"]
 
 # %%
-ground_truth_labels = ground_truth_labels[['ID', 'Vote', 'CropTyp',
-                                           'Acres', 'Irrigtn', 'LstSrvD',
-                                           'DataSrc', 'county']]
-
-ground_truth_labels.shape
+in_df.head(2)
 
 # %%
-print (all_SF_data.county.unique())
-print ()
-print (all_SF_data.Irrigtn.unique())
+in_df.head(2)
 
 # %%
-GT_cropTypes = list(ground_truth_labels.CropTyp.unique())
-irriigated_SF_data = irriigated_SF_data[irriigated_SF_data.CropTyp.isin(GT_cropTypes)].copy()
-
-irriigated_SF_data.shape
+pool.head(2)
 
 # %%
-irriigated_SF_data.ExctAcr.min()
+sorted(list(pool.Irrigtn.unique()))
 
 # %%
-all_SF_data.CropTyp = all_SF_data.CropTyp.str.lower()
+sorted(list(pool.DataSrc.unique()))
 
 # %%
+pool.county.unique()
 
 # %%
-## see which crop types are included in training process
-## where all fields of that crop are included (not just 10%).
+pool["SF_year"] = pool["ID"].str.split("_", expand=True)[3]
+pool["SF_year"] = pool["SF_year"].astype(int)
 
-crops_100Percent_in_train = []
-percentage_dict = {}
-
-# for crop in GT_cropTypes:
-#     curr_irr_all = irriigated_SF_data[irriigated_SF_data.CropTyp == crop].copy()
-#     GT_fields = ground_truth_labels[ground_truth_labels.CropTyp == crop].copy()
-#     if len(curr_irr_all) == len(GT_fields):
-#         crops_100Percent_in_train += [crop]
-        
-#     percentage_dict[crop] = round( (len(GT_fields) / len(curr_irr_all)) * 100, 2)
-    
-    
-
-
-for crop in GT_cropTypes:
-    curr_irr_all = irriigated_SF_data[irriigated_SF_data.CropTyp == crop].copy()
-    curr_irr_all_large = curr_irr_all[curr_irr_all.ExctAcr > 10 ]
-    GT_fields = ground_truth_labels[ground_truth_labels.CropTyp == crop].copy()
-    
-    perc_ = round( (len(GT_fields) / len(curr_irr_all)) * 100, 2)
-    perc_large_ = round( (len(GT_fields) / len(curr_irr_all_large)) * 100, 2)
-    percentage_dict[crop] = [perc_, perc_large_]
-    
+pool_Adams = pool[pool.county == "Adams"].copy()
+pool_Benton = pool[pool.county == "Benton"].copy()
+pool_Franklin = pool[pool.county == "Franklin"].copy()
+pool_Yakima = pool[pool.county == "Yakima"].copy()
+pool_Grant = pool[pool.county == "Grant"].copy()
+pool_Walla = pool[pool.county == "Walla Walla"].copy()
 
 # %%
-ground_truth_labels.shape
+print (pool_Adams.SF_year.unique())
+print (pool_Benton.SF_year.unique())
+print (pool_Franklin.SF_year.unique())
+print (pool_Yakima.SF_year.unique())
+print (pool_Grant.SF_year.unique())
+print (pool_Walla.SF_year.unique())
 
 # %%
-print (irriigated_SF_data[irriigated_SF_data.CropTyp == "canola"].shape)
-print (irriigated_SF_data[(irriigated_SF_data.CropTyp == "canola") & \
-                         (irriigated_SF_data.ExctAcr > 10)].shape)
+in_df = in_df.round(3)
 
-print (ground_truth_labels[ground_truth_labels.CropTyp == "canola"].shape)
-
-
-# IF we look at irriigated_SF_data There should be 6 fields of canola.
-# why there are 27? Look at evaluation set. And why evaluation set is larger than
-# irriigated_SF_data? counties?
+out_name = "/Users/hn/Documents/01_research_data/Amin/inclusion.csv"
+in_df.to_csv(out_name, index = False)
 
 # %%
+A = ["Phenological patterns  (start, end, peak) ??",
+"Temperature",
+"Precipitation",
+"Radiation",
+"RH",
+"Potential ET",
+"Actual ET - MODIS ET",
+"Soil moisture VIC",
+"GDD (0-degree baseline, no upper threshold)  Try multiple options to check for correlation",
+"HDD (multiple thresholds)",
+"dGDD",
+"DTR",
+"Drought index SPEI  12 month (monthly)",
+"Day length",
+"Soil characteristics",
+"Vegetation type"]
 
-# %%
-percentage_dict
-
-# %%
-    
-
-# %%
-
-# %%
-
-# %%
-
-# %%
-# "ryegrass seed" and "medicinal herb" 
-ground_truth_labels[ground_truth_labels.CropTyp == "ryegrass seed"]
-
-# %%
-list(ground_truth_labels.CropTyp.unique())
-
-# %%
-ground_truth_labels[ground_truth_labels.CropTyp == "wildlife feed"].shape
-
-# %%
-irriigated_SF_data.head(2)
-
-# %%
-irriigated_SF_data[irriigated_SF_data.CropTyp == "barley hay"].shape
-
-# %%
-ground_truth_labels[ground_truth_labels.CropTyp == "barley hay"].shape
-
-# %%
-irriigated_SF_data[(irriigated_SF_data.CropTyp == "barley hay") &\
-                   (irriigated_SF_data.ExctAcr > 10)].shape
+sorted(A)
 
 # %%
 
