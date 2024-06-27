@@ -80,7 +80,6 @@ print (len(meta_crops))
 [x for x in meta_crops if not(x in GT_crops)]
 
 # %%
-GT_wMeta[GT_wMeta["CropTyp"] == "unknown"].shape
 
 # %%
 # csv_data_parts = os.listdir(data_part_of_shapefile_dir)
@@ -113,11 +112,9 @@ print (len(GT_wMeta.CropTyp.unique()))
 
 # %%
 # pool = pool[pool.ExctAcr > 10].copy()
-pool = pool[pool.CropTyp != "unknown"]
 pool = pool[pool.CropTyp.isin(list(GT_wMeta.CropTyp.unique()))]
 
 # %%
-GT_wMeta = GT_wMeta[GT_wMeta.CropTyp != "unknown"]
 GT_wMeta.head(2)
 
 # %%
@@ -185,29 +182,60 @@ print (pool_Walla.SF_year.unique())
 # %%
 in_df = in_df.round(3)
 
-out_name = "/Users/hn/Documents/01_research_data/Amin/inclusion.csv"
-in_df.to_csv(out_name, index = False)
+# out_name = "/Users/hn/Documents/01_research_data/Amin/inclusion.csv"
+# in_df.to_csv(out_name, index = False)
 
 # %%
-A = ["Phenological patterns  (start, end, peak) ??",
-"Temperature",
-"Precipitation",
-"Radiation",
-"RH",
-"Potential ET",
-"Actual ET - MODIS ET",
-"Soil moisture VIC",
-"GDD (0-degree baseline, no upper threshold)  Try multiple options to check for correlation",
-"HDD (multiple thresholds)",
-"dGDD",
-"DTR",
-"Drought index SPEI  12 month (monthly)",
-"Day length",
-"Soil characteristics",
-"Vegetation type"]
-
-sorted(A)
+in_df.head(2)
 
 # %%
+import pickle
+from datetime import datetime
+dir_ = "/Users/hn/Documents/01_research_data/NASA/Amin/"
+filename = dir_ + "5_OverSampled_TestResults.sav"
+five_OverSam_TestRes = pd.read_pickle(filename)
+five_OverSam_TestRes.keys()
+
+# %%
+five_OverSam_TestRes = five_OverSam_TestRes["ML_test_results"]
+five_OverSam_TestRes.keys()
+
+# %%
+for _key in five_OverSam_TestRes.keys():
+    # remove the 6th split. That's the one with different size
+    if "train_ID6" in five_OverSam_TestRes[_key].keys():
+        five_OverSam_TestRes[_key].pop("train_ID6")
+    
+
+# %%
+for _key in five_OverSam_TestRes.keys():
+    print (_key)
+    print (five_OverSam_TestRes[_key].keys())
+
+# %%
+for _key in five_OverSam_TestRes.keys():
+    for train_ID in five_OverSam_TestRes[_key].keys():
+        five_OverSam_TestRes[_key][train_ID]["a_test_set_df"] = \
+             pd.merge(five_OverSam_TestRes[_key][train_ID]["a_test_set_df"], 
+                      pool[["ID", "CropTyp"]], how="left", on="ID")
+
+# %%
+five_OverSam_TestRes.keys()
+
+# %%
+five_OverSam_TestRes['inclusion_prob'] = in_df
+
+# %%
+import pickle
+from datetime import datetime
+dir_ = "/Users/hn/Documents/01_research_data/NASA/Amin/"
+filename = dir_ + "five_OverSam_TestRes_and_InclusionProb.sav"
+
+export_ = {"five_OverSam_TestRes": five_OverSam_TestRes, 
+           "source_code" : "inclusion.ipynb",
+           "Author": "HN",
+           "Date" : datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+pickle.dump(export_, open(filename, 'wb'))
 
 # %%
