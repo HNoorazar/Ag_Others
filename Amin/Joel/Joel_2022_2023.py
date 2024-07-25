@@ -62,7 +62,6 @@ for year in years:
 
     all_no_filter = pd.concat([all_no_filter, data_nofilter])
     
-    
     all_no_filter["correct_year"] = False
     all_no_filter.loc[
         all_no_filter.last_survey_year == all_no_filter.image_year, "correct_year"] = True
@@ -141,9 +140,7 @@ Whitman[Whitman.label == "double-cropped"]
 
 # %%
 # %%time
-
-Joel_QAQC_V3 = gpd.read_file(data_dir_ + "From_Joel/" + "Joel_QAQC_V3/updated_shp.shp", 
-                             crs='EPSG:4326')
+Joel_QAQC_V3 = gpd.read_file(data_dir_ + "From_Joel/" + "Joel_QAQC_V3/updated_shp.shp", crs='EPSG:4326')
 
 Joel_QAQC_V3.OBJECTID = SF.OBJECTID.astype(int)
 Joel_QAQC_V3.head(2)
@@ -384,10 +381,9 @@ axs.set_xticks(X_axis, df.county)
 axs.set_ylabel("acreage")
 axs.legend(loc="best")
 axs.xaxis.set_ticks_position("none")
-
-# send the guidelines back
 ymin, ymax = axs.get_ylim();
-axs.set(ylim=(ymin - 1, ymax + 25), axisbelow=True);
+
+axs.set(ylim=(ymin - 1, ymax + 25), axisbelow=True); # send the guidelines back
 
 
 # %%
@@ -445,6 +441,7 @@ file_name = data_dir_ + "county_2022_nofilter_labelsAcr.pdf"
 plt.show()
 
 # %%
+width
 
 # %%
 # https://matplotlib.org/stable/gallery/lines_bars_and_markers/barchart.html
@@ -709,9 +706,8 @@ for a_year in years:
                 ax.set_xticks(x + width, counties)
                 ax.legend(loc="best", ncols=1)
                 ax.tick_params(axis="x", labelrotation=90)
-                ymin, ymax = ax.get_ylim()  # send the guidelines back
-                ax.set(ylim=(ymin - 1, ymax + 25), axisbelow=True)
-                # send the guidelines back
+                ymin, ymax = ax.get_ylim()
+                ax.set(ylim=(ymin - 1, ymax + 25), axisbelow=True) # send the guidelines back
                 ax.set_title(f"Year {a_year}. srvy filter: {a_filter}. {y_label_}")
                 file_name = plot_dir+ f"county_{a_year}_filter{a_filter}_{y_label_.replace(' ', '_')}.pdf"
 
@@ -753,15 +749,128 @@ for a_year in years:
                 ax.legend(loc="best", ncols=1)
                 ax.tick_params(axis="x", labelrotation=90)
 
-                ymin, ymax = ax.get_ylim()  # send the guidelines back
-                ax.set(ylim=(ymin - 1, ymax + 25), axisbelow=True)
-                # send the guidelines back
-
+                ymin, ymax = ax.get_ylim()
+                ax.set(ylim=(ymin - 1, ymax + 25), axisbelow=True) # send the guidelines back
                 ax.set_title(f"Year {a_year}. srvy filter: {a_filter}. {plot_col}")
                 file_name = (plot_dir + f"county_{a_year}_filter{a_filter}_{plot_col}.pdf")
 
                 plt.savefig(fname=file_name, dpi=200, bbox_inches="tight", transparent=False)
                 plt.close()
+
+# %%
+
+# %% [markdown]
+# # Percentages
+
+# %%
+filter_ = [True, False]
+plot_what = ["id", "acres"]
+
+perc_plot_dir_ = plot_dir + "percentages/"
+os.makedirs(perc_plot_dir_, exist_ok=True)
+y_lim_max_ = 110
+counter = 1
+for a_year in years:
+    for a_filter in filter_:
+        for plot_col in plot_what:
+            if plot_col == "id":
+                if a_filter == True:
+                    df = all_correct_year[all_correct_year["image_year"] == a_year].copy()
+                elif a_filter == False:                    
+                    df = all_no_filter[all_no_filter["image_year"] == a_year].copy()
+
+                y_label_ = "field count percentage"
+                df = pd.DataFrame(df.groupby(["county", "label"])["id"].count()).reset_index()
+
+                df = df.pivot(index="county", columns="label", values=plot_col).reset_index(drop=False)
+                df.fillna(0, inplace=True)
+                df.sort_values(by=["county"], inplace=True)
+                df.reset_index(drop=True, inplace=True)
+                counties = list(df["county"].unique())
+
+                x = np.arange(len(counties))  # the label locations
+                width, multiplier = 0.25, 0  # the width of the bars
+                
+                df["double_perc"] = 100 * df["double-cropped"] / (df["double-cropped"] + df["single-cropped"])
+                df["single_perc"] = 100 * df["single-cropped"] / (df["double-cropped"] + df["single-cropped"])
+                df["double_perc"] = df["double_perc"].round()
+                df["single_perc"] = df["single_perc"].round()
+
+                fig, ax = plt.subplots(1, 1, figsize=(20, 3), sharex=False,
+                                       gridspec_kw={"hspace": 0.35, "wspace": 0.05})
+                ax.grid(axis="y", which="both")
+
+                for a_col in ["double_perc", "single_perc"]:
+                    offset = width * multiplier
+                    rects = ax.bar(x + offset, df[a_col], width, label=a_col)
+                    ax.bar_label(rects, padding=3, label_type="edge", rotation=45)
+                    multiplier += 1
+
+                ax.set_ylim([0, y_lim_max_])
+                if plot_col == "id":
+                    ax.set_ylabel(y_label_)
+                else:
+                    ax.set_ylabel(plot_col)
+
+                ax.set_xticks(x + width, counties)
+                ax.legend(loc="best", ncols=1)
+                ax.tick_params(axis="x", labelrotation=90)
+                ymin, ymax = ax.get_ylim()
+                ax.set(ylim=(ymin - 1, ymax + 25), axisbelow=True) # send the guidelines back
+                ax.set_title(f"Year {a_year}. srvy filter: {a_filter}. {y_label_}")
+                file_name = perc_plot_dir_+ \
+                            f"county_{a_year}_filter{a_filter}_{y_label_.replace(' ', '_')}_perc.pdf"
+
+                plt.savefig(fname=file_name, dpi=200, bbox_inches="tight", transparent=False)
+                plt.close()
+
+            if plot_col == "acres":
+                if a_filter == True:
+                    df = all_correct_year[all_correct_year["image_year"] == a_year].copy()
+                elif a_filter == False:
+                    df = all_no_filter[all_no_filter["image_year"] == a_year].copy()
+                    
+                df = df[["county", "label", "acres"]]
+                df = pd.DataFrame(df.groupby(["county", "label"])["acres"].sum()).reset_index()
+                df = df.pivot(index="county", columns="label", values=plot_col).reset_index(drop=False)
+
+                df.fillna(0, inplace=True)
+                df.sort_values(by=["county"], inplace=True)
+                df.reset_index(drop=True, inplace=True)
+                counties = list(df.county.unique())
+                
+                df["double_perc"] = 100 * df["double-cropped"] / (df["double-cropped"] + df["single-cropped"])
+                df["single_perc"] = 100 * df["single-cropped"] / (df["double-cropped"] + df["single-cropped"])
+                df["double_perc"] = df["double_perc"].round()
+                df["single_perc"] = df["single_perc"].round()
+
+                x = np.arange(len(counties))  # the label locations
+                width, multiplier = 0.35, 0  # the width of the bars
+
+                fig, ax = plt.subplots(1, 1, figsize=(20, 3), sharex=False,
+                                       gridspec_kw={"hspace": 0.35, "wspace": 0.05})
+                ax.grid(axis="y", which="both")
+
+                for a_col in ["double_perc", "single_perc"]:
+                    offset = width * multiplier
+                    rects = ax.bar(x + offset, df[a_col], width, label=a_col)
+                    ax.bar_label(rects, padding=3, label_type="edge", rotation=45)
+                    multiplier += 1
+
+                ax.set_ylim([0, y_lim_max_])
+                ax.set_ylabel(plot_col + " percentage")
+                ax.set_xticks(x + width, counties)
+                ax.legend(loc="best", ncols=1)
+                ax.tick_params(axis="x", labelrotation=90)
+
+                ymin, ymax = ax.get_ylim()
+                ax.set(ylim=(ymin - 1, ymax + 25), axisbelow=True) # send the guidelines back
+                ax.set_title(f"Year {a_year}. srvy filter: {a_filter}. {plot_col}")
+                file_name = (perc_plot_dir_ + f"county_{a_year}_filter{a_filter}_{plot_col}_perc.pdf")
+                plt.savefig(fname=file_name, dpi=200, bbox_inches="tight", transparent=False)
+                plt.close()
+
+# %%
 
 # %%
 
@@ -814,9 +923,9 @@ for a_year in years:
                     df.fillna(0, inplace=True)
                     df.sort_values(by=["croptyp"], inplace=True)
                     df.reset_index(drop=True, inplace=True)
-                    counties = list(df["croptyp"].unique())
+                    crop_types = list(df["croptyp"].unique())
 
-                    x = np.arange(len(counties))  # the label locations
+                    x = np.arange(len(crop_types))  # the label locations
                     width, multiplier = 0.25, 0  # the width of the bars
 
                     fig, ax = plt.subplots(1, 1, figsize=(plot_width_, 3), sharex=False,
@@ -836,17 +945,15 @@ for a_year in years:
                     else:
                         ax.set_ylabel(plot_col)
 
-                    ax.set_xticks(x + width, counties)
+                    ax.set_xticks(x + width, crop_types)
                     ax.legend(loc="best", ncols=1)
                     ax.tick_params(axis="x", labelrotation=90)
                     ax.set_title(f"Year {a_year}. srvy filter: {a_filter}. {y_label_}")
-
-                    ymin, ymax = ax.get_ylim()  # send the guidelines back
-                    ax.set(ylim=(ymin - 1, ymax + 25), axisbelow=True)
-                    # send the guidelines back
+                    ymin, ymax = ax.get_ylim()
+                    ax.set(ylim=(ymin - 1, ymax + 25), axisbelow=True) # send the guidelines back
 
                     file_name = plot_dir+\
-                            f"crop_{a_year}_filter{a_filter}_{y_label_.replace(' ', '_')}_{lastName}.pdf"
+                                f"crop_{a_year}_filter{a_filter}_{y_label_.replace(' ', '_')}_{lastName}.pdf"
 
                     plt.savefig(fname=file_name, dpi=200, bbox_inches="tight", transparent=False)
                     plt.close()
@@ -871,9 +978,9 @@ for a_year in years:
                     df.fillna(0, inplace=True)
                     df.sort_values(by=["croptyp"], inplace=True)
                     df.reset_index(drop=True, inplace=True)
-                    counties = list(df.croptyp.unique())
+                    crop_types = list(df.croptyp.unique())
 
-                    x = np.arange(len(counties)) # the label locations
+                    x = np.arange(len(crop_types)) # the label locations
                     width, multiplier = 0.35, 0  # the width of the bars
 
                     fig, ax = plt.subplots(1, 1, figsize=(plot_width_, 3), sharex=False,
@@ -889,12 +996,11 @@ for a_year in years:
 
                     ax.set_ylim([0, y_lim_max_])
                     ax.set_ylabel(plot_col)
-                    ax.set_xticks(x + width, counties)
+                    ax.set_xticks(x + width, crop_types)
                     ax.legend(loc="best", ncols=1)
                     ax.tick_params(axis="x", labelrotation=90)
-                    ymin, ymax = ax.get_ylim()  # send the guidelines back
-                    ax.set(ylim=(ymin - 1, ymax + 25), axisbelow=True)
-                    # send the guidelines back
+                    ymin, ymax = ax.get_ylim()
+                    ax.set(ylim=(ymin - 1, ymax + 25), axisbelow=True) # send the guidelines back
 
                     ax.set_title(f"Year {a_year}. srvy filter: {a_filter}. {y_label_}")
                     file_name = (plot_dir+\
@@ -904,15 +1010,156 @@ for a_year in years:
                     plt.close()
 
 # %%
-all_no_filter[all_no_filter.id == 21552]
 
 # %%
 
 # %%
-len(perennials)
 
 # %%
-len(potential_2D)
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %% [markdown]
+# # Crop-wise percentages
+
+# %%
+perennials_choice = [True, False]
+filter_ = [True]
+counter = 1
+y_lim_max_ = 110
+
+for a_year in years:
+    for a_filter in filter_:
+        for plot_col in plot_what:
+            for perennial in perennials_choice:
+                if plot_col == "id":
+                    if a_filter == True:
+                        df = all_correct_year[all_correct_year["image_year"] == a_year].copy()
+                    elif a_filter == False:
+                        df = all_no_filter[all_no_filter["image_year"] == a_year].copy()
+                        
+                    if perennial == True:
+                        df = df[df.croptyp.isin(perennials)].copy()
+                        lastName = "perennial"
+                        plot_width_ = 20
+                    else:
+                        df = df[df.croptyp.isin(potential_2D)].copy()
+                        lastName = "2D"
+                        plot_width_ = 30
+
+                    y_label_ = "field count percentage"
+                    df = pd.DataFrame(df.groupby(["croptyp", "label"])["id"].count()).reset_index()
+                    df = df.pivot(index="croptyp", columns="label", values=plot_col).reset_index(drop=False)
+                    df.fillna(0, inplace=True)
+                    df.sort_values(by=["croptyp"], inplace=True)
+                    df.reset_index(drop=True, inplace=True)
+                    crop_types = list(df["croptyp"].unique())
+                    
+                    df["double_perc"] = 100 * df["double-cropped"] / (df["double-cropped"] + df["single-cropped"])
+                    df["single_perc"] = 100 * df["single-cropped"] / (df["double-cropped"] + df["single-cropped"])
+                    df["double_perc"] = df["double_perc"].round()
+                    df["single_perc"] = df["single_perc"].round()
+
+                    x = np.arange(len(crop_types)) # the label locations
+                    width, multiplier = 0.25, 0  # the width of the bars
+
+                    fig, ax = plt.subplots(1, 1, figsize=(plot_width_, 3), sharex=False,
+                                           gridspec_kw={"hspace": 0.35, "wspace": 0.05})
+                    ax.grid(axis="y", which="both")
+
+                    for a_col in ["double_perc", "single_perc"]:
+                        offset = width * multiplier
+                        rects = ax.bar(x + offset, df[a_col], width, label=a_col)
+                        ax.bar_label(rects, padding=3, label_type="edge", rotation=90,
+                                     fontsize=tick_legend_FontSize*1.7)
+                        multiplier += 1
+
+                    ax.set_ylim([0, y_lim_max_])
+                    if plot_col == "id":
+                        ax.set_ylabel(y_label_)
+                    else:
+                        ax.set_ylabel(plot_col)
+
+                    ax.set_xticks(x + width, crop_types)
+                    ax.legend(loc="best", ncols=1)
+                    ax.tick_params(axis="x", labelrotation=90)
+                    ax.set_title(f"Year {a_year}. srvy filter: {a_filter}. {y_label_}")
+
+                    ymin, ymax = ax.get_ylim()
+                    ax.set(ylim=(ymin - 1, ymax + 25), axisbelow=True) # send the guidelines back
+                    file_name = perc_plot_dir_+\
+                            f"crop_{a_year}_filter{a_filter}_{y_label_.replace(' ', '_')}_{lastName}_perc.pdf"
+
+                    plt.savefig(fname=file_name, dpi=200, bbox_inches="tight", transparent=False)
+                    plt.close()
+
+                if plot_col == "acres":
+                    y_label_ = "acres percentage"
+                    if a_filter == True:
+                        df = all_correct_year[all_correct_year["image_year"] == a_year].copy()
+                    elif a_filter == False:
+                        df = all_no_filter[all_no_filter["image_year"] == a_year].copy()
+
+                    if perennial == True:
+                        df = df[df.croptyp.isin(perennials)].copy()
+                        lastName = "perennial"
+                    else:
+                        df = df[df.croptyp.isin(potential_2D)].copy()
+                        lastName = "2D"
+                    df = pd.DataFrame(df.groupby(["croptyp", "label"])["acres"].sum()).reset_index()
+                    df = df.pivot(index="croptyp", columns="label", values=plot_col).reset_index(drop=False)
+
+                    df.fillna(0, inplace=True)
+                    df.sort_values(by=["croptyp"], inplace=True)
+                    df.reset_index(drop=True, inplace=True)
+                    crop_types = list(df.croptyp.unique())
+                    
+                    df["double_perc"] = 100 * df["double-cropped"] / (df["double-cropped"] + df["single-cropped"])
+                    df["single_perc"] = 100 * df["single-cropped"] / (df["double-cropped"] + df["single-cropped"])
+                    df["double_perc"] = df["double_perc"].round()
+                    df["single_perc"] = df["single_perc"].round()
+
+                    x = np.arange(len(crop_types)) # the label locations
+                    width, multiplier = 0.35, 0  # the width of the bars
+
+                    fig, ax = plt.subplots(1, 1, figsize=(plot_width_, 3), sharex=False,
+                                           gridspec_kw={"hspace": 0.35, "wspace": 0.05})
+                    ax.grid(axis="y", which="both")
+
+                    for a_col in ["double_perc", "single_perc"]:
+                        offset = width * multiplier
+                        rects = ax.bar(x + offset, df[a_col], width, label=a_col)
+                        ax.bar_label(rects, padding=3, label_type="edge", rotation=90, 
+                                     fontsize=tick_legend_FontSize*1.7)
+                        multiplier += 1
+
+                    ax.set_ylim([0, y_lim_max_])
+                    ax.set_ylabel(plot_col + " percentage")
+                    ax.set_xticks(x + width, crop_types)
+                    ax.legend(loc="best", ncols=1)
+                    ax.tick_params(axis="x", labelrotation=90)
+                    ymin, ymax = ax.get_ylim()
+                    ax.set(ylim=(ymin - 1, ymax + 25), axisbelow=True) # send the guidelines back
+                    ax.set_title(f"Year {a_year}. srvy filter: {a_filter}. {y_label_}")
+                    file_name = (perc_plot_dir_+\
+                                 f"crop_{a_year}_filter{a_filter}_{plot_col}_{lastName}_perc.pdf")
+
+                    plt.savefig(fname=file_name, dpi=200, bbox_inches="tight", transparent=False)
+                    plt.close()
+
+# %%
+
+# %%
 
 # %%
 (Joel_QAQC_V3_df["DoubleCrop"] == Joel_QAQC_V3_df["DoubleCrop_pred"]).sum()
