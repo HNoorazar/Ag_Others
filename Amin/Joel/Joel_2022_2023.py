@@ -872,23 +872,18 @@ for a_year in years:
 
 # %%
 
-# %%
-
 # %% [markdown]
 # # Crop-wise plots
 #
 # filter_ must be True
 
 # %%
-params = {
-    "legend.fontsize": tick_legend_FontSize * 1.5,  # medium, large
-    "axes.labelsize": tick_legend_FontSize * 1.7,
-    "axes.titlesize": tick_legend_FontSize * 1.7,
-    "xtick.labelsize": tick_legend_FontSize * 1.5,  #  * 0.75
-    "ytick.labelsize": tick_legend_FontSize * 1.5,
-}
+params = {"legend.fontsize": tick_legend_FontSize * 1.5, # medium, large
+          "axes.labelsize": tick_legend_FontSize * 1.7,
+          "axes.titlesize": tick_legend_FontSize * 1.7,
+          "xtick.labelsize": tick_legend_FontSize * 1.5,  #  * 0.75
+          "ytick.labelsize": tick_legend_FontSize * 1.5}
 plt.rcParams.update(params)
-
 y_lim_multi = 0.25
 
 # %%
@@ -1008,24 +1003,6 @@ for a_year in years:
 
                     plt.savefig(fname=file_name, dpi=200, bbox_inches="tight", transparent=False)
                     plt.close()
-
-# %%
-
-# %%
-
-# %%
-
-# %%
-
-# %%
-
-# %%
-
-# %%
-
-# %%
-
-# %%
 
 # %%
 
@@ -1156,6 +1133,466 @@ for a_year in years:
 
                     plt.savefig(fname=file_name, dpi=200, bbox_inches="tight", transparent=False)
                     plt.close()
+
+# %%
+
+# %% [markdown]
+# # Overlay the years
+
+# %%
+all_correct_year.head(2)
+
+# %%
+years
+
+# %%
+# overlay, county-percentages
+
+filter_ = [True, False]
+plot_what = ["id", "acres"]
+
+overlay_perc_plot_dir_ = plot_dir + "overlay_perc/"
+os.makedirs(overlay_perc_plot_dir_, exist_ok=True)
+y_lim_max_ = 110
+counter = 1
+
+# overlay part:
+df_overlay = pd.DataFrame()
+for a_year in years:
+    df = all_correct_year[all_correct_year["image_year"] == a_year].copy()
+    df_overlay = pd.concat([df_overlay, df])
+
+for plot_col in plot_what:
+    if plot_col == "id":
+        y_label_ = "field count percentage"
+        df = df_overlay.copy()
+        df = pd.DataFrame(df.groupby(["county", "label"])["id"].count()).reset_index()
+        df = df.pivot(index="county", columns="label", values=plot_col).reset_index(drop=False)
+        df.fillna(0, inplace=True)
+        df.sort_values(by=["county"], inplace=True)
+        df.reset_index(drop=True, inplace=True)
+
+        counties = list(df["county"].unique())
+
+        x = np.arange(len(counties)) # the label locations
+        width, multiplier = 0.25, 0  # the width of the bars
+
+        df["double_perc"] = 100 * df["double-cropped"] / (df["double-cropped"] + df["single-cropped"])
+        df["single_perc"] = 100 * df["single-cropped"] / (df["double-cropped"] + df["single-cropped"])
+        df["double_perc"] = df["double_perc"].round()
+        df["single_perc"] = df["single_perc"].round()
+
+        fig, ax = plt.subplots(1, 1, figsize=(20, 3), sharex=False,
+                               gridspec_kw={"hspace": 0.35, "wspace": 0.05})
+        ax.grid(axis="y", which="both")
+
+        for a_col in ["double_perc", "single_perc"]:
+            offset = width * multiplier
+            rects = ax.bar(x + offset, df[a_col], width, label=a_col)
+            ax.bar_label(rects, padding=3, label_type="edge", rotation=45)
+            multiplier += 1
+
+        ax.set_ylim([0, y_lim_max_])
+        if plot_col == "id":
+            ax.set_ylabel(y_label_)
+        else:
+            ax.set_ylabel(plot_col)
+
+        ax.set_xticks(x + width, counties)
+        ax.legend(loc="best", ncols=1)
+        ax.tick_params(axis="x", labelrotation=90)
+        ymin, ymax = ax.get_ylim()
+        ax.set(ylim=(ymin - 1, ymax + 25), axisbelow=True) # send the guidelines back
+        ax.set_title(f"correct years overlayed, {y_label_}");
+        file_name = overlay_perc_plot_dir_+ \
+                    f"county_correct_years_overlayed_{y_label_.replace(' ', '_')}_perc.pdf"
+
+        plt.savefig(fname=file_name, dpi=200, bbox_inches="tight", transparent=False)
+        plt.close()
+
+    if plot_col == "acres":
+        df = df_overlay.copy()
+        df = df[["county", "label", "acres"]]
+        df = pd.DataFrame(df.groupby(["county", "label"])["acres"].sum()).reset_index()
+        df = df.pivot(index="county", columns="label", values=plot_col).reset_index(drop=False)
+
+        df.fillna(0, inplace=True)
+        df.sort_values(by=["county"], inplace=True)
+        df.reset_index(drop=True, inplace=True)
+        counties = list(df.county.unique())
+
+        df["double_perc"] = 100 * df["double-cropped"] / (df["double-cropped"] + df["single-cropped"])
+        df["single_perc"] = 100 * df["single-cropped"] / (df["double-cropped"] + df["single-cropped"])
+        df["double_perc"] = df["double_perc"].round()
+        df["single_perc"] = df["single_perc"].round()
+
+        x = np.arange(len(counties))  # the label locations
+        width, multiplier = 0.35, 0  # the width of the bars
+
+        fig, ax = plt.subplots(1, 1, figsize=(20, 3), sharex=False,
+                               gridspec_kw={"hspace": 0.35, "wspace": 0.05})
+        ax.grid(axis="y", which="both")
+
+        for a_col in ["double_perc", "single_perc"]:
+            offset = width * multiplier
+            rects = ax.bar(x + offset, df[a_col], width, label=a_col)
+            ax.bar_label(rects, padding=3, label_type="edge", rotation=45)
+            multiplier += 1
+
+        ax.set_ylim([0, y_lim_max_])
+        ax.set_ylabel(plot_col + " percentage")
+        ax.set_xticks(x + width, counties)
+        ax.legend(loc="best", ncols=1)
+        ax.tick_params(axis="x", labelrotation=90)
+
+        ymin, ymax = ax.get_ylim()
+        ax.set(ylim=(ymin - 1, ymax + 25), axisbelow=True) # send the guidelines back
+        ax.set_title(f"correct years overlayed. {plot_col}")
+        file_name = (overlay_perc_plot_dir_ + f"county_county_correct_years_overlayed_{plot_col}_perc.pdf")
+        plt.savefig(fname=file_name, dpi=200, bbox_inches="tight", transparent=False)
+        plt.close()
+
+# %%
+y_lim_multi
+
+# %%
+#
+# overlay, county-wise, counts (no percentage)
+#
+filter_ = [True, False]
+plot_what = ["id", "acres"]
+
+overlay_count_plot_dir_ = plot_dir + "overlay_count/"
+os.makedirs(overlay_count_plot_dir_, exist_ok=True)
+y_lim_max_ = 110
+
+# overlay part:
+df_overlay = pd.DataFrame()
+for a_year in years:
+    df = all_correct_year[all_correct_year["image_year"] == a_year].copy()
+    df_overlay = pd.concat([df_overlay, df])
+
+for plot_col in plot_what:
+    if plot_col == "id":
+        y_label_ = "field count"
+        df = df_overlay.copy()
+        df = pd.DataFrame(df.groupby(["county", "label"])["id"].count()).reset_index()
+        y_lim_max_ = df[plot_col].max() + df[plot_col].max() * y_lim_multi
+        df = df.pivot(index="county", columns="label", values=plot_col).reset_index(drop=False)
+        df.fillna(0, inplace=True)
+        df.sort_values(by=["county"], inplace=True)
+        df.reset_index(drop=True, inplace=True)
+
+        counties = list(df["county"].unique())
+
+        x = np.arange(len(counties)) # the label locations
+        width, multiplier = 0.25, 0  # the width of the bars
+
+        fig, ax = plt.subplots(1, 1, figsize=(20, 3), sharex=False,
+                               gridspec_kw={"hspace": 0.35, "wspace": 0.05})
+        ax.grid(axis="y", which="both")
+
+        for a_col in ["double-cropped", "single-cropped"]:
+            offset = width * multiplier
+            rects = ax.bar(x + offset, df[a_col], width, label=a_col)
+            ax.bar_label(rects, padding=3, label_type="edge", rotation=90)
+            multiplier += 1
+
+        ax.set_ylim([0, y_lim_max_])
+        if plot_col == "id":
+            ax.set_ylabel(y_label_)
+        else:
+            ax.set_ylabel(plot_col)
+
+        ax.set_xticks(x + width, counties)
+        ax.legend(loc="best", ncols=1)
+        ax.tick_params(axis="x", labelrotation=90)
+        ymin, ymax = ax.get_ylim()
+        ax.set(ylim=(ymin - 1, ymax + 25), axisbelow=True) # send the guidelines back
+        ax.set_title(f"correct years overlayed, {y_label_}");
+        file_name = overlay_count_plot_dir_+ \
+                    f"county_correct_years_overlayed_{y_label_.replace(' ', '_')}.pdf"
+
+        plt.savefig(fname=file_name, dpi=200, bbox_inches="tight", transparent=False)
+        plt.close()
+
+    if plot_col == "acres":
+        df = df_overlay.copy()
+        df = df[["county", "label", "acres"]]
+        df = pd.DataFrame(df.groupby(["county", "label"])["acres"].sum()).reset_index()
+        y_lim_max_ = df[plot_col].max() + df[plot_col].max() * y_lim_multi
+        
+        df = df.pivot(index="county", columns="label", values=plot_col).reset_index(drop=False)
+
+        df.fillna(0, inplace=True)
+        df.sort_values(by=["county"], inplace=True)
+        df.reset_index(drop=True, inplace=True)
+        counties = list(df.county.unique())
+        x = np.arange(len(counties)) # the label locations
+        width, multiplier = 0.35, 0  # the width of the bars
+
+        fig, ax = plt.subplots(1, 1, figsize=(20, 3), sharex=False,
+                               gridspec_kw={"hspace": 0.35, "wspace": 0.05})
+        ax.grid(axis="y", which="both")
+
+        for a_col in ["double-cropped", "single-cropped"]:
+            offset = width * multiplier
+            rects = ax.bar(x + offset, df[a_col], width, label=a_col)
+            ax.bar_label(rects, padding=3, label_type="edge", rotation=90)
+            multiplier += 1
+
+        ax.set_ylim([0, y_lim_max_])
+        ax.set_ylabel(plot_col)
+        ax.set_xticks(x + width, counties)
+        ax.legend(loc="best", ncols=1)
+        ax.tick_params(axis="x", labelrotation=90)
+
+        ymin, ymax = ax.get_ylim()
+        ax.set(ylim=(ymin - 1, ymax + 25), axisbelow=True) # send the guidelines back
+        ax.set_title(f"correct years overlayed. {plot_col}")
+        file_name = (overlay_count_plot_dir_ + f"county_correct_years_overlayed_{plot_col}.pdf")
+        plt.savefig(fname=file_name, dpi=200, bbox_inches="tight", transparent=False)
+        plt.close()
+
+# %% [markdown]
+# # overlay Crop-wise count
+
+# %%
+perennials_choice = [True, False]
+filter_ = [True]
+counter = 1
+
+for plot_col in plot_what:
+    for perennial in perennials_choice:
+        if plot_col == "id":
+            df = df_overlay.copy()
+            
+            if perennial == True:
+                df = df[df.croptyp.isin(perennials)].copy()
+                lastName = "perennial"
+                plot_width_ = 20
+            else:
+                df = df[df.croptyp.isin(potential_2D)].copy()
+                lastName = "2D"
+                plot_width_ = 30
+
+            y_label_ = "field count"
+            df = pd.DataFrame(df.groupby(["croptyp", "label"])["id"].count()).reset_index()
+            y_lim_max_ = df[plot_col].max() + df[plot_col].max() * y_lim_multi
+            df = df.pivot(index="croptyp", columns="label", values=plot_col).reset_index(drop=False)
+            df.fillna(0, inplace=True)
+            df.sort_values(by=["croptyp"], inplace=True)
+            df.reset_index(drop=True, inplace=True)
+            crop_types = list(df["croptyp"].unique())
+
+            x = np.arange(len(crop_types)) # the label locations
+            width, multiplier = 0.25, 0  # the width of the bars
+
+            fig, ax = plt.subplots(1, 1, figsize=(plot_width_, 3), sharex=False,
+                                   gridspec_kw={"hspace": 0.35, "wspace": 0.05})
+            ax.grid(axis="y", which="both")
+
+            for a_col in ["double-cropped", "single-cropped"]:
+                offset = width * multiplier
+                rects = ax.bar(x + offset, df[a_col], width, label=a_col)
+                ax.bar_label(rects, padding=3, label_type="edge", rotation=90,
+                             fontsize=tick_legend_FontSize*1.7)
+                multiplier += 1
+
+            ax.set_ylim([0, y_lim_max_])
+            if plot_col == "id":
+                ax.set_ylabel(y_label_)
+            else:
+                ax.set_ylabel(plot_col)
+
+            ax.set_xticks(x + width, crop_types)
+            ax.legend(loc="best", ncols=1)
+            ax.tick_params(axis="x", labelrotation=90)
+            ax.set_title(f"correct_yrs_overlayed. {y_label_}")
+
+            ymin, ymax = ax.get_ylim()
+            ax.set(ylim=(ymin - 1, ymax + 25), axisbelow=True) # send the guidelines back
+            file_name = overlay_count_plot_dir_+\
+                    f"crop_correct_yrs_overlayed_{y_label_.replace(' ', '_')}_{lastName}.pdf"
+
+            plt.savefig(fname=file_name, dpi=200, bbox_inches="tight", transparent=False)
+            plt.close()
+
+        if plot_col == "acres":
+            df = df_overlay.copy()
+            y_label_ = "acres"
+
+            if perennial == True:
+                df = df[df.croptyp.isin(perennials)].copy()
+                lastName = "perennial"
+            else:
+                df = df[df.croptyp.isin(potential_2D)].copy()
+                lastName = "2D"
+            df = pd.DataFrame(df.groupby(["croptyp", "label"])["acres"].sum()).reset_index()
+            y_lim_max_ = df[plot_col].max() + df[plot_col].max() * y_lim_multi
+            df = df.pivot(index="croptyp", columns="label", values=plot_col).reset_index(drop=False)
+
+            df.fillna(0, inplace=True)
+            df.sort_values(by=["croptyp"], inplace=True)
+            df.reset_index(drop=True, inplace=True)
+            crop_types = list(df.croptyp.unique())
+
+            x = np.arange(len(crop_types)) # the label locations
+            width, multiplier = 0.35, 0  # the width of the bars
+
+            fig, ax = plt.subplots(1, 1, figsize=(plot_width_, 3), sharex=False,
+                                   gridspec_kw={"hspace": 0.35, "wspace": 0.05})
+            ax.grid(axis="y", which="both")
+
+            for a_col in ["double-cropped", "single-cropped"]:
+                offset = width * multiplier
+                rects = ax.bar(x + offset, df[a_col], width, label=a_col)
+                ax.bar_label(rects, padding=3, label_type="edge", rotation=90, 
+                             fontsize=tick_legend_FontSize*1.7)
+                multiplier += 1
+
+            ax.set_ylim([0, y_lim_max_])
+            ax.set_ylabel(plot_col)
+            ax.set_xticks(x + width, crop_types)
+            ax.legend(loc="best", ncols=1)
+            ax.tick_params(axis="x", labelrotation=90)
+            ymin, ymax = ax.get_ylim()
+            ax.set(ylim=(ymin - 1, ymax + 25), axisbelow=True) # send the guidelines back
+            ax.set_title(f"correct_yrs_overlayed. {y_label_}")
+            file_name = (overlay_count_plot_dir_+\
+                         f"crop_correct_yrs_overlayed_{plot_col}_{lastName}.pdf")
+
+            plt.savefig(fname=file_name, dpi=200, bbox_inches="tight", transparent=False)
+            plt.close()
+
+# %%
+
+# %% [markdown]
+# # overlay Crop-wise percentages
+
+# %%
+perennials_choice = [True, False]
+filter_ = [True]
+counter = 1
+y_lim_max_ = 110
+
+for plot_col in plot_what:
+    for perennial in perennials_choice:
+        if plot_col == "id":
+            df = df_overlay.copy()
+            
+            if perennial == True:
+                df = df[df.croptyp.isin(perennials)].copy()
+                lastName = "perennial"
+                plot_width_ = 20
+            else:
+                df = df[df.croptyp.isin(potential_2D)].copy()
+                lastName = "2D"
+                plot_width_ = 30
+
+            y_label_ = "field count percentage"
+            df = pd.DataFrame(df.groupby(["croptyp", "label"])["id"].count()).reset_index()
+            df = df.pivot(index="croptyp", columns="label", values=plot_col).reset_index(drop=False)
+            df.fillna(0, inplace=True)
+            df.sort_values(by=["croptyp"], inplace=True)
+            df.reset_index(drop=True, inplace=True)
+            crop_types = list(df["croptyp"].unique())
+
+            df["double_perc"] = 100 * df["double-cropped"] / (df["double-cropped"] + df["single-cropped"])
+            df["single_perc"] = 100 * df["single-cropped"] / (df["double-cropped"] + df["single-cropped"])
+            df["double_perc"] = df["double_perc"].round()
+            df["single_perc"] = df["single_perc"].round()
+
+            x = np.arange(len(crop_types)) # the label locations
+            width, multiplier = 0.25, 0  # the width of the bars
+
+            fig, ax = plt.subplots(1, 1, figsize=(plot_width_, 3), sharex=False,
+                                   gridspec_kw={"hspace": 0.35, "wspace": 0.05})
+            ax.grid(axis="y", which="both")
+
+            for a_col in ["double_perc", "single_perc"]:
+                offset = width * multiplier
+                rects = ax.bar(x + offset, df[a_col], width, label=a_col)
+                ax.bar_label(rects, padding=3, label_type="edge", rotation=90,
+                             fontsize=tick_legend_FontSize*1.7)
+                multiplier += 1
+
+            ax.set_ylim([0, y_lim_max_])
+            if plot_col == "id":
+                ax.set_ylabel(y_label_)
+            else:
+                ax.set_ylabel(plot_col)
+
+            ax.set_xticks(x + width, crop_types)
+            ax.legend(loc="best", ncols=1)
+            ax.tick_params(axis="x", labelrotation=90)
+            ax.set_title(f"correct_yrs_overlayed. {y_label_}")
+
+            ymin, ymax = ax.get_ylim()
+            ax.set(ylim=(ymin - 1, ymax + 25), axisbelow=True) # send the guidelines back
+            file_name = overlay_perc_plot_dir_+\
+                    f"crop_correct_yrs_overlayed_{y_label_.replace(' ', '_')}_{lastName}.pdf"
+
+            plt.savefig(fname=file_name, dpi=200, bbox_inches="tight", transparent=False)
+            plt.close()
+
+        if plot_col == "acres":
+            df = df_overlay.copy()
+            y_label_ = "acres percentage"
+
+            if perennial == True:
+                df = df[df.croptyp.isin(perennials)].copy()
+                lastName = "perennial"
+            else:
+                df = df[df.croptyp.isin(potential_2D)].copy()
+                lastName = "2D"
+            df = pd.DataFrame(df.groupby(["croptyp", "label"])["acres"].sum()).reset_index()
+            df = df.pivot(index="croptyp", columns="label", values=plot_col).reset_index(drop=False)
+
+            df.fillna(0, inplace=True)
+            df.sort_values(by=["croptyp"], inplace=True)
+            df.reset_index(drop=True, inplace=True)
+            crop_types = list(df.croptyp.unique())
+
+            df["double_perc"] = 100 * df["double-cropped"] / (df["double-cropped"] + df["single-cropped"])
+            df["single_perc"] = 100 * df["single-cropped"] / (df["double-cropped"] + df["single-cropped"])
+            df["double_perc"] = df["double_perc"].round()
+            df["single_perc"] = df["single_perc"].round()
+
+            x = np.arange(len(crop_types)) # the label locations
+            width, multiplier = 0.35, 0  # the width of the bars
+
+            fig, ax = plt.subplots(1, 1, figsize=(plot_width_, 3), sharex=False,
+                                   gridspec_kw={"hspace": 0.35, "wspace": 0.05})
+            ax.grid(axis="y", which="both")
+
+            for a_col in ["double_perc", "single_perc"]:
+                offset = width * multiplier
+                rects = ax.bar(x + offset, df[a_col], width, label=a_col)
+                ax.bar_label(rects, padding=3, label_type="edge", rotation=90, 
+                             fontsize=tick_legend_FontSize*1.7)
+                multiplier += 1
+
+            ax.set_ylim([0, y_lim_max_])
+            ax.set_ylabel(plot_col + " percentage")
+            ax.set_xticks(x + width, crop_types)
+            ax.legend(loc="best", ncols=1)
+            ax.tick_params(axis="x", labelrotation=90)
+            ymin, ymax = ax.get_ylim()
+            ax.set(ylim=(ymin - 1, ymax + 25), axisbelow=True) # send the guidelines back
+            ax.set_title(f"correct_yrs_overlayed. {y_label_}")
+            file_name = (overlay_perc_plot_dir_+\
+                         f"crop_correct_yrs_overlayed_{plot_col}_percentage_{lastName}.pdf")
+
+            plt.savefig(fname=file_name, dpi=200, bbox_inches="tight", transparent=False)
+            plt.close()
+
+# %%
+lastName
+
+# %%
+
+# %%
 
 # %%
 
