@@ -45,7 +45,7 @@ merged_varieties.drop(["Location", "Year"], axis="columns", inplace=True)
 merged_varieties.head(2)
 
 # %%
-list(merged_varieties.columns)
+list(merged_varieties.columns)[:5]
 
 # %%
 print ((merged_varieties["7_dtr"] == merged_varieties["7_dtr.1"]).sum())
@@ -66,7 +66,7 @@ merged_varieties.rename(columns=lambda x: x.lower().replace(' ', '_'), inplace=T
 merged_with_vars.rename(columns=lambda x: x.lower().replace(' ', '_'), inplace=True)
 
 # %%
-list(merged_with_vars.columns)
+list(merged_with_vars.columns)[:5]
 
 # %% [markdown]
 # #### Rename columns so I can remember?
@@ -125,7 +125,7 @@ print (wheat_date["planting_date"].dt.year.max())
 wheat_date['season_length'].isna().sum()
 
 # %%
-pd.to_datetime(wheat_date["heading_date"])
+pd.to_datetime(wheat_date["planting_date"])[:3]
 
 # %%
 wheat_date.head(2)
@@ -202,7 +202,7 @@ axes.set_xlabel("season length (in days)");
 text_ = min_loc + ", " + str(min_year)
 axes.text(df.loc[0, "season_length"]-2, 3, text_, fontsize = 12);
 
-text_ = max_loc + ", " + str(max_year) + "\n   " + max2_loc + ", " + str(max2_year) 
+text_ = max_loc + ", " + str(max_year) + "\n " + max2_loc + ", " + str(max2_year) 
 axes.text(df.loc[two_max_idx[0], "season_length"]-15, 3, text_, fontsize = 12);
 
 # axes.set_title('season length distribution');
@@ -210,6 +210,8 @@ fig.suptitle('season length distribution', y=0.95, fontsize=18)
 fig.subplots_adjust(top=0.85, bottom=0.15, left=0.052, right=0.981, wspace=-0.2, hspace=0)
 file_name = wheat_plot_dir + "season_length_hist.pdf"
 plt.savefig(file_name, dpi=400)
+
+# %%
 
 # %%
 fig, axes = plt.subplots(1, 1, figsize=(10, 3), sharey=False, sharex=False, dpi=dpi_)
@@ -224,6 +226,8 @@ fig.suptitle('planting date distribution', y=0.95, fontsize=18)
 fig.subplots_adjust(top=0.85, bottom=0.15, left=0.052, right=0.981, wspace=-0.2, hspace=0)
 file_name = wheat_plot_dir + "planting_DoY_hist.pdf"
 plt.savefig(file_name, dpi=400)
+
+# %%
 
 # %% [markdown]
 # ### annual DF, Seperate Varieties
@@ -260,9 +264,9 @@ df_year = pd.DataFrame(dict_season)
 df_year.head(2)
 
 # %%
-df_year["all_gdd"] = df[gdd_cols].sum(axis=1)
-df_year["all_dgdd"] = df[dgdd_cols].sum(axis=1)
-df_year["all_precip"] = df[precip_cols].sum(axis=1)
+df_year["year_gdd"] = df[gdd_cols].sum(axis=1)
+df_year["year_dgdd"] = df[dgdd_cols].sum(axis=1)
+df_year["year_precip"] = df[precip_cols].sum(axis=1)
 df_year.head(2)
 
 # %%
@@ -332,19 +336,65 @@ df_season[(df_season["location"] == "Almira") & (df_season["variety"] == "Alpowa
 # ## Annual X, Average Varieties
 
 # %%
+df_year.head(2)
+
+# %%
+df_year_avg = df_year[["location", "year", "yield"]].copy()
+df_year_avg = df_year_avg.groupby(["location", "year"]).mean().reset_index(drop=False)
+
+df_year_weather = df_year[["location", "year", "year_gdd", "year_dgdd", "year_precip"]].copy()
+df_year_weather.drop_duplicates(inplace=True)
+
+df_year_avg = pd.merge(df_year_avg, df_year_weather, on=["location", "year"], how="left")
+df_year_avg.head(2)
 
 # %% [markdown]
 # ## 4 Seasons X, Average Varieties
+
+# %%
+df_season.head(2)
+
+# %%
+seasonal_vars = [x for x in df_season.columns if "s" in x]
+
+# %%
+df_season_avg = df_season[["location", "year", "yield"]].copy()
+df_season_avg = df_season_avg.groupby(["location", "year"]).mean().reset_index(drop=False)
+
+df_season_weather = df_season[["location", "year"] + seasonal_vars].copy()
+df_season_weather.drop_duplicates(inplace=True)
+
+df_season_avg = pd.merge(df_season_avg, df_season_weather, on=["location", "year"], how="left")
+df_season_avg.head(2)
+
+# %%
+print (df_season.shape)
+print (df_season_avg.shape)
+
+# %%
+merged_varieties["yield"] = merged_varieties["yield"].round(2)
+merged_with_vars["yield"] = merged_with_vars["yield"].round(2)
+
+df_year["yield"] = df_year["yield"].round(2)
+df_year_avg["yield"] = df_year_avg["yield"].round(2)
+
+df_season["yield"] = df_season["yield"].round(2)
+df_season_avg["yield"] = df_season_avg["yield"].round(2)
 
 # %%
 
 # %%
 filename = wheat_reOrganized + "average_and_seperate_varieties.sav"
 
-export_ = {"averaged_varieties": merged_varieties, 
-           "averaged_varieties_annual_X": df_year, 
-           "separate_varieties": merged_with_vars,
+export_ = {"averaged_varieties_weekly": merged_varieties, 
+           "separate_varieties_weekly": merged_with_vars,
+
+           "separate_varieties_annual": df_year, 
+           "averaged_varieties_annual": df_year_avg, 
+           
            "separate_varieties_4season": df_season,
+           "averaged_varieties_4season" : df_season_avg,
+           
            "dates" : wheat_date,
            "source_code" : "read_excel_dump",
            "Author": "HN",
