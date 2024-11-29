@@ -15,7 +15,7 @@
 # %%
 import warnings
 warnings.filterwarnings("ignore")
-
+import numpy as np
 import pickle, pandas as pd
 from datetime import datetime
 import os
@@ -173,6 +173,8 @@ plt.rcParams["ytick.left"] = True
 plt.rcParams["xtick.labelbottom"] = True
 plt.rcParams["ytick.labelleft"] = True
 plt.rcParams.update(params)
+
+suptitle_fontsize = 15
 dpi_ = 300
 
 # %%
@@ -206,7 +208,7 @@ text_ = max_loc + ", " + str(max_year) + "\n " + max2_loc + ", " + str(max2_year
 axes.text(df.loc[two_max_idx[0], "season_length"]-15, 3, text_, fontsize = 12);
 
 # axes.set_title('season length distribution');
-fig.suptitle('season length distribution', y=0.95, fontsize=18)
+fig.suptitle('season length distribution', y=0.95, fontsize=suptitle_fontsize)
 fig.subplots_adjust(top=0.85, bottom=0.15, left=0.052, right=0.981, wspace=-0.2, hspace=0)
 file_name = wheat_plot_dir + "season_length_hist.pdf"
 plt.savefig(file_name, dpi=400)
@@ -222,10 +224,41 @@ sns.histplot(data=wheat_date["plant_doy"], ax=axes, bins=100, kde=True);
 axes.set_xlabel("DoY");
 
 # axes.set_title('season length distribution');
-fig.suptitle('planting date distribution', y=0.95, fontsize=18)
+fig.suptitle('planting date distribution', y=0.95, fontsize=suptitle_fontsize)
 fig.subplots_adjust(top=0.85, bottom=0.15, left=0.052, right=0.981, wspace=-0.2, hspace=0)
 file_name = wheat_plot_dir + "planting_DoY_hist.pdf"
 plt.savefig(file_name, dpi=400)
+
+# %%
+
+# %%
+fig, axes = plt.subplots(1, 1, figsize=(10, 3), sharey=False, sharex=False, dpi=dpi_)
+sns.set_style({'axes.grid' : False})
+
+sns.histplot(data=merged_with_vars["yield"], ax=axes, bins=100, kde=True);
+axes.set_xlabel("yield (bushel/acre)");
+
+# axes.set_title('season length distribution');
+fig.suptitle('yield distribution (bushel/acre)', y=0.95, fontsize=suptitle_fontsize)
+fig.subplots_adjust(top=0.85, bottom=0.15, left=0.052, right=0.981, wspace=-0.2, hspace=0)
+file_name = wheat_plot_dir + "yield_hist.pdf"
+plt.savefig(file_name, dpi=400)
+
+# %%
+
+# %%
+fig, axes = plt.subplots(1, 1, figsize=(10, 3), sharey=False, sharex=False, dpi=dpi_)
+sns.set_style({'axes.grid' : False})
+
+sns.histplot(data=np.log(merged_with_vars["yield"]), ax=axes, bins=100, kde=True);
+axes.set_xlabel("log(yield) (yield: bushel/acre)");
+fig.suptitle('log(yield) distribution (yield: bushel/acre)', y=0.95, fontsize=suptitle_fontsize)
+# axes.set_title('season length distribution');
+fig.subplots_adjust(top=0.85, bottom=0.15, left=0.052, right=0.981, wspace=-0.2, hspace=0)
+file_name = wheat_plot_dir + "log_yield_hist.pdf"
+plt.savefig(file_name, dpi=400)
+
+# %%
 
 # %%
 
