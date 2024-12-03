@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -253,7 +253,7 @@ scatt_.fig.suptitle(title_, y=.98)
 sns.move_legend(scatt_, "upper left", bbox_to_anchor=(0.58, .93))
 
 
-fig_name = dgdd_plot_dir + "annual_" + variety + "_corr.pdf"
+fig_name = dgdd_plot_dir + "annual_" + variety + "_corr2.pdf"
 plt.savefig(fname=fig_name, dpi=300, bbox_inches="tight")
 del(variety)
 

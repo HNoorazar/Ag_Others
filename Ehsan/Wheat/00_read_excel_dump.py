@@ -5,24 +5,24 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
 # ---
 
-# %%
-import warnings
-warnings.filterwarnings("ignore")
-import numpy as np
-import pickle, pandas as pd
-from datetime import datetime
-import os
-
-import seaborn as sns
-import matplotlib
-import matplotlib.pyplot as plt
+# %% [markdown]
+# import warnings
+# warnings.filterwarnings("ignore")
+# import numpy as np
+# import pickle, pandas as pd
+# from datetime import datetime
+# import os
+#
+# import seaborn as sns
+# import matplotlib
+# import matplotlib.pyplot as plt
 
 # %%
 data_dir_base = "/Users/hn/Documents/01_research_data/Ehsan/wheat/"
@@ -259,8 +259,37 @@ file_name = wheat_plot_dir + "log_yield_hist.pdf"
 plt.savefig(file_name, dpi=400)
 
 # %%
+temp_df = wheat_date.copy()
+temp_df.dropna(inplace=True)
+print (temp_df.shape)
+temp_df.head(2)
 
 # %%
+temp_df["heading_date"] = pd.to_datetime(temp_df["heading_date"])
+temp_df["heading_DoY"] = temp_df["heading_date"].dt.dayofyear
+temp_df.head(2)
+
+# %%
+temp_df["Head_minus_plant"] = temp_df["heading_DoY"] - temp_df["plant_doy"]
+
+# %%
+fig, axes = plt.subplots(1, 1, figsize=(10, 3), sharey=False, sharex=False, dpi=dpi_)
+sns.set_style({'axes.grid' : False})
+
+sns.histplot(data=(temp_df["Head_minus_plant"]), ax=axes, bins=100, kde=True);
+axes.set_xlabel(r"(heading - planting) dates");
+fig.suptitle('planting date to heading date', y=0.95, fontsize=suptitle_fontsize)
+# axes.set_title('heading_date');
+fig.subplots_adjust(top=0.85, bottom=0.15, left=0.052, right=0.981, wspace=-0.2, hspace=0)
+file_name = wheat_plot_dir + "heading_date_dist.pdf"
+plt.savefig(file_name, dpi=400)
+
+# %%
+print (wheat_date.shape)
+print (temp_df.shape)
+
+# %%
+229-113
 
 # %% [markdown]
 # ### annual DF, Seperate Varieties
