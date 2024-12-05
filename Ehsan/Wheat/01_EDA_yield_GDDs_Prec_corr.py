@@ -40,8 +40,8 @@ data_dir_base = "/Users/hn/Documents/01_research_data/Ehsan/wheat/"
 wheat_reOrganized = data_dir_base + "wheat_reOrganized/"
 
 wheat_plot_dir = data_dir_base + "plots/"
-dgdd_plot_dir  = data_dir_base + "plots/dGDD_precip/"
-gdd_plot_dir   = data_dir_base + "plots/GDD_precip/"
+dgdd_plot_dir  = wheat_plot_dir + "dGDD_precip/"
+gdd_plot_dir   = wheat_plot_dir + "GDD_precip/"
 
 os.makedirs(wheat_plot_dir, exist_ok=True)
 os.makedirs(dgdd_plot_dir, exist_ok=True)
