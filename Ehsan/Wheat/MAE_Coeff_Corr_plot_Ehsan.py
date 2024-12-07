@@ -220,8 +220,14 @@ plt.savefig(file_name + ".jpg", bbox_inches='tight', dpi=save_dpi)
 plt.savefig(file_name + ".pdf", bbox_inches='tight', dpi=save_dpi) # light, not 4 Microsoft prods.
 
 # %%
-
-# %%
+with plt.xkcd():
+    plot_the_damn_thing2(y=y_test_rf_tw, y_hat=y_test_pred_rf_tw, 
+                     xlabel_ = "Actual Test Weight (lb/bu)", 
+                     ylabel_ = "Predicted Test Weight (lb/bu)")
+    file_name = plot_dir + "tw_XKCD"
+    plt.savefig(file_name + ".png", bbox_inches='tight', dpi=save_dpi) # heavy
+    plt.savefig(file_name + ".jpg", bbox_inches='tight', dpi=save_dpi) 
+    plt.savefig(file_name + ".pdf", bbox_inches='tight', dpi=save_dpi) # light, not 4 Microsoft prods.
 
 # %%
 
