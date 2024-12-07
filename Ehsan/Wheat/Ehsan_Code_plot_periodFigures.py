@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -46,45 +46,51 @@ os.makedirs(period_figures_dir, exist_ok=True)
 # %%
 dpi_ = 300
 
-
 # %%
-def plot_stages_in_color_w_text(axes):
+stage_colors = {'Germination & Emergence' : "palegreen",
+                'Tillering' : mcolors.TABLEAU_COLORS['tab:olive'],
+                'Heading' : "darkgreen",
+                'Flowering' : 'navajowhite',
+                'Grain Filling' : 'yellow',
+                "Maturity" : 'darkkhaki'}
+
+def plot_stages_in_color_w_text(axes, stage_colors):
     axes.set_xlim(14, 140)
     axes.set_ylim(0, 30)
     y_text=2
     # Germination
     x1, x2 = 15, 20
-    axes.axvspan(x1, x2, color='palegreen'); #facecolor='.01', alpha=0.2
+    axes.axvspan(x1, x2, color=stage_colors["Germination & Emergence"]); #facecolor='.01', alpha=0.2
     axes.text(x=(x1+x2)/2-1, y=1, s=f'Germination & Emergence', rotation=90,
               fontdict={'fontsize':15, 'fontweight':'bold'});
 
     # Tillering
     x1, x2 = 30, 40 #,y_text= 10
-    axes.axvspan(x1, x2, color=mcolors.TABLEAU_COLORS['tab:olive']);
+    axes.axvspan(x1, x2, color=stage_colors["Tillering"]);
     axes.text(x=(x1+x2)/2-2, y=y_text, s=f'Tillering', rotation=90,
               fontdict={'fontsize':20, 'fontweight':'bold'});
 
     # Heading
     x1, x2 = 60, 70 #, y_text = 10
-    axes.axvspan(x1, x2, color="darkgreen");
+    axes.axvspan(x1, x2, color=stage_colors["Heading"]);
     axes.text(x=(x1+x2)/2 - 2, y=y_text, s=f'Heading', rotation=90,
               fontdict={'fontsize':20, 'fontweight':'bold','color':'white'});
 
     # Flowering
     x1, x2 = 85, 90 #, y_text = 10
-    axes.axvspan(x1, x2, color='navajowhite');
+    axes.axvspan(x1, x2, color=stage_colors['Flowering']);
     axes.text(x=(x1+x2)/2 - 1.5, y=y_text, s=f'Flowering', rotation=90,
               fontdict={'fontsize':20, 'fontweight':'bold'});
 
     # Grain Filling
     x1, x2 = 120, 125 #y_text = 7
-    axes.axvspan(x1, x2, color='yellow');
+    axes.axvspan(x1, x2, color=stage_colors['Grain Filling']);
     axes.text(x=(x1+x2)/2 - 1, y=y_text, s=f'Grain Filling', rotation=90,
               fontdict={'fontsize':20, 'fontweight':'bold'});
 
     # Maturity
     x1, x2 = 135, 140 # , y_text=10
-    axes.axvspan(x1, x2, color='lightyellow');
+    axes.axvspan(x1, x2, color=stage_colors["Maturity"]);
     axes.text(x=(x1+x2)/2 - 1.5, y=y_text, s=f'Maturity', rotation=90,
               fontdict={'fontsize':20, 'fontweight':'bold'});
 
@@ -93,24 +99,24 @@ def plot_stages_in_color_w_text(axes):
     tickss_ = [15, 20, 30, 40, 60, 70, 85, 90, 120, 125, 135, 140]
     axes.set_xticks(tickss_, tickss_);
     
-def plot_stages_in_color_no_text(ax_, ymax_=2):
+def plot_stages_in_color_no_text(ax_, stage_colors, ymax_=2):
     x1, x2 = 15, 20 # Germination
-    ax_.axvspan(x1, x2, ymax=ymax_, color='palegreen');
+    ax_.axvspan(x1, x2, ymax=ymax_, color=stage_colors['Germination & Emergence']);
 
     x1, x2 = 30, 40 # Tillering
-    ax_.axvspan(x1, x2, ymax=ymax_, color=mcolors.TABLEAU_COLORS['tab:olive']);
+    ax_.axvspan(x1, x2, ymax=ymax_, color=stage_colors['Tillering']);
 
     x1, x2 = 60, 70 # Heading
-    ax_.axvspan(x1, x2, ymax=ymax_, color="darkgreen");
+    ax_.axvspan(x1, x2, ymax=ymax_, color=stage_colors['Heading']);
 
     x1, x2 = 85, 90 # Flowering
-    ax_.axvspan(x1, x2, ymax=ymax_, color='navajowhite');
+    ax_.axvspan(x1, x2, ymax=ymax_, color=stage_colors['Flowering']);
 
     x1, x2 = 120, 125 # Grain Filling
-    ax_.axvspan(x1, x2, ymax=ymax_, color='yellow');
+    ax_.axvspan(x1, x2, ymax=ymax_, color=stage_colors['Grain Filling']);
 
     x1, x2 = 135, 140 # Maturity
-    ax_.axvspan(x1, x2, ymax=ymax_, color='lightyellow');
+    ax_.axvspan(x1, x2, ymax=ymax_, color=stage_colors['Maturity']);
 
 
 # %%
@@ -133,7 +139,7 @@ plt.rcParams.update(params)
 fig, ax = plt.subplots(1, 1, figsize=(15, 3.5),
                          gridspec_kw={"hspace": 0.15, "wspace": 0.15}, dpi=dpi_)
 
-plot_stages_in_color_w_text(ax)
+plot_stages_in_color_w_text(ax, stage_colors)
 
 fig_name = period_figures_dir + "growing_stages"
 plt.savefig(fig_name + ".pdf", bbox_inches='tight', dpi=dpi_)
@@ -190,7 +196,7 @@ y_VPD = 6
 # Define line properties for each subplot
 thick_order, thin_order = 0, 3
 thick_w, thin_w = 10, 2
-thick_c, thin_c = "red", "black"
+thick_c, thin_c = "dodgerblue", "orangered" # ""
 
 lines_properties = [
     # For Subplot 1
@@ -251,14 +257,12 @@ for i, ax in enumerate(axes):
     for y, x_start, x_end, color, linewidth_, label in zip(
         props['y'], props['x_start'], props['x_end'], props['colors'], props['linewidths'], props['labels']
     ):
-        if i==4:
-            print (i, y)
-        # Draw the horizontal line with specified color and thickness
+
         if color == thick_c:
             ax.hlines(y=y, xmin=x_start, xmax=x_end, color=color, 
                       linestyle='-', linewidth=linewidth_, alpha=1)
         elif color == thin_c:
-            ax.hlines(y=y, xmin=x_start, xmax=x_end, color=color, linestyle='-', linewidth=linewidth_, zorder=3)
+            ax.hlines(y=y, xmin=x_start, xmax=x_end, color=color, linewidth=linewidth_, zorder=3)
         
         if label: # Add the label if specified
             midpoint_x = (x_start + x_end) / 2
@@ -268,12 +272,11 @@ for i, ax in enumerate(axes):
     points = props.get('points', {})
     if points: # Add points with custom size and color
         ax.scatter(points['x'], points['y'], color=thin_c, s=50, label='Point', zorder=3)
-    # Set specific x-axis ticks
+
     ax.set_xticks([30, 60, 90, 120, 150])
     ax.set_title(subplot_titles[i], fontsize=22) # Set manual title
-    ax.tick_params(axis='x', which='major', labelsize=15)
-    # ax.set_yticks([])  # Remove y-axis ticks and labels
-    plot_stages_in_color_no_text(ax, ymax_=1)
+    ax.tick_params(axis='x', which='major')
+    plot_stages_in_color_no_text(ax, stage_colors=stage_colors, ymax_=1)
 
 plt.xlim(0, 150)
 plt.ylim(0.5, 6.5)
@@ -293,9 +296,9 @@ matplotlib.rcParams.update(matplotlib.rcParamsDefault)
 tick_legend_FontSize = 2
 params = {"font.family": "Arial",
           "legend.fontsize": tick_legend_FontSize * 1,
-          "axes.labelsize": tick_legend_FontSize * 1.2,
-          "axes.titlesize": tick_legend_FontSize * 2,
-          "xtick.labelsize": tick_legend_FontSize * 10,
+          "axes.labelsize": tick_legend_FontSize * 10,
+          "axes.titlesize": tick_legend_FontSize * 200,
+          "xtick.labelsize": tick_legend_FontSize * 8,
           "ytick.labelsize": tick_legend_FontSize * 10,
           "axes.titlepad": 10,
           "xtick.bottom": True,
@@ -326,28 +329,28 @@ for i, ax in enumerate(axes):
         if color == thick_c:
             ax.hlines(y=y, xmin=x_start, xmax=x_end, color=color, 
                       linestyle='-', linewidth=linewidth_, alpha=1)
-        elif color == thin_c:
-            ax.hlines(y=y, xmin=x_start, xmax=x_end, color=color, linestyle='-', linewidth=linewidth_, zorder=3)
+        else:
+            ax.hlines(y=y, xmin=x_start, xmax=x_end, color=color, linewidth=linewidth_, zorder=3)
 
         if label: # Add the label if specified
             midpoint_x = (x_start + x_end) / 2
-            ax.text(midpoint_x, y + 0.05, label.split("(")[1].split(")")[0], 
-                    color=color, ha='center', va='bottom', fontsize=16, fontweight='bold')
+            ax.text(midpoint_x, y + 0.08, label.split("(")[1].split(")")[0], 
+                    color=color, ha='center', va='bottom', fontsize=18)
                 
     # Add points if defined
     points = props.get('points', {})
     if points: # Add points with custom size and color
         ax.scatter(points['x'], points['y'], color=thin_c, s=50, label='Point', zorder=3)
-    # Set specific x-axis ticks
-    ax.set_xticks([30, 60, 90, 120, 150])
+    
+    ax.set_xticks([30, 60, 90, 120, 150]) # Set specific x-axis ticks
     ax.set_title(subplot_titles[i], fontsize=22) # Set manual title
-    ax.tick_params(axis='x', which='major', labelsize=15)
+    ax.tick_params(axis='x', which='major')
     ax.set_ylim(0.5, 7)
     ax.grid(which='major', alpha=0.5, axis="y")
     if i>0:
         # ax.set_yticks([])
         ax.set_yticklabels([])
-    plot_stages_in_color_no_text(ax, ymax_=.081)
+    plot_stages_in_color_no_text(ax, stage_colors, ymax_=.081)
     
 
 axes[0].set_yticks([1, 2, 3, 4, 5, 6])
@@ -356,7 +359,7 @@ axes[0].set_yticklabels(["GDD", "PR", "PRDTR", "RH", "SRAD", "VPD"])
 plt.xlim(0, 150)
 
 # Add a common x-axis label
-fig.supxlabel("days after planting".title(), fontsize=20, y=-0.05)  # Adjust `y` for spacing
+fig.supxlabel("days after planting".title(), fontsize=22, y=-0.1)  # Adjust `y` for spacing
 # plt.tight_layout()
 fig_name = period_figures_dir + "traits_windows_range_BS_TM"
 plt.savefig(fig_name + ".pdf", bbox_inches='tight', dpi=dpi_)
