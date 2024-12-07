@@ -205,7 +205,7 @@ def plot_the_damn_thing2(y, y_hat, xlabel_, ylabel_):
     ax.set_xlabel(xlabel_)
     ax.set_ylabel(ylabel_)
     ax.tick_params(length=2, width=.5, color="gray")
-    ax.grid(False)
+    ax.grid(axis="y")
 #     ax.set_xticks(ax.get_yticks())
 #     ax.set_yticks(ax.get_xticks())
 
@@ -214,7 +214,7 @@ plot_the_damn_thing2(y=y_test_rf_tw, y_hat=y_test_pred_rf_tw,
                      xlabel_ = "Actual Test Weight (lb/bu)", 
                      ylabel_ = "Predicted Test Weight (lb/bu)")
 
-file_name = plot_dir + "tw_HN"
+file_name = plot_dir + "tw_HN_Grid"
 plt.savefig(file_name + ".png", bbox_inches='tight', dpi=save_dpi) # heavy
 plt.savefig(file_name + ".jpg", bbox_inches='tight', dpi=save_dpi) 
 plt.savefig(file_name + ".pdf", bbox_inches='tight', dpi=save_dpi) # light, not 4 Microsoft prods.
