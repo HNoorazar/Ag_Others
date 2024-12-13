@@ -194,10 +194,9 @@ def plot_the_damn_thing2(y, y_hat, xlabel_, ylabel_):
             label=f"$y=x$", alpha=0.7, linestyle=xy_line_s)
 
     # Choose one of the following
-    plt.text(x_0, x_0+3.5, f'y = x', fontname=xy_fontname,
+    plt.text(x_0, x_0+3.5, f'y = x', fontname=xy_fontname, 
              fontsize=text_fontsize, color=xy_line_c, rotation=40)
     # ax.legend(bbox_to_anchor=(.35, 0.85), frameon=False)    
-    
     
     ax.set_xlim(np.min(x), np.max(x))
     ax.set_ylim(np.min(x), np.max(x))
@@ -208,6 +207,7 @@ def plot_the_damn_thing2(y, y_hat, xlabel_, ylabel_):
     ax.grid(axis="y")
 #     ax.set_xticks(ax.get_yticks())
 #     ax.set_yticks(ax.get_xticks())
+
 
 # %%
 plot_the_damn_thing2(y=y_test_rf_tw, y_hat=y_test_pred_rf_tw, 
