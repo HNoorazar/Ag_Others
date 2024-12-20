@@ -384,8 +384,7 @@ lines_properties = [
      "x_end": [61, 145, 51, 94, 100, 49.25],
      "colors": list(np.repeat([thin_c, thick_c], 3)),
      "linewidths": np.repeat([thin_w, thick_w], 3),
-     "labels": ["Grain Yield (9-61)", "Plant Height (13-145)",
-                "Test Weight (47-51)", None, None, None],
+     "labels": ["Grain Yield (9-61)", "Plant Height (13-145)", "Test Weight (47-51)", None, None, None],
      "points": { "x": [35, 79, 49], "y": [y_Grain_Yield, y_Plant_Height, y_Test_Weight]},
     },
     # For Subplot 3
