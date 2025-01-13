@@ -1,0 +1,310 @@
+\documentclass[serif, xcolor={dvipsnames}]{beamer} % serif, mathserif
+
+
+% \usepackage{fourier}
+\usepackage{newunicodechar}
+\newcommand\Warning{%
+ \makebox[1.4em][c]{%
+ \makebox[0pt][c]{\raisebox{.1em}{\small!}}%
+ \makebox[0pt][c]{\color{red}\Large$\bigtriangleup$}}}%
+\newunicodechar{⚠}{\Warning}
+
+\usepackage{stackengine}
+\usepackage{scalerel}
+\newcommand\dangersign[1][2ex]{%
+  \renewcommand\stacktype{L}%
+  \scaleto{\stackon[1.3pt]{\color{red}$\triangle$}{\tiny !}}{#1}%
+}
+
+
+
+\usepackage{fontawesome} % lightbulb
+% we can define where figures are located
+\usepackage{enumerate}
+\usepackage{etaremune} % reverse order for enumerate
+\usepackage{hhline}
+\usepackage{listings}
+\newcommand{\idea}{{\faLightbulbO~}}
+\newcommand{\Rq}{{\faSearch~}}
+
+\newcommand{\xitem}{%
+  \par\hangindent3em\hangafter0
+  \noindent\llap{$\triangleright$\enspace}%
+  \ignorespaces}
+  
+% \def\myitem{\hangindent=5em$\triangleright$}
+\def\myitem{\hangindent=5em}
+
+\usepackage[natbib=true,style=authoryear,backend=bibtex,useprefix=true,giveninits=true]{biblatex}
+\DeclareNameAlias{author}{last-first}
+\addbibresource{./beamer_Refs.bib}
+\usepackage[capitalise]{cleveref}
+
+\def\code#1{{\scriptsize\texttt{#1}}}
+% hypersetup only changes the year in citation.
+\hypersetup{
+    colorlinks=true,
+    linkcolor=white, % color1 : will be black
+    filecolor=red,
+    urlcolor=ForestGreen,
+    citecolor=cyan,
+    bookmarksopen=false,
+    pdftitle={Title},
+    pdfauthor={Author},
+}
+
+\DeclareCiteCommand{\cite}
+  {\color{cyan}\usebibmacro{prenote}}%
+  {\usebibmacro{citeindex}%
+   \usebibmacro{cite}}
+  {\multicitedelim}
+  {\usebibmacro{postnote}
+  }
+
+
+
+\usepackage[scaled=.9]{helvet} % platino activation
+\usepackage{tabularx,multirow}
+\usepackage{colortbl}
+\RequirePackage{booktabs}
+
+\colorlet{shadecolor}{gray!40}
+
+\usepackage{chngcntr}
+\usepackage{tcolorbox}
+
+\setbeamertemplate{footline}[text line]{}
+\setbeamertemplate{navigation symbols}{}
+\usepackage{subcaption}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{calrsfs}
+\usepackage{multicol}
+%\captionsetup{font={small,stretch=0.80}}
+\DeclareCaptionLabelFormat{andtable}{#1~#2  \&  \tablename~\thetable}
+
+\newtheorem{thm}{Theorem}[section] % "[section]" restarts the theorem counter at every new section.
+\newtheorem{Coro}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{rem}[thm]{Remark}
+\newtheorem{exm}[thm]{Example}
+\newtheorem{deff}{Definition}
+
+
+
+\usepackage{textpos} % i donno what this does
+
+% \usepackage{etoolbox}
+% \usepackage{mathptmx}
+\usepackage{graphicx}
+\usecolortheme{beaver}
+
+% \usetheme{Berlin}
+\usetheme{Boadilla} % adds date and page number
+% \usetheme{Copenhagen}
+% \usetheme{Ilmenau}
+% \setbeamertemplate{blocks}[rounded][shadow=false]
+% \addtobeamertemplate{block begin}{\pgfsetfillopacity{0.8}}{\pgfsetfillopacity{1}}
+\setbeamercolor*{structure}{fg=mygreen}
+\setbeamercolor*{block title example}{fg=blue!50,bg= blue!10}
+\setbeamercolor*{block body example}{fg= blue,bg= blue!5}
+
+\usepackage{ulem}
+\usepackage{cancel}
+\usefonttheme{professionalfonts}
+{\vspace*{.10mm}}
+\usetheme[height=10mm]{Rochester}
+
+
+
+\definecolor{mygreen}{cmyk}{0.82,0.11,1,0.25}
+\definecolor{aliceblue}{rgb}{0.94, 0.97, 1.0}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\definecolor{bittersweet}{rgb}{1.0, 0.44, 0.37}
+\definecolor{Gray}{gray}{0.85}
+% \definecolor{LCyan}{rgb}{0.88,1,1}
+\definecolor{mgreen}{rgb}{0.0,0.5,0.0}
+%% \definecolor{mgreen}{rgb}{0.2, 0.8, 1}
+\definecolor{brickred}{rgb}{0.8, 0.25, 0.33}
+\definecolor{bleudefrance}{rgb}{0.19, 0.55, 0.91}
+\definecolor{AB}{rgb}{0.94, 0.97, 1.0}
+\definecolor{AB}{rgb}{0.9,.81,.68}
+\definecolor{azureWeb}{rgb}{0.94, 1.0, 1.0}
+\definecolor{beaublue}{rgb}{0.74, 0.83, 0.9}
+\definecolor{linen}{rgb}{0.98, 0.94, 0.9}
+\definecolor{magnolia}{rgb}{0.97, 0.96, 1.0}
+\definecolor{moccasin}{rgb}{0.98, 0.92, 0.84}
+\definecolor{navajowhite}{rgb}{1.0, 0.87, 0.68}
+\definecolor{palecornflowerblue}{rgb}{0.67, 0.8, 0.94}
+
+
+
+\title{Making a Case}
+\author{HN}
+\institute[WSU]{Washington State University}
+\date{\today}
+
+\titlegraphic{\includegraphics[width=.8cm]{cat1}}
+%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%% Fonts
+\usepackage[osf, sc]{mathpazo}
+% \renewcommand{\familydefault}{\sfdefault}
+% \usepackage{lmodern}
+% \usepackage{tgschola} % western type font
+% \renewcommand{\familydefault}{\sfdefault} % nice
+%\usepackage[sfdefault]{carlito}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\maketitle
+
+%\addtobeamertemplate{frametitle}{}{%}
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\frametitle{General}
+
+\begin{itemize}
+\item Anything worth making needs patience and practice
+\item If you want mastery, you need to immerse yourself in it till it becomes your second nature, just like walking
+
+\vspace{.5in}
+\item Top(?) two take aways from graduate school
+\begin{enumerate}
+\item Try not to have a bias and be playful \Rq
+\item When you are wrong, you are wrong \dangersign
+\end{enumerate}
+\end{itemize}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[t]
+\frametitle{Source of This Notes}
+
+\vspace{-.18in}
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{ISLP_cover}
+    \end{minipage}%
+    \hspace{.2in}
+    \begin{minipage}{0.5\textwidth}
+       Notes from\\ {\bf An Introduction to Statistical Learning} {\tiny with Applications in Python}
+    \end{minipage}
+\end{figure}
+
+\begin{itemize}
+\item It's an easy read and as the name suggests, it's just Introduction. Good for intuition building
+\item Its PDF is available for free from the Authors' website.
+\item Sign-up \& receive coupons (30\%-50\% off)
+\end{itemize}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[t]
+\frametitle{Last thing first (There is no magic wand)}
+
+\begin{itemize}[<+->]
+\item There is no unique tool that outperforms other methods (there is no free lunch) 
+\item There is no tool that is both accurate (in predicting) AND interpretable (unless we get lucky?!)
+\end{itemize}
+
+\pause
+\vspace{.05in}
+\begin{tcolorbox}
+\centering
+{\bf define your goal and deal with it}
+\end{tcolorbox}
+
+\pause
+\vspace{-.1in}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{model_flex_inter}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[t]
+\frametitle{Some Definition}
+
+
+\begin{deff}[Variance of a method] Variance refers to the amount by which
+$\hat f$ would change if we estimated it using a different training data set.
+\end{deff}
+\pause
+\begin{deff}[Bias of a method] Bias refers to the error that is introduced by approximating a real-life problem, which may be extremely complicated, by a much simpler model.
+\end{deff}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[allowframebreaks, noframenumbering,t]
+\frametitle{Bibliography}
+\printbibliography
+\end{frame}
+
+\end{document}
