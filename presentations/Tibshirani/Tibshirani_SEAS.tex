@@ -36,6 +36,7 @@
 \def\myitem{\hangindent=5em}
 
 \usepackage[natbib=true,style=authoryear,backend=bibtex,useprefix=true,giveninits=true]{biblatex}
+% \usepackage[backend=bibtex]{biblatex}
 \DeclareNameAlias{author}{last-first}
 \addbibresource{./beamer_Refs.bib}
 \usepackage[capitalise]{cleveref}
@@ -102,6 +103,7 @@
 \usecolortheme{beaver}
 
 % \usetheme{Berlin}
+
 \usetheme{Boadilla} % adds date and page number
 % \usetheme{Copenhagen}
 % \usetheme{Ilmenau}
@@ -161,7 +163,8 @@
 % \renewcommand{\familydefault}{\sfdefault} % nice
 %\usepackage[sfdefault]{carlito}
 
-
+% the following breaks long titles in References 
+\DeclareFieldFormat[book,article]{title}{\textit{#1}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
 \maketitle
@@ -281,12 +284,24 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}[t]
+\frametitle{More Resources}
+
+\begin{itemize}
+\item Guesstimation:~\cite{weinstein2008guesstimation}
+\item First Course in Probability~\cite{ross1976first}
+\item Introduction to Regression by Montgomery~\cite{montgomery2021introduction}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[allowframebreaks,t]{References} 
 \frametitle{Some Definition}
 
 
@@ -298,13 +313,15 @@ $\hat f$ would change if we estimated it using a different training data set.
 \end{deff}
 
 \end{frame}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}[allowframebreaks, noframenumbering,t]
 \frametitle{Bibliography}
+\nocite{*}
 \printbibliography
+
 \end{frame}
 
 \end{document}
