@@ -35,10 +35,22 @@
 % \def\myitem{\hangindent=5em$\triangleright$}
 \def\myitem{\hangindent=5em}
 
+
 \usepackage[natbib=true,style=authoryear,backend=bibtex,useprefix=true,giveninits=true]{biblatex}
+\addbibresource{./beamer_Refs.bib}
 % \usepackage[backend=bibtex]{biblatex}
 \DeclareNameAlias{author}{last-first}
-\addbibresource{./beamer_Refs.bib}
+% the following breaks long titles in References 
+\DeclareFieldFormat[book,article]{title}{\textit{#1}}
+\DeclareCiteCommand{\cite}
+  {\color{cyan}\usebibmacro{prenote}}%
+  {\usebibmacro{citeindex}%
+   \usebibmacro{cite}}
+  {\multicitedelim}
+  {\usebibmacro{postnote}
+  }
+
+
 \usepackage[capitalise]{cleveref}
 
 \def\code#1{{\scriptsize\texttt{#1}}}
@@ -53,16 +65,6 @@
     pdftitle={Title},
     pdfauthor={Author},
 }
-
-\DeclareCiteCommand{\cite}
-  {\color{cyan}\usebibmacro{prenote}}%
-  {\usebibmacro{citeindex}%
-   \usebibmacro{cite}}
-  {\multicitedelim}
-  {\usebibmacro{postnote}
-  }
-
-
 
 \usepackage[scaled=.9]{helvet} % platino activation
 \usepackage{tabularx,multirow}
@@ -163,8 +165,6 @@
 % \renewcommand{\familydefault}{\sfdefault} % nice
 %\usepackage[sfdefault]{carlito}
 
-% the following breaks long titles in References 
-\DeclareFieldFormat[book,article]{title}{\textit{#1}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
 \maketitle
@@ -291,12 +291,22 @@
 \frametitle{More Resources}
 
 \begin{itemize}
-\item Guesstimation:~\cite{weinstein2008guesstimation}
-\item First Course in Probability~\cite{ross1976first}
-\item Introduction to Regression by Montgomery~\cite{montgomery2021introduction}
+\item {\scriptsize Guesstimation:~\citep{weinstein2008guesstimation}}
+\item {\scriptsize First Course in Probability~\citep{ross1976first}}
+\item {\scriptsize Introduction to Linear Regression Analysis~\citep{montgomery2021introduction}}
+\end{itemize}
+{\bf \scriptsize  Non-technical}
+\begin{itemize}
+\item {\scriptsize Excellent Sheep: The Miseducation of the American Elite and the Way to a Meaningful Life~\citep{sheep}}
+\item {\scriptsize The Culture Code: The Secrets of Highly Successful Groups~\citep{CultureCode}}
 \end{itemize}
 
+{\bf \scriptsize  Tools}
+\begin{itemize}
+\item {\scriptsize Software Carpentry has lots of tutorials including \href{https://swcarpentry.github.io/git-novice/}{GitHub}!}
+\end{itemize}
 \end{frame}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
