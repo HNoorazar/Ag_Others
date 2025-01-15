@@ -34,19 +34,8 @@ from matplotlib import cm
 from datetime import datetime
 
 # %%
-data_dir_base = "/Users/hn/Documents/01_research_data/Others/Ehsan/wheat/"
-wheat_reOrganized = data_dir_base + "wheat_reOrganized/"
-
-wheat_plot_dir = data_dir_base + "plots/"
-dgdd_plot_dir = wheat_plot_dir + "dGDD_precip/"
-gdd_plot_dir = wheat_plot_dir + "GDD_precip/"
-
-period_figures_dir = wheat_plot_dir + "period_figures/"
-os.makedirs(period_figures_dir, exist_ok=True)
-
-# %%
-
-# %%
+data_dir_base = 
+plot_dir = "a_dir"
 
 # %%
 # Define line properties for each subplot
@@ -88,7 +77,7 @@ lines_properties = [
      "points": {"x": [38, 118], "y": [4, 6]},
     },
     # For Subplot 5
-    {"y": [3, 3 - 0.03],  # Ehsan
+    {"y": [3, 3 - 0.03],
      "x_start": [47, 48.75],
      "x_end": [51, 49.25],
      "colors": list(np.repeat(["orangered", "dodgerblue"], 1)),
