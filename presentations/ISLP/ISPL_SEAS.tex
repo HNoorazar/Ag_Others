@@ -129,27 +129,24 @@
 % \usepackage{etoolbox}
 % \usepackage{mathptmx}
 \usepackage{graphicx}
-\usecolortheme{beaver}
-
 % \usetheme{Berlin}
 
-\usetheme{Boadilla} % adds date and page number
+
 % \usetheme{Copenhagen}
 % \usetheme{Ilmenau}
 % \setbeamertemplate{blocks}[rounded][shadow=false]
 % \addtobeamertemplate{block begin}{\pgfsetfillopacity{0.8}}{\pgfsetfillopacity{1}}
-\setbeamercolor*{structure}{fg=mgreen}
-\setbeamercolor*{block title example}{fg=blue!50,bg= blue!10}
-\setbeamercolor*{block body example}{fg= blue,bg= blue!5}
 
 \usepackage{ulem}
 \usepackage{cancel}
 \usefonttheme{professionalfonts}
 {\vspace*{.10mm}}
+\usecolortheme{beaver}
+\usetheme[height=10mm]{Boadilla} % adds date and page number
 \usetheme[height=10mm]{Rochester}
 
-
-
+\definecolor{beaver}{rgb}{0.6, 0.4, 0.2} % Define the beaver color in RGB
+\setbeamercolor*{structure}{fg=mgreen}
 
 
 \title{Making a Case}
@@ -228,26 +225,126 @@
 \begin{frame}[t]
 \frametitle{Last thing first (There is no magic wand)}
 
-\begin{itemize}[<+->]
+\begin{itemize}
 \item There is no unique tool that outperforms other methods (there is no free lunch) 
+\pause
 \item There is no tool that is both accurate (in predicting) AND interpretable (unless we get lucky?!)
 \end{itemize}
-
 \pause
-\vspace{.05in}
-\begin{tcolorbox}
-\centering
-{\bf define your goal and deal with it}
-\end{tcolorbox}
 
-\pause
-\vspace{-.1in}
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\linewidth]{model_flex_inter}
 \end{figure}
-
 \end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Comparison of Model Performances}
+\vspace{-.1in}
+\begin{figure}[!ht] %htp
+\captionsetup[subfigure]{labelformat=empty}
+\centering
+\hspace{-.12in}
+\subfloat[]{\includegraphics[width=.8\textwidth]{knnL}
+}\\
+\vspace{-.35in}
+\subfloat[]{\includegraphics[width=.8\columnwidth]{knnNonL}
+}
+\end{figure}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Some Model Assumptions}
+
+\begin{itemize}
+\item Logistic regression fits the data via likelihood maximization
+\item Linear Discriminant Analysis (LDA): distribution of $X$ is normal in each class with identical covariance matrix.
+\item Quadratic Discriminant Analysis (QDA): distribution of $X$ is normal in each class with class specific covariance matrix.
+\end{itemize}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Comparison of Model Performances}
+\vspace{-.1in}
+\begin{figure}[!ht] %htp
+\captionsetup[subfigure]{labelformat=empty}
+\centering
+\subfloat[]{\includegraphics[width=.8\textwidth]{classification_compare}
+}\\
+\vspace{-.35in}
+\subfloat[]{\includegraphics[width=.8\columnwidth]{classification_compare2}
+}
+\end{figure}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{PCR vs. PLS}
+Two methods for reducing the dimensionality in regression
+
+\begin{itemize}[<+->]
+\item $y = {\color{dodgerblue}\mathbf{X}}\beta$
+\item Principal Components Regression (PCR): regression using PCA
+\item Partial Least Squares (PLS)
+\item ``PLS is popular in the field of chemometrics \dots 
+In practice it often performs no better
+than ridge regression or PCR. While the supervised dimension reduction
+of PLS can reduce bias, it also has the potential to increase variance, so
+that the overall benefit of PLS relative to PCR is a wash.''
+\end{itemize}
+\vfill
+\only<.(1)>{
+{\bf Other uses of PCA}
+\begin{enumerate}
+\item Missing value imputation
+\item Recommender systems
+\item EDA
+\end{enumerate}
+}
+%Ax = b \text{~~~~or~~~~} 
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{a Note on p-value}
+\begin{tcolorbox}
+``\dots, p-values have recently been the topic of 
+extensive commentary in the social science research community, to the extent
+that some social science journals have gone so far as to ban the use of
+p-values altogether! We will simply comment that when properly 
+understood and applied, p-values provide a powerful tool for drawing inferential
+conclusions from our data.''
+\end{tcolorbox}
+
+\begin{tcolorbox}
+`` \dots By contrast, if we fail to reject $H_0$,
+then our findings are more nebulous: we will not know whether we failed
+to reject $H_0$ because our sample size was too small (in which case testing
+$H_0$ again on a larger or higher-quality dataset might lead to rejection), or
+whether we failed to reject $H_0$ because $H_0$ really holds.'' \\P. 559 (and read page 564).
+\end{tcolorbox}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -260,7 +357,7 @@
 \item The error term ($\sim N(0, \sigma^2)$) is a catch-all for what we miss with this
 simple model: measurement errors, false modeling, omitted variables
 
-\item RSS (or $\text{RSE} = \sqrt{RSS/(n-2)}$) depends on Y-units. 
+\item RSS or $\text{RSE} = \sqrt{RSS/(n-2)}$ depend on Y-units. 
 
 \item $R^2$ is unitless.
 
@@ -269,35 +366,6 @@ simple model: measurement errors, false modeling, omitted variables
 \item ``\dots  and an $R^2$ value well below 0.1 might be more realistic!'' (page 79)
 \end{itemize}
 \end{frame}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
