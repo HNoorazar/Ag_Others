@@ -118,7 +118,7 @@
 \newtheorem{thm}{Theorem}[section] % "[section]" restarts the theorem counter at every new section.
 \newtheorem{Coro}[thm]{Corollary}
 \newtheorem{lem}[thm]{Lemma}
-\newtheorem{rem}[thm]{Remark}
+\newtheorem{rem}{Remark}
 \newtheorem{exm}[thm]{Example}
 \newtheorem{deff}{Definition}
 
@@ -151,7 +151,7 @@
 
 \title{Making a Case}
 \author{HN}
-\institute[WSU]{Washington State University}
+% \institute[WSU]{}
 \date{\today}
 
 \titlegraphic{\includegraphics[width=.8cm]{cat1}}
@@ -177,27 +177,11 @@
 %%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}
-\frametitle{General}
-
-\begin{itemize}
-\item Anything worth making needs patience and practice
-\item If you want mastery, you need to immerse yourself in it till it becomes your second nature, just like walking
-
-\vspace{.5in}
-\item Top(?) two take aways from graduate school
-\begin{enumerate}
-\item Try not to have a bias/prejudice. be playful \Rq
-\item When you are wrong, you are wrong \dangersign
-\end{enumerate}
-\end{itemize}
-\end{frame}
-
 %%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%
 \begin{frame}[t]
-\frametitle{Source of This Notes}
+\frametitle{Source of These Notes}
 
 \vspace{-.18in}
 \begin{figure}[htbp]
@@ -232,7 +216,7 @@
 \end{itemize}
 \pause
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{model_flex_inter}
 \end{figure}
@@ -258,7 +242,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}
+\begin{frame}[t]
 \frametitle{Some Model Assumptions}
 
 \begin{itemize}
@@ -315,8 +299,8 @@ that the overall benefit of PLS relative to PCR is a wash.''
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}
-\frametitle{a Note on p-value}
+\begin{frame}[t]
+\frametitle{Some Notes on p-value}
 \begin{tcolorbox}
 ``\dots, p-values have recently been the topic of 
 extensive commentary in the social science research community, to the extent
@@ -337,15 +321,49 @@ whether we failed to reject $H_0$ because $H_0$ really holds.'' \\P. 559 (and re
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[t]
+\frametitle{Some Notes on p-value}
+\begin{rem}
+{\bf Hierarchical principle:} if we include an interaction in a model, we
+should also include the main effects, even if the p-values associated with
+their coefficients are not significant. 
+\end{rem}
+\end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[t]
+\frametitle{Train Set v. Test Set}
+\vspace{-.2in}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{hist_comparition_one_at_a_time}
+\end{figure}
+\pause
+\begin{itemize}
+\item Earth Mover's Distance: 13
+\item Kullback Divergence: $\infty$
+\end{itemize}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{High-Leverage Points}
+\vspace{-.18in}
+\begin{figure}[htbp]
+\hspace{-.2in}
+    \begin{minipage}{0.4\textwidth}
+        \includegraphics[width=\linewidth]{high_leverage_point}
+    \end{minipage}%
+    \hspace{.2in}
+    \begin{minipage}{0.5\textwidth}
+       Compute leverage statistics
+    \end{minipage}
+\end{figure}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+\end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -357,7 +375,7 @@ whether we failed to reject $H_0$ because $H_0$ really holds.'' \\P. 559 (and re
 \item The error term ($\sim N(0, \sigma^2)$) is a catch-all for what we miss with this
 simple model: measurement errors, false modeling, omitted variables
 
-\item RSS or $\text{RSE} = \sqrt{RSS/(n-2)}$ depend on Y-units. 
+\item RSS or $\text{RSE} = \sqrt{RSS/(n-p-1)}$ depend on Y-units. 
 
 \item $R^2$ is unitless.
 
@@ -391,12 +409,12 @@ simple model: measurement errors, false modeling, omitted variables
 \frametitle{More Resources}
 
 \begin{itemize}
-\item {\scriptsize Guesstimation:~\citep{weinstein2008guesstimation}}
 \item {\scriptsize First Course in Probability~\citep{ross1976first}}
 \item {\scriptsize Introduction to Linear Regression Analysis~\citep{montgomery2021introduction}}
 \end{itemize}
 {\bf \scriptsize  Non-technical}
 \begin{itemize}
+\item {\scriptsize Guesstimation:~\citep{weinstein2008guesstimation}}
 \item {\scriptsize Excellent Sheep: The Miseducation of the American Elite and the Way to a Meaningful Life~\citep{sheep}}
 \item {\scriptsize The Culture Code: The Secrets of Highly Successful Groups~\citep{CultureCode}}
 \end{itemize}

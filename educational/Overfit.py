@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -45,8 +45,8 @@ np.random.normal(loc=0.0, scale=1.0, size=10)
 # %%
 np.random.seed(6)
 vec_size = 10
-x = np.random.normal(size =vec_size)
-y = x + np.random.normal(loc=0, scale =1, size =vec_size)
+x = np.random.normal(size=vec_size)
+y = x + np.random.normal(loc=0, scale=1, size=vec_size)
 # np. corrcoef (x, y)
 
 # %%
