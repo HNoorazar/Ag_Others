@@ -384,6 +384,29 @@ simple model: measurement errors, false modeling, omitted variables
 \item ``\dots  and an $R^2$ value well below 0.1 might be more realistic!'' (page 79)
 \end{itemize}
 \end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}[t]
+\frametitle{Do I have enough data?}
+Do I have enough data? It depends. That question is ill imposed.
+Depends on the dimension (number of variables). So, it is about
+the ratio $n/p$. See figure below and page 22 of~\cite{hastie2017elements}
+which is freely available too on \href{https://hastie.su.domains/ElemStatLearn/}{Authors' website}.
+
+\begin{figure}[H]
+\includegraphics[width=.8\linewidth]{enough_11}
+\vspace{-.1in}
+\caption{\scriptsize{Test MSE for linear regression (black dashed lines) and KNN
+(green curves) as the number of variables p increases. The true function is non-linear 
+in the first variable, as in the lower panel in Figure 3.19, and does not
+depend on the additional variables. The performance of linear regression 
+deteriorates slowly in the presence of these additional noise variables, whereas KNN's
+performance degrades much more quickly as p increases.}}
+\end{figure}
+
+\end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
