@@ -359,7 +359,7 @@ their coefficients are not significant.
     \end{minipage}%
     \hspace{.2in}
     \begin{minipage}{0.5\textwidth}
-       We cannot look only at one dimension to detect unusual points.
+       We cannot look one dimension at a time to detect unusual points.
     \end{minipage}
 \end{figure}
 
@@ -455,6 +455,19 @@ performance degrades much more quickly as p increases.}}
 \begin{frame}[allowframebreaks,t]{References} 
 \frametitle{Some Definition}
 
+\begin{deff}[Outlier] An outlier is a point for which $y_i$ is far from the value predicted by the model
+\end{deff}
+\iffalse
+The above definition is from the book and it's considering the dependent variable into account.
+But what if there is no dependent variable? Then we have the following:
+\fi
+\begin{deff}[Outlier] The training data contains outliers which are defined as observations that are far from the others.
+\end{deff}
+
+There are methods to detect outliers and/or anomalies.
+
+\begin{deff}[High leverage points] unusual $x$ value; ``observations with high leverage have an unusual value for $x_i$.''
+\end{deff}
 
 \begin{deff}[Variance of a method] Variance refers to the amount by which
 $\hat f$ would change if we estimated it using a different training data set.
@@ -462,13 +475,6 @@ $\hat f$ would change if we estimated it using a different training data set.
 
 \begin{deff}[Bias of a method] Bias refers to the error that is introduced by approximating a real-life problem, which may be extremely complicated, by a much simpler model.
 \end{deff}
-
-\begin{deff}[Outlier] unusual $y$ value
-\end{deff}
-
-\begin{deff}[High leverage points] unusual $x$ value
-\end{deff}
-
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%

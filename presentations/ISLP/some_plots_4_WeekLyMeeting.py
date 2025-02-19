@@ -236,10 +236,248 @@ axes.set_xticks([]); axes.set_yticks([]);
 fig_name = fig_dir + "high_leverage_point"
 plt.savefig(fig_name + ".pdf", bbox_inches="tight", dpi=600)
 
-# %%
-x.min()
+# %% [markdown]
+# # Some definitions
+#
+# **outlier** An outlier is a point for which $y_i$ is far from the value predicted by the model
+#
+# **outlier** The training data contains outliers which are defined as observations that are far from the others.
+#
+# **High leverage points** unusual $x$ value; "observations with high leverage have an unusual value for $x_i$"
 
 # %%
-x.max()
+tick_legend_FontSize = 3
+params = {"font.family": "Times",
+          "legend.fontsize": tick_legend_FontSize * 4,
+          "axes.labelsize": tick_legend_FontSize * 4,
+          "axes.titlesize": tick_legend_FontSize * 4,
+          "xtick.labelsize": tick_legend_FontSize * 4,
+          "ytick.labelsize": tick_legend_FontSize * 4,
+          "axes.titlepad": 10,
+          "xtick.bottom": True,
+          "xtick.labelbottom": True,
+          "ytick.left": True,
+          "ytick.labelleft": True,
+          "axes.linewidth": 0.05}
+plt.rcParams.update(params)
+
+# %%
+from sklearn.covariance import EllipticEnvelope
+from sklearn.inspection import DecisionBoundaryDisplay
+from sklearn.svm import OneClassSVM
+
+estimators = {"Empirical Covariance": EllipticEnvelope(support_fraction=1.0, contamination=0.25),
+              "Robust Covariance (Minimum Covariance Determinant)": EllipticEnvelope(contamination=0.25),
+              "OCSVM": OneClassSVM(nu=0.25, gamma=0.35)}
+
+# %%
+import matplotlib.lines as mlines
+import matplotlib.pyplot as plt
+
+from sklearn.datasets import load_wine
+
+X = load_wine()["data"][:, [1, 2]]  # two clusters
+
+fig, ax = plt.subplots()
+colors = ["tab:blue", "tab:orange", "tab:red"]
+# Learn a frontier for outlier detection with several classifiers
+legend_lines = []
+for color, (name, estimator) in zip(colors, estimators.items()):
+    estimator.fit(X)
+    DecisionBoundaryDisplay.from_estimator(
+        estimator,
+        X,
+        response_method="decision_function",
+        plot_method="contour",
+        levels=[0],
+        colors=color,
+        ax=ax,
+    )
+    legend_lines.append(mlines.Line2D([], [], color=color, label=name))
+
+
+ax.scatter(X[:, 0], X[:, 1], color="black")
+bbox_args = dict(boxstyle="round", fc="0.8")
+arrow_args = dict(arrowstyle="->")
+ax.annotate(
+    "outlying points",
+    xy=(4, 2),
+    xycoords="data",
+    textcoords="data",
+    xytext=(3, 1.25),
+    bbox=bbox_args,
+    arrowprops=arrow_args,
+)
+ax.legend(handles=legend_lines, loc="upper center")
+_ = ax.set(
+    xlabel="ash",
+    ylabel="malic_acid",
+    title="Outlier detection on a real data set (wine recognition)",
+)
+
+# %%
+
+# %%
+fig, axes = plt.subplots(1, 1, figsize=(5, 5), sharey=False)
+# axes.grid(axis="y", which="both");
+# axes.plot(x_y_line, x_y_line, label = "$y=x$")
+
+axes.scatter(x, y, color="orange");
+axes.scatter(1, -1, color="red");
+axes.set_xticks([]); axes.set_yticks([]);
+
+# %%
+x = np.append(x, 1)
+y = np.append(y, -1)
+
+# %%
+fig, axes = plt.subplots(1, 1, figsize=(5, 5), sharey=False)
+# axes.grid(axis="y", which="both");
+# axes.plot(x_y_line, x_y_line, label = "$y=x$")
+
+axes.scatter(x, y, color="orange");
+axes.set_xticks([]); axes.set_yticks([]);
+
+# %%
+xy_2D = np.column_stack((x, y))
+
+# %%
+import matplotlib.lines as mlines
+import matplotlib.pyplot as plt
+
+from sklearn.datasets import load_wine
+
+fig, ax = plt.subplots()
+colors = ["tab:blue", "tab:orange", "tab:red"]
+# Learn a frontier for outlier detection with several classifiers
+legend_lines = []
+for color, (name, estimator) in zip(colors, estimators.items()):
+    estimator.fit(xy_2D)
+    DecisionBoundaryDisplay.from_estimator(estimator,
+                                           xy_2D,
+                                           response_method="decision_function",
+                                           plot_method="contour",
+                                           levels=[0],
+                                           colors=color,
+                                           ax=ax)
+    legend_lines.append(mlines.Line2D([], [], color=color, label=name))
+
+
+ax.scatter(xy_2D[:, 0], xy_2D[:, 1], color="black")
+bbox_args = dict(boxstyle="round", fc="0.8")
+arrow_args = dict(arrowstyle="->")
+
+ax.legend(handles=legend_lines, loc="upper center")
+_ = ax.set(xlabel="$x_1$",
+           ylabel="$x_2$",
+           title="Outlier detection")
+
+# %% [markdown]
+# ### Anomaly detection using Isolation Forest 
+
+# %%
+from sklearn.ensemble import IsolationForest
+from sklearn.model_selection import train_test_split
+
+# %%
+X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+
+# %%
+X_train = X_train.reshape(-1, 1)
+y_train = y_train.reshape(-1, 1)
+
+X_test = X_test.reshape(-1, 1)
+y_test = y_test.reshape(-1, 1)
+
+# %%
+# initialize and fit the model
+clf = IsolationForest(contamination=0.1)
+clf.fit(X_train)
+
+# predict the anomalies in the data
+y_pred_train = clf.predict(X_train)
+y_pred_test = clf.predict(X_test)
+
+# %%
+fig, axes = plt.subplots(1, 2, figsize=(8, 4))
+
+axes[0].scatter(X_train[y_pred_train==1, 0], y_train[y_pred_train==1, 0], color='green', label='Normal');
+axes[0].scatter(X_train[y_pred_train==-1, 0], y_train[y_pred_train==-1, 0], 
+                color='red', label='Anomaly'); # , alpha=0.2
+axes[0].set_title("Training Data");
+axes[0].legend();
+
+##
+axes[1].scatter(X_test[y_pred_test==1, 0], y_test[y_pred_test==1, 0], color='green', label='Normal');
+axes[1].scatter(X_test[y_pred_test==-1, 0], y_test[y_pred_test==-1, 0], color='red', label='Anomaly');
+axes[1].set_title("Test Data");
+axes[1].legend();
+
+# %%
+
+# %%
+# initialize and fit the model
+clf = IsolationForest(contamination=0.1)
+clf.fit(x.reshape(-1,1))
+
+# predict the anomalies in the data
+y_pred_train = clf.predict(x.reshape(-1,1))
+# y_pred_test = clf.predict(X_test)
+
+# %%
+fig, axes = plt.subplots(1, 1, figsize=(4, 4))
+axes.scatter(x[y_pred_train==1], y[y_pred_train==1], color='green', label='Normal');
+axes.scatter(x[y_pred_train==-1], y[y_pred_train==-1], color='red', label='Anomaly'); # , alpha=0.2
+
+# axes.legend();
+
+# %% [markdown]
+# ## LocalOutlierFactor
+
+# %%
+from sklearn.neighbors import LocalOutlierFactor
+
+# Sample data (replace with your actual data)
+data = np.array([[1, 1], [1.5, 1.5], [5, 5], [8, 8], [1, 1.2], [5.5, 5.5], [1, 1.1], [9, 8], [10, 10]])
+
+# Create LOF model
+lof = LocalOutlierFactor(n_neighbors=3, contamination='auto')
+
+# Fit the model and predict outliers
+y_pred = lof.fit_predict(data)
+
+# Get outlier scores
+lof_scores = lof.negative_outlier_factor_
+
+# Identify outliers (values less than 0)
+outliers = data[y_pred == -1]
+
+# Print results
+print("Outlier Predictions:", y_pred)
+print("LOF Scores:", lof_scores)
+print("Outliers:\n", outliers)
+
+# %%
+# Create LOF model
+lof = LocalOutlierFactor(n_neighbors=3, contamination='auto')
+
+# Fit the model and predict outliers
+y_pred = lof.fit_predict(xy_2D)
+
+# Get outlier scores
+lof_scores = lof.negative_outlier_factor_
+
+# Identify outliers (values less than 0)
+outliers = xy_2D[y_pred == -1]
+
+# Print results
+# print("Outlier Predictions:", y_pred)
+# print("LOF Scores:", lof_scores)
+# print("Outliers:\n", outliers)
+
+# %%
+fig, axes = plt.subplots(1, 1, figsize=(4, 4))
+axes.scatter(x[y_pred==1], y[y_pred==1], color='green', label='Normal');
+axes.scatter(x[y_pred==-1], y[y_pred==-1], color='red', label='Anomaly'); # , alpha=0.2
 
 # %%
