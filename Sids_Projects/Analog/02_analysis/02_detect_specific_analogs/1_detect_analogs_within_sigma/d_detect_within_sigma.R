@@ -107,7 +107,7 @@ for (row in (1 : nrow(NN_loc_yearsssss))){
       # 
       # NN_loc_yearsssss[row, col] would not work, either have to add "with=FALSE"
       # or use NN_loc_yearsssss[row, ..col]
-      # R thing
+      #  R thing
       #
       output_dt[curr_row_output, 1] <- NN_loc_yearsssss[row, col, with=FALSE]
       output_dt[curr_row_output, 2] <- NN_loc_locations[row, col, with=FALSE]

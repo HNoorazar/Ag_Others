@@ -1076,8 +1076,16 @@ find_NN_info_biofix <- function(ICV, historical_dt, future_dt, n_neighbors, nume
     # standardize the projected conditions
     Yj_prime <- sweep(Yj[, (1+length(non_numeric_cols)):(PCs + length(non_numeric_cols))], MARGIN=2, Zj_sd, FUN = `/`)
     Yj_prime <- cbind(Yj[, non_numeric_cols], Yj_prime)
-    
-    NN_list <- get.knnx(data = X_prime[, (1+length(non_numeric_cols)):(PCs+length(non_numeric_cols))], 
+
+    X_prime <- na.omit(X_prime)
+    Yj_prime <- na.omit(Yj_prime)
+
+    X_prime[sapply(X_prime, is.infinite)] <- NA
+    X_prime <- X_prime[complete.cases(X_prime), ]
+
+    n_neighbors <- nrow(X_prime)   ##  *** Sid *** <- this line is new
+  
+    NN_list <- get.knnx(data = X_prime[, (1+length(non_numeric_cols)):(PCs+length(non_numeric_cols))],
                         query= Yj_prime[, (1+length(non_numeric_cols)):(PCs+length(non_numeric_cols))], 
                         k=n_neighbors, algorithm="brute")
     #

@@ -67,7 +67,7 @@ top_3_dt <- within(top_3_dt, remove(top_2_fip, top_3_fip, emission))
 future_dt <- data.table(readRDS(paste0(main_in, "CDD_precip_", emission, ".rds")))
 hist_dt <- data.table(readRDS(paste0(main_in, "hist_CDD_precip.rds")))
 #
-# filter the  9 locations that are not in historical data
+# filter the 9 locations that are not in historical data
 #
 future_dt <- future_dt %>% filter(location %in% hist_dt$location)
 #
@@ -84,7 +84,7 @@ future_dt$time_period[future_dt$year >= 2076] <- "F3"
 # 
 ################################################################################
 #
-# add  fips to the data to use it for filtering
+# add fips to the data to use it for filtering
 #
 future_dt <- merge(future_dt, hist_1300_fip_dt, all.x=T, by="location")
 hist_dt <- merge(hist_dt, hist_1300_fip_dt, all.x=T, by="location")

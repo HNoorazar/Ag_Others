@@ -61,7 +61,7 @@ for (time_p in time_periods){
   saveRDS(NN_sigma_tb, paste0(out_dir, "/NN_sigma_tb_", model_ty, "_", time_p,  ".rds"))
 }
 
-# break the into three time periods
+# break into three time periods
 
 # NN_dist_tb_list_2026_2050 <- NN_dist_tb_list[grep(pattern = "2026_2050", x = NN_dist_tb_list)]
 # NN_loc_year_tb_list_2026_2050 <- NN_loc_year_tb_list[grep(pattern = "2026_2050", x = NN_loc_year_tb_list)]
