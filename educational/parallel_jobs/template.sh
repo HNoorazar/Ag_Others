@@ -17,9 +17,6 @@ echo
 echo "--- We are now in $PWD ..."
 echo
 
-## echo "I am Slurm job ${SLURM_JOB_ID}, array job ${SLURM_ARRAY_JOB_ID}, and array task ${SLURM_ARRAY_TASK_ID}."
-
-
 module load gcc/7.3.0
 module load anaconda3
 
