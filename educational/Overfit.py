@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -26,10 +26,14 @@ import statistics
 import statsmodels.api as sm
 
 import matplotlib
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt\
+
+
+import os
 
 # %%
 outdir = "/Users/hn/Documents/01_research_data/Other_people/Ehsan/"
+os.makedirs(outdir, exist_ok=True)
 
 # %%
 random.seed(10)
@@ -219,7 +223,7 @@ if legend is not None:
     
 fig.suptitle(f"effect of removing an outlier on a highly flexible model", y=0.95, 
              fontdict={"family": "serif"}, fontsize=15)
-file_name = outdir + f"degree7PolyModelRemoveOutlier.png"
+file_name = outdir + f"degree7PolyModelRemoveOutlier.pdf"
 plt.savefig(file_name, bbox_inches="tight", dpi=300)
 
 # %%
@@ -272,7 +276,7 @@ for degree in np.arange(3, 14):
     
     train_mse_list.append(train_mse)
     test_mse_list.append(test_mse)
-    
+
 
 # %%
 train_mse_list
@@ -303,7 +307,7 @@ ax1.set_ylabel("mean squared error");
 
 fig.suptitle(f"train and test MSE as model flexibility increases", y=0.95, 
              fontdict={"family": "serif"}, fontsize=15)
-file_name = outdir + f"trainTestMSE.png"
+file_name = outdir + f"trainTestMSE.pdf"
 plt.savefig(file_name, bbox_inches="tight", dpi=300)
 
 # %%
@@ -311,5 +315,176 @@ train_df.shape
 
 # %%
 test_df.shape
+
+# %%
+###
+
+# %%
+fig, axes = plt.subplots(1, 1, figsize=(5, 5), sharey=False, gridspec_kw={"hspace": 0.02, "wspace": 0.1})
+axes.grid(axis="y", which="both");
+
+
+x = np.linspace(-10, 10, 400)
+y = x ** 2
+
+axes.plot(x, y, label = 'true model', lw=3);
+
+axes.axhline(y=55, label="model 1", color="y", lw=3);
+axes.axhline(y=65, label="model 2", color="r", lw=3);
+axes.axhline(y=70, label="model 3", color="g", lw=3);
+axes.axhline(y=58, label="model 4", color="orange", lw=3);
+
+axes.legend(loc="best");
+axes.set_xlim(3, 10);
+
+plt.title('models based on different datasets');
+file_name = outdir + f"crudeModelVariance.pdf"
+plt.savefig(file_name, bbox_inches="tight", dpi=300)
+
+# %%
+
+# %%
+x_skewed = np.concatenate((np.linspace(-10, -1, 50), np.linspace(-1, 10, 10))) 
+x_skewed.sort()
+x_skewed = x_skewed+2
+y_skewed = (x_skewed**2)/10
+
+
+fig, axes = plt.subplots(1, 1, figsize=(5, 5), sharey=False, gridspec_kw={"hspace": 0.02, "wspace": 0.1})
+axes.grid(axis="y", which="both");
+axes.plot(x_skewed, y_skewed, label = 'train error', lw=3);
+axes.legend(loc="best");
+
+# %%
+x_skewed = np.concatenate((np.linspace(-10, -1, 50), np.linspace(-1, 10, 10))) 
+x_skewed.sort()
+x_skewed = x_skewed + 3
+y_skewed = (x_skewed**2)
+
+
+fig, axes = plt.subplots(1, 1, figsize=(5, 5), sharey=False, gridspec_kw={"hspace": 0.02, "wspace": 0.1})
+axes.grid(axis="y", which="both");
+axes.plot(x_skewed, y_skewed, label = 'train error', lw=3);
+axes.legend(loc="best");
+
+# %%
+
+# %%
+
+# %%
+# Original x_skewed and y_skewed
+x_skewed = np.concatenate((np.linspace(-10, -1, 50), np.linspace(-1, 10, 10))) 
+x_skewed.sort()
+x_skewed = x_skewed + 2
+y_skewed = (x_skewed**2)/10
+
+# x and y for the second plot
+x = np.linspace(0, 10, 400)
+y = 1 / x**(1/3)
+
+x = x[1:]; y = y[1:]
+
+# Shifting and scaling y_skewed so it's above the y plot
+y_skewed_shifted = y_skewed + np.max(y) + 0.2  # Add a vertical offset
+
+# Plotting the original x and y, and the shifted x_skewed and y_skewed
+plt.figure(figsize=(8, 6))
+
+# Plotting y vs x
+plt.plot(x, y, label='y = 1/x^(1/3)', color='b', linewidth=2)
+
+# Plotting the shifted y_skewed vs x_skewed
+plt.plot(x_skewed, y_skewed_shifted, label='Shifted y_skewed', color='r', linestyle='--', linewidth=2)
+
+# Labels and Title
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Shifting and Scaling x_skewed, y_skewed')
+
+# Show legend
+plt.legend()
+
+# Show grid and plot
+plt.grid(True)
+plt.show()
+
+# %%
+
+# %%
+
+# %%
+# X-axis: model complexity
+x = np.linspace(0, 10, 300)
+
+# Simulated training error: decreases monotonically
+train_error = np.exp(-0.3 * x)
+
+# Simulated generalization (true) error: U-shape + noise
+true_error = 0.1 + 0.05 * (x - 5)**2 + 0.05 * np.sin(2 * x)
+
+# Simulated test error: true error + noise
+test_error = true_error + 0.03 * np.random.randn(len(x))
+
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.plot(x, train_error, label="Training Error", linewidth=2)
+plt.plot(x, test_error, label="Test Error", linewidth=2)
+plt.plot(x, true_error, label="Generalization (True) Error", linestyle='--', linewidth=2)
+
+# Marking w' and w''
+w1 = 3.5
+w2 = 7.5
+plt.axvline(w1, color='gray', linestyle=':', ymax=0.65)
+plt.axvline(w2, color='gray', linestyle=':', ymax=0.85)
+plt.text(w1, 0.4, "w'", ha='center', fontsize=12)
+plt.text(w2, 0.6, "w''", ha='center', fontsize=12)
+
+# Labels and styling
+plt.xlabel("Model Complexity")
+plt.ylabel("Error")
+plt.legend()
+plt.grid(True)
+plt.title("Training, Test, and Generalization Error vs. Model Complexity")
+
+plt.tight_layout()
+plt.show()
+
+# %%
+# X-axis: model complexity
+x = np.linspace(0, 10, 300)
+
+# Simulated training error: decreases monotonically
+train_error = np.exp(-0.3 * x)
+
+# Simulated generalization (true) error: U-shape + oscillation, shifted upward
+true_error = 0.1 + 0.05 * (x - 5)**2 + 0.05 * np.sin(2 * x) + 0.3  # +0.3 ensures it's above training error
+test_error = true_error + 0.03 * np.random.randn(len(x))
+
+# Plotting
+plt.figure(figsize=(5, 5))
+plt.plot(x, train_error, label="training Error", linewidth=2)
+plt.plot(x, test_error, label="test Error", linewidth=1)
+plt.plot(x, true_error, label="generalization (true) Error", linestyle='--', linewidth=2)
+
+
+# Marking w' and w''
+w1, w2 = 5, 7.5
+plt.axvline(w1, color='gray', linestyle=':')
+plt.axvline(w2, color='gray', linestyle=':')
+plt.text(w1-.4, 1.5, r"$\hat \beta_1$", ha='center', fontsize=12)
+plt.text(w2-.4, 1.5, r"$\hat \beta_2$", ha='center', fontsize=12)
+
+# Labels and styling
+plt.xlabel("model flexibility"); plt.ylabel("error");
+plt.xticks([]); plt.yticks([]);
+
+plt.legend(loc="lower left")
+plt.grid(True)
+plt.title("training and generalization error vs. model complexity")
+
+plt.tight_layout()
+
+file_name = outdir + f"GeneralizationOverFit.pdf"
+plt.savefig(file_name, bbox_inches="tight", dpi=300)
 
 # %%
